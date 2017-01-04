@@ -1,4 +1,8 @@
+
 import base
+import util
+
+CLOSE, SERVER, ACTIVE = range(3)
 
 
 class Disconnect(RuntimeError):
@@ -18,3 +22,19 @@ class Server(base.Base):
         self._buff_size = buff_size
         self._run = True
         self.logger.info("buff size %d" % buff_size)
+
+    def add_server(
+        self,
+        our_address=("localhost", 80)
+    ):
+        s = util.creat_nonblocking_socket()
+        s.setnonblocking(0)
+        s.listen(1)
+        self._add_to_database(s, state=SERVER)
+
+    def _add_to_database(self, socket, state=ACTIVE):
+        self._database[socket.fileno()] = {
+            "socket": socket,
+            "buff": "",
+            "state": state,
+        }

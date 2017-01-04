@@ -22,6 +22,18 @@ def parse_args():
         ),
     )
     parser.add_argument(
+        "--address",
+        default=["128.0.0.1:80"],
+        nargs="+",
+        help="The address(es) we will connect to, default %(default)d",
+    )
+    parser.add_argument(
+        "--buff-size",
+        default=1024,
+        type=int,
+        help="Buff size for each time, default %(default)d"
+    )
+    parser.add_argument(
         '--log-level',
         dest='log_level_str',
         default='INFO',
@@ -37,6 +49,19 @@ def parse_args():
     )
     args = parser.parse_args()
     args.log_level = LOG_STR_LEVELS[args.log_level_str]
+    address_list = []
+    for a in parser.proxy:
+        a = a.split(":")
+        if len(a) != 2:
+            raise ValueError(
+                """--Address need to be in the next format:
+                    server_address:server_port"""
+            )
+        address_list.append({
+            "our address": (a[0], int(a[1])),
+            "connect address": (a[2], int(a[3]))
+        })
+    parser.address = address_list
     return args
 
 
@@ -53,6 +78,11 @@ def main():
             level=args.log_level,
         )
     logger.info("Parsed args and created logger")
+    for address_dict in args.proxy:
+        Server.add_server(
+            address_dict["our address"],
+            address_dict["connect address"]
+        )
     Server.Server(1024)
 
 
