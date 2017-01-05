@@ -78,12 +78,13 @@ def main():
             level=args.log_level,
         )
     logger.info("Parsed args and created logger")
+    server = Server.Server(args.buff_size)
     for address_dict in args.proxy:
-        Server.add_server(
+        server.add_server(
             address_dict["our address"],
             address_dict["connect address"]
         )
-    Server.Server(1024)
+    server.start_server()
 
 
 if __name__ == "__main__":
