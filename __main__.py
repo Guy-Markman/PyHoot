@@ -2,6 +2,7 @@
 # Added logger
 import argparse
 import logging
+import signal
 
 import base
 import Server
@@ -67,6 +68,7 @@ def parse_args():
 
 def main():
     args = parse_args()
+
     print args
     if args.log_file:
         logger = base.setup_logging(
@@ -79,6 +81,13 @@ def main():
         )
     logger.info("Parsed args and created logger")
     server = Server.Server(args.buff_size)
+
+    # Signals set and handlers for nice shutdown
+    def terminate_handler(signo, frame):
+        server.terminate()
+    signal.signal(signal.SIGINT, terminate_handler)
+    signal.signal(signal.SIGTERM, terminate_handler)
+
     for address_dict in args.proxy:
         server.add_server(
             address_dict["our address"],
