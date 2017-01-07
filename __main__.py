@@ -48,6 +48,11 @@ def parse_args():
         required=False,
         help='Logfile to write to, otherwise will log to console.',
     )
+    parser.add_argument(
+        '--base',
+        default='.',
+        help='Base directory to search files in, default: %(defaults)',
+    )
     args = parser.parse_args()
     args.log_level = LOG_STR_LEVELS[args.log_level_str]
     address_list = []
@@ -80,7 +85,7 @@ def main():
             level=args.log_level,
         )
     logger.info("Parsed args and created logger")
-    server = Server.Server(args.buff_size)
+    server = Server.Server(args.buff_size, args.base)
 
     # Signals set and handlers for nice shutdown
     def terminate_handler(signo, frame):

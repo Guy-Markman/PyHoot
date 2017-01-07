@@ -1,5 +1,5 @@
-# TODO: write file object
 import errno
+import os
 import select
 import socket
 import traceback
@@ -10,6 +10,8 @@ import util
 CLOSE, SERVER, ACTIVE = range(3)
 CRLF = "\r\n"
 END_HEARDER = 2 * CRLF
+HTTP_VERSION = "HTTP/1.1"
+MAX_NUMBER_OF_HEADERS = 100
 
 
 class Disconnect(RuntimeError):
@@ -24,15 +26,17 @@ class Server(base.Base):
     def __init__(
         self,
         buff_size,
+        base_directory
     ):
         super(Server, self).__init__()
         self._buff_size = buff_size
         self._run = True
         self.logger.info("Initialized server, buff size %d" % buff_size)
-
+        self._base_directory = base_directory
     # Creat server side socket and add it to the database. \n
     # our_address: tupple of the address that the server will do bind to.
     #              format (address, port), default (localhost, 80)
+
     def add_server(
         self,
         our_address=("localhost", 80)
@@ -75,21 +79,24 @@ class Server(base.Base):
     # references to it from it's peer
     def _close_socket(self, socket):
         entry = self._database[socket]
-        peer_socket = entry["peer"]
-        if peer_socket is not None:
-            if entry["state"] == ACTIVE:
-                self._database[peer_socket].remove(socket)
-            elif entry["state"] == SERVER:
-                for peer_socket in self._database[socket]["peer"]:
-                    peer_database = self._database[peer_socket]
-                    peer_database.update({
-                        "peer": None,
-                        "state": CLOSE
-                    })
+        if entry["peer"] is not None:
+            self._remove_refernces(entry)
 
         socket.close()
         self._database.pop(socket)
         self.logger.debug("Close success")
+
+    # Remove refences from database
+    def _remove_refernces(self, entry):
+        if entry["state"] == ACTIVE:
+            self._database[self._database[socket]["peer"]].remove(socket)
+        elif entry["state"] == SERVER:
+            for peer_socket in self._database[socket]["peer"]:
+                peer_database = self._database[peer_socket]
+                peer_database.update({
+                    "peer": None,
+                    "state": CLOSE
+                })
 
     # build the three list (rlist, wlist, xlist) for select.select
     def _build_select(self):
@@ -134,6 +141,77 @@ class Server(base.Base):
             if accepted is not None:
                 accepted.close()
 
+    # Creat the error we will send to the client
+    def _creat_error(self, s, code, message, extra):
+        self._database[s]["buff"] = (
+            """%s %s %s \r\n
+                Content-Length: %s\r\n
+                \r\n
+                %s""" % (
+                HTTP_VERSION,
+                code,
+                message,
+                code,
+                message,
+                extra
+            )
+        )
+
+    # Get request, and creat FileObject by it
+    def _handle_active(self, s):
+        status_sent = False
+        try:
+            rest = bytearray()
+            req, rest = util.recv_line(s,
+                                       self._database[s]["buff"],
+                                       block_size=self._buff_size)
+            req_comps = req.split(' ', 2)
+            if req_comps[2] != HTTP_VERSION:
+                raise RuntimeError('Not HTTP protocol')
+            if len(req_comps) != 3:
+                raise RuntimeError('Incomplete HTTP protocol')
+
+            method, uri, signature = req_comps
+            if method != 'GET':
+                raise RuntimeError("HTTP unsupported method '%s'" % method)
+            if not uri or uri[0] != '/' or '\\' in uri:
+                raise RuntimeError("Invalid URI")
+
+            file_name = os.path.normpath(
+                '%s%s' % (
+                    self._base_directory,
+                    os.path.normpath(uri),
+                )
+            )
+
+            #
+            # Parse header
+            #
+            headers = {
+                'Contint-Length': None
+            }
+            for i in range(MAX_NUMBER_OF_HEADERS):
+                line, rest = util.recv_line(s, rest)
+                if not line:
+                    break
+                k, v = util.parse_header(line)
+                if k in headers:
+                    headers[k] = v
+            else:
+                raise RuntimeError('Too many headers')
+        except IOError as e:
+            traceback.print_exc()
+            if not status_sent:
+                if e.errno == errno.ENOENT:
+                    self._creat_error(s, 404, 'File Not Found', e)
+                else:
+                    self._creat_error(s, 500, 'Internal Error', e)
+        except Exception as e:
+            traceback.print_exc()
+            if not status_sent:
+                self._creat_error(s, 500, 'Internal Error', e)
+                self._remove_refernces(self._database[s])
+
     # The main function of the class, makes everything work
     def start_server(self):
         while self._database:
@@ -160,23 +238,13 @@ class Server(base.Base):
                 rlist, wlist, xlist = select.select(self._build_select())
                 # taking care of all the sockets in rlist
                 for s in rlist:
-                    if self._database[socket]["state"] == SERVER:
+                    socket_state = self._database[socket]["state"]
+                    if socket_state == SERVER:
                         self._connect_socket(s)
-                    else:
-                        while True:
-                            try:
-                                self._database[s]["buff"] += util.recv_line(
-                                    s,
-                                    self._database[s]["buff"],
-                                    block_size=self._buff_size)
-                            except socket.error as e:
-                                if e.errno not in (errno.EWOULDBLOCK,
-                                                   errno.EAGAIN):
-                                    raise
-                                break
-                        if END_HEARDER in self._database[s]["buff"]:
-                            print "TODO"
-                            # TODO: Continue writing it
+                    elif socket_state == ACTIVE:
+                        self._handle_active(s)
+                for s in xlist:
+                    raise RuntimeError("Error in socket, closing it")
 
             # taking care of errors
             except select.error as e:

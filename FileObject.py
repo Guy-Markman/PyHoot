@@ -15,7 +15,7 @@ class FileObject(base.Base):
         self._file_name = file_name
         if not os.path.isfile(file_name):
             self.logger.error(traceback.format_exc)
-            raise RuntimeError("File not found")
+            os.open(file_name, os.O_RDONLY)
 
         self._cursor_position = 0  # The curson position right now
 
