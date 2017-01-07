@@ -1,12 +1,15 @@
 # TODO: write file object
 import errno
 import select
+import socket
 import traceback
 
 import base
 import util
 
 CLOSE, SERVER, ACTIVE = range(3)
+CRLF = "\r\n"
+END_HEARDER = 2 * CRLF
 
 
 class Disconnect(RuntimeError):
@@ -93,7 +96,7 @@ class Server(base.Base):
         rlist = []
         wlist = []
         xlist = []
-        for socket in self._database.keys():
+        for s in self._database.keys():
             xlist.append[socket]
             entry = self._database[socket]
             if entry["state"] == CLOSE:
@@ -146,20 +149,35 @@ class Server(base.Base):
 
                 # closing every socket that is ready for close (sent everything
                 # and in close mode)
-                for socket in self._database.keys():
+                for s in self._database.keys():
                     entry = self._database[socket]
                     if entry["state"] == CLOSE and entry["buff"] == "":
                         self.logger.info("closing socket, fd %d" %
                                          entry[socket.fileno()])
-                        self._close_socket(socket)
+                        self._close_socket(s)
 
                 # build and do select
                 rlist, wlist, xlist = select.select(self._build_select())
                 # taking care of all the sockets in rlist
-                for socket in rlist:
-                    entry = self._database[socket]
-                    if entry["state"] == SERVER:
-                        self._connect_socket(socket)
+                for s in rlist:
+                    if self._database[socket]["state"] == SERVER:
+                        self._connect_socket(s)
+                    else:
+                        while True:
+                            try:
+                                self._database[s]["buff"] += util.recv_line(
+                                    s,
+                                    self._database[s]["buff"],
+                                    block_size=self._buff_size)
+                            except socket.error as e:
+                                if e.errno not in (errno.EWOULDBLOCK,
+                                                   errno.EAGAIN):
+                                    raise
+                                break
+                        if END_HEARDER in self._database[s]["buff"]:
+                            print "TODO"
+                            # TODO: Continue writing it
+
             # taking care of errors
             except select.error as e:
                 if e[0] != errno.EINTR:
