@@ -34,107 +34,111 @@ class Server(base.Base):
         self._run = True
         self.logger.info("Initialized server, buff size %d" % buff_size)
         self._base_directory = base_directory
-    # Creat server side socket and add it to the database. \n
-    # our_address: tupple of the address that the server will do bind to.
-    #              format (address, port), default (localhost, 80)
+        self.add_server
 
     def add_server(
         self,
         our_address=("localhost", 80)
     ):
+        """ Creat server side socket and add it to the database. \n
+            our_address: tupple of the address that the server will do bind to.
+                         format (address, port), default (localhost, 80)
+        """
         s = util.creat_nonblocking_socket()
         s.setnonblocking(0)
         s.listen(1)
-        self._add_to_database(s, state=SERVER)
+        self._add_to_database(s)
         self.logger.info("Created server on address %s" % our_address)
+        self._ad
 
-    # Add the socket to the database, structre will be:
-    # {socket :  {
-    #            "buff":buffer will contain the data we need to send,
-    #            "state": state of the socket, CLOSE, SERVER or CLIENT,
-    #            "file": file_object to send,
-    #            "peer": CLIENT, the server we are connected to,
-    #                    SERVER, list of the sockets that connected to server
-    #                    CLOSE, None
-    #            }
-    def _add_to_database(self, socket, state=CLIENT, peer=None):
+    def _add_to_database(self, s, state=SERVER, peer=None):
+        """
+                Add the socket to the database, structre will be:
+                {socket :  {
+                "buff":buffer will contain the data we need to send,
+                "state": state of the socket, CLOSE, SERVER or CLIENT,
+                "file": file_object to send,
+                "peer": CLIENT, the server we are connected to,
+                        SERVER, list of the sockets that connected to server
+                        CLOSE, None
+                }
+        """
         if state not in (CLOSE, SERVER, CLIENT):
             raise RuntimeError("State not found")
-        self._database[socket] = {
+        self._database[s] = {
             "state": state,
         }
+        entry = self._database[s]
         if state == SERVER:
-            self._database[socket]["peer"] = {}
+            entry["peer"] = []
         elif state == CLIENT:
-            self._database[socket]["client"] = Client.Client(socket, peer)
+            entry["client"] = Client.Client(s)
+            entry["peer"] = peer
         else:
-            self._database[socket]["peer"] = None
-        self.logger.debug("Socket added to database, {%s: %s}" % (
-            socket,
-            self._database[socket]
+            self._database[s]["peer"] = None
+        self.logger.debug("s added to database, {%s: %s}" % (
+            s,
+            self._database[s]
         ))
 
-    # close the socket, remove it from it's from the database and remove
-    # references to it from it's peer
-    def _close_socket(self, socket):
-        entry = self._database[socket]
-        if entry["peer"] is not None:
-            self._remove_refernces(entry)
-
-        socket.close()
-        self._database.pop(socket)
+    def _close_socket(self, s):
+        """ close the socket, remove it from it's from the database and remove
+        references to it from it's peer"""
+        if self._database[s]["state"] != CLOSE:
+            self._change_to_close(s)
+        s.close()
+        self._database.pop(s)
         self.logger.debug("Close success")
 
-    def _change_to_close(self, socket):
-        self.datbase[socket]["state"] = CLOSE
-        self._remove_refernces(socket)
-
-    # Remove refences from database
-    def _remove_refernces(self, socket):
-        entry = self._database[socket]
+    def _change_to_close(self, s):
+        """Change the socket s to close state"""
+        entry = self._database[s]
+        entry["state"] = CLOSE
         if entry["state"] == CLIENT:
-            self._database[self._database[socket]["peer"]].pop(socket)
+            if entry["peer"] is not None:
+                self._database[entry["peer"]].pop(s)
+            entry["buff"] = entry["client"].buff
+            entry["peer"] = None
+            entry.pop("client")
         elif entry["state"] == SERVER:
-            for peer_socket in self._database[socket]["peer"].keys():
-                peer_database = self._database[peer_socket]
-                peer_database["peer"] = None
-                peer_database.pop("client")
+            for peer_s in self._database[s]["peer"].keys():
+                peer_s._change_to_close(peer_s)
 
-    # build the three list (rlist, wlist, xlist) for select.select
     def _build_select(self):
+        """build the three list (rlist, wlist, xlist) for select.select"""
         rlist = []
         wlist = []
         xlist = []
         for s in self._database.keys():
-            xlist.append[socket]
-            entry = self._database[socket]
+            xlist.append[s]
+            entry = self._database[s]
             if entry["state"] == CLOSE:
-                wlist.append[socket]
+                wlist.append[s]
             if entry["state"] == SERVER:
-                rlist.append[socket]
+                rlist.append[s]
             if entry["state"] == CLIENT:
                 if entry:
-                    wlist.append[socket]
-                socket_peer = entry["client"].get_peer()
-                if (
-                    self._datbase[socket_peer]["peer"]
-                ):
-                    rlist.append[socket]
+                    wlist.append[s]
+                if self._database[s]["client"].buff:
+                    rlist.append[s]
         self.logger.debug("""rlist = %s\n
                              wlist = %s\n
                              xlist = %s\n
                           """ % (rlist, wlist, xlist))
         return rlist, wlist, xlist
 
-    # accept socket to the system, add it to the database and add reference to
-    # it in the server it's connect to
-    def _connect_socket(self, socket):
+        self._conn
+
+    def _connect_socket(self, server):
+        """accept socket to the system, add it to the database and add referene
+           to it in the server it's connect to
+        """
         accepted = None
         try:
-            accepted, addr = socket.accept()
+            accepted, addr = server.accept()
             accepted.setblocking(0)
-            self._add_to_database(socket=socket, state=CLIENT, peer=socket)
-            self._database[socket]["peer"].append(accepted)
+            self._add_to_database(accepted, state=CLIENT, peer=server)
+            self._database[server]["peer"].append(accepted)
             self.logger.info("connect the socket from %s" % addr)
         except Exception:
             self.loggger.error(traceback.format_exc)
@@ -143,7 +147,7 @@ class Server(base.Base):
 
     # Creat the error we will send to the client
     def _creat_error(self, s, code, message, extra):
-        self._database[s]["buff"] = (
+        self._database[s]["client"].buff += (
             """%s %s %s \r\n
                 Content-Length: %s\r\n
                 \r\n
@@ -157,8 +161,8 @@ class Server(base.Base):
             )
         )
 
-    # The main function of the class, makes everything work
     def start_server(self):
+        """The main function of the class, makes everything work"""
         while self._database:
             try:
                 # check if the program need to stop, if it does starts the
@@ -166,17 +170,14 @@ class Server(base.Base):
                 # to close
                 if not self._run:
                     self.logger.info("closing all")
-                    for entry in self._database:
-                        entry["state"] = CLOSE
-                        entry["peer"] = None
+                    for s in self._database.keys():
+                        self._change_to_close(s)
 
                 # closing every socket that is ready for close (sent everything
                 # and in close mode)
                 for s in self._database.keys():
-                    entry = self._database[socket]
+                    entry = self._database[s]
                     if entry["state"] == CLOSE and entry["buff"] == "":
-                        self.logger.info("closing socket, fd %d" %
-                                         entry[socket.fileno()])
                         self._close_socket(s)
 
                 # build and do select
@@ -187,7 +188,7 @@ class Server(base.Base):
                     if socket_state == SERVER:
                         self._connect_socket(s)
                     elif socket_state == CLIENT:
-                        self._handle_CLIENT(s)
+                        self._database[s]["client"].read()
                 for s in xlist:
                     raise RuntimeError("Error in socket, closing it")
 
@@ -195,10 +196,10 @@ class Server(base.Base):
             except select.error as e:
                 if e[0] != errno.EINTR:
                     self.logger.error(traceback.format_exc())
-                    self._close_socket(socket)
+                    self._close_socket(s)
             except Disconnect as e:
-                self._close_socket(socket)
+                self._close_socket(s)
                 self.logger.error(traceback.format_exc())
             except Exception as e:
-                self._close_fd(socket)
+                self._close_socket(s)
                 self.logger.critical(traceback.format_exc)
