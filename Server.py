@@ -1,3 +1,4 @@
+#TODO: switch use of dictionary to Client object
 import errno
 import os
 import select
@@ -7,7 +8,7 @@ import traceback
 import base
 import util
 
-CLOSE, SERVER, ACTIVE = range(3)
+CLOSE, SERVER, CLIENT = range(3)
 CRLF = "\r\n"
 END_HEARDER = 2 * CRLF
 HTTP_VERSION = "HTTP/1.1"
@@ -50,14 +51,14 @@ class Server(base.Base):
     # Add the socket to the database, structre will be:
     # {socket :  {
     #            "buff":buffer will contain the data we need to send,
-    #            "state": state of the socket, CLOSE, SERVER or ACTIVE,
+    #            "state": state of the socket, CLOSE, SERVER or CLIENT,
     #            "file": file_object to send,
-    #            "peer": ACTIVE, the server we are connected to,
+    #            "peer": CLIENT, the server we are connected to,
     #                    SERVER, list of the sockets that connected to server
     #                    CLOSE, None
     #            }
-    def _add_to_database(self, socket, state=ACTIVE, peer=None):
-        if state not in (CLOSE, SERVER, ACTIVE):
+    def _add_to_database(self, socket, state=CLIENT, peer=None):
+        if state not in (CLOSE, SERVER, CLIENT):
             raise RuntimeError("State not found")
         self._database[socket] = {
             "buff": "",
@@ -66,7 +67,7 @@ class Server(base.Base):
         }
         if state == SERVER:
             self._database[socket].update({"peer": []})
-        elif state == ACTIVE:
+        elif state == CLIENT:
             self._database[socket].update({"peer": peer})
         else:
             self._database[socket].update({"peer": None})
@@ -88,7 +89,7 @@ class Server(base.Base):
 
     # Remove refences from database
     def _remove_refernces(self, entry):
-        if entry["state"] == ACTIVE:
+        if entry["state"] == CLIENT:
             self._database[self._database[socket]["peer"]].remove(socket)
         elif entry["state"] == SERVER:
             for peer_socket in self._database[socket]["peer"]:
@@ -110,7 +111,7 @@ class Server(base.Base):
                 wlist.append[socket]
             if entry["state"] == SERVER:
                 rlist.append[socket]
-            if entry["state"] == ACTIVE:
+            if entry["state"] == CLIENT:
                 if entry["buff"]:
                     wlist.append[socket]
                 socket_peer = entry["peer"]
@@ -133,7 +134,7 @@ class Server(base.Base):
         try:
             accepted, addr = socket.accept()
             accepted.setblocking(0)
-            self._add_to_database(socket=socket, state=ACTIVE, peer=socket)
+            self._add_to_database(socket=socket, state=CLIENT, peer=socket)
             self._database[socket]["peer"].append(accepted)
             self.logger.info("connect the socket from %s" % addr)
         except Exception:
@@ -158,7 +159,7 @@ class Server(base.Base):
         )
 
     # Get request, and creat FileObject by it
-    def _handle_active(self, s):
+    def _handle_CLIENT(self, s):
         status_sent = False
         try:
             rest = bytearray()
@@ -241,8 +242,8 @@ class Server(base.Base):
                     socket_state = self._database[socket]["state"]
                     if socket_state == SERVER:
                         self._connect_socket(s)
-                    elif socket_state == ACTIVE:
-                        self._handle_active(s)
+                    elif socket_state == CLIENT:
+                        self._handle_CLIENT(s)
                 for s in xlist:
                     raise RuntimeError("Error in socket, closing it")
 
