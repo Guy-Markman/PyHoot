@@ -1,11 +1,11 @@
-#TODO: switch use of dictionary to Client object
+# TODO: switch use of dictionary to Client object
 import errno
-import os
 import select
 import socket
 import traceback
 
 import base
+import Client
 import util
 
 CLOSE, SERVER, CLIENT = range(3)
@@ -61,16 +61,14 @@ class Server(base.Base):
         if state not in (CLOSE, SERVER, CLIENT):
             raise RuntimeError("State not found")
         self._database[socket] = {
-            "buff": "",
             "state": state,
-            "file": None
         }
         if state == SERVER:
-            self._database[socket].update({"peer": []})
+            self._database[socket]["peer"] = {}
         elif state == CLIENT:
-            self._database[socket].update({"peer": peer})
+            self._database[socket]["client"] = Client.Client(socket, peer)
         else:
-            self._database[socket].update({"peer": None})
+            self._database[socket]["peer"] = None
         self.logger.debug("Socket added to database, {%s: %s}" % (
             socket,
             self._database[socket]
@@ -87,17 +85,20 @@ class Server(base.Base):
         self._database.pop(socket)
         self.logger.debug("Close success")
 
+    def _change_to_close(self, socket):
+        self.datbase[socket]["state"] = CLOSE
+        self._remove_refernces(socket)
+
     # Remove refences from database
-    def _remove_refernces(self, entry):
+    def _remove_refernces(self, socket):
+        entry = self._database[socket]
         if entry["state"] == CLIENT:
-            self._database[self._database[socket]["peer"]].remove(socket)
+            self._database[self._database[socket]["peer"]].pop(socket)
         elif entry["state"] == SERVER:
-            for peer_socket in self._database[socket]["peer"]:
+            for peer_socket in self._database[socket]["peer"].keys():
                 peer_database = self._database[peer_socket]
-                peer_database.update({
-                    "peer": None,
-                    "state": CLOSE
-                })
+                peer_database["peer"] = None
+                peer_database.pop("client")
 
     # build the three list (rlist, wlist, xlist) for select.select
     def _build_select(self):
@@ -112,13 +113,11 @@ class Server(base.Base):
             if entry["state"] == SERVER:
                 rlist.append[socket]
             if entry["state"] == CLIENT:
-                if entry["buff"]:
+                if entry:
                     wlist.append[socket]
-                socket_peer = entry["peer"]
+                socket_peer = entry["client"].get_peer()
                 if (
-                    socket_peer is not None
-                    and (len(self._database[socket_peer]["buff"]) <
-                         self._buff_size)
+                    self._datbase[socket_peer]["peer"]
                 ):
                     rlist.append[socket]
         self.logger.debug("""rlist = %s\n
@@ -157,61 +156,6 @@ class Server(base.Base):
                 extra
             )
         )
-
-    # Get request, and creat FileObject by it
-    def _handle_CLIENT(self, s):
-        status_sent = False
-        try:
-            rest = bytearray()
-            req, rest = util.recv_line(s,
-                                       self._database[s]["buff"],
-                                       block_size=self._buff_size)
-            req_comps = req.split(' ', 2)
-            if req_comps[2] != HTTP_VERSION:
-                raise RuntimeError('Not HTTP protocol')
-            if len(req_comps) != 3:
-                raise RuntimeError('Incomplete HTTP protocol')
-
-            method, uri, signature = req_comps
-            if method != 'GET':
-                raise RuntimeError("HTTP unsupported method '%s'" % method)
-            if not uri or uri[0] != '/' or '\\' in uri:
-                raise RuntimeError("Invalid URI")
-
-            file_name = os.path.normpath(
-                '%s%s' % (
-                    self._base_directory,
-                    os.path.normpath(uri),
-                )
-            )
-
-            #
-            # Parse header
-            #
-            headers = {
-                'Contint-Length': None
-            }
-            for i in range(MAX_NUMBER_OF_HEADERS):
-                line, rest = util.recv_line(s, rest)
-                if not line:
-                    break
-                k, v = util.parse_header(line)
-                if k in headers:
-                    headers[k] = v
-            else:
-                raise RuntimeError('Too many headers')
-        except IOError as e:
-            traceback.print_exc()
-            if not status_sent:
-                if e.errno == errno.ENOENT:
-                    self._creat_error(s, 404, 'File Not Found', e)
-                else:
-                    self._creat_error(s, 500, 'Internal Error', e)
-        except Exception as e:
-            traceback.print_exc()
-            if not status_sent:
-                self._creat_error(s, 500, 'Internal Error', e)
-                self._remove_refernces(self._database[s])
 
     # The main function of the class, makes everything work
     def start_server(self):
