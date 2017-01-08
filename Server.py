@@ -11,8 +11,6 @@ import util
 CLOSE, SERVER, CLIENT = range(3)
 CRLF = "\r\n"
 END_HEARDER = 2 * CRLF
-HTTP_VERSION = "HTTP/1.1"
-MAX_NUMBER_OF_HEADERS = 100
 
 
 class Disconnect(RuntimeError):
@@ -32,7 +30,7 @@ class Server(base.Base):
         super(Server, self).__init__()
         self._buff_size = buff_size
         self._run = True
-        self.logger.info("Initialized server, buff size %d" % buff_size)
+        self.logger.info("Initialized server, buff size '%d'" % buff_size)
         self._base_directory = base_directory
         self.add_server
 
@@ -48,7 +46,7 @@ class Server(base.Base):
         s.setnonblocking(0)
         s.listen(1)
         self._add_to_database(s)
-        self.logger.info("Created server on address %s" % our_address)
+        self.logger.info("Created server on address '%s'" % our_address)
         self._ad
 
     def _add_to_database(self, s, state=SERVER, peer=None):
@@ -72,11 +70,11 @@ class Server(base.Base):
         if state == SERVER:
             entry["peer"] = []
         elif state == CLIENT:
-            entry["client"] = Client.Client(s)
+            entry["client"] = Client.Client(s, self._buff_size)
             entry["peer"] = peer
         else:
             self._database[s]["peer"] = None
-        self.logger.debug("s added to database, {%s: %s}" % (
+        self.logger.debug("s added to database, {'%s': '%s'}" % (
             s,
             self._database[s]
         ))
@@ -121,9 +119,9 @@ class Server(base.Base):
                     wlist.append[s]
                 if self._database[s]["client"].buff:
                     rlist.append[s]
-        self.logger.debug("""rlist = %s\n
-                             wlist = %s\n
-                             xlist = %s\n
+        self.logger.debug("""rlist = '%s'\n
+                             wlist = '%s'\n
+                             xlist = '%s'\n
                           """ % (rlist, wlist, xlist))
         return rlist, wlist, xlist
 
@@ -139,27 +137,11 @@ class Server(base.Base):
             accepted.setblocking(0)
             self._add_to_database(accepted, state=CLIENT, peer=server)
             self._database[server]["peer"].append(accepted)
-            self.logger.info("connect the socket from %s" % addr)
+            self.logger.info("connect the socket from '%s'" % addr)
         except Exception:
             self.loggger.error(traceback.format_exc)
             if accepted is not None:
                 accepted.close()
-
-    # Creat the error we will send to the client
-    def _creat_error(self, s, code, message, extra):
-        self._database[s]["client"].buff += (
-            """%s %s %s \r\n
-                Content-Length: %s\r\n
-                \r\n
-                %s""" % (
-                HTTP_VERSION,
-                code,
-                message,
-                code,
-                message,
-                extra
-            )
-        )
 
     def start_server(self):
         """The main function of the class, makes everything work"""

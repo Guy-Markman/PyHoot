@@ -48,11 +48,6 @@ def parse_args():
         required=False,
         help='Logfile to write to, otherwise will log to console.',
     )
-    parser.add_argument(
-        '--base',
-        default='.',
-        help='Base directory to search files in, default: %(defaults)',
-    )
     args = parser.parse_args()
     args.log_level = LOG_STR_LEVELS[args.log_level_str]
     address_list = []

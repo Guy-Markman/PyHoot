@@ -1,8 +1,10 @@
+import errno
 import socket
+
+import constants
 
 MAX_BLOCK_SIZE = 1024
 MAX_HEADER_LENGTH = 4096
-CRLF = "\r\n"
 
 
 def creat_nonblocking_socket(self):
@@ -13,19 +15,39 @@ def creat_nonblocking_socket(self):
 
 def recv_line(
     s,
-    buf,
     max_length=MAX_HEADER_LENGTH,
     block_size=MAX_BLOCK_SIZE,
 ):
-    while True:
-        if len(buf) > max_length:
-            raise RuntimeError(
-                'Exceeded maximum line length %s' % max_length)
-        n = buf.find(CRLF)
-        if n != -1:
-            break
-        t = s.recv(block_size)
-        if not t:
-            raise RuntimeError('Disconnect')
-        buf += t
-    return buf[:n].decode('utf-8'), buf[n + len(CRLF):]
+    buf = ""
+    try:
+        while True:
+            if len(buf) > max_length:
+                raise RuntimeError(
+                    'Exceeded maximum line length %s' % max_length)
+            if buf.find(constants.CRLF) != -1:
+                break
+            t = s.recv(block_size)
+            if not t:
+                raise RuntimeError('Disconnect')
+            buf += t
+    except socket.error as e:
+        if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
+            raise
+    return buf
+
+
+def creat_error(self, code, message, extra):
+    """Creat the error we will send to the client"""
+    return (
+        """%s %s %s \r\n
+            Content-Length: %s\r\n
+            \r\n
+            %s""" % (
+            constants.HTTP_VERSION,
+            code,
+            message,
+            code,
+            message,
+            extra
+        )
+    )
