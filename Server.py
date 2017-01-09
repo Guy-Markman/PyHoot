@@ -1,4 +1,3 @@
-# TODO: switch use of dictionary to Client object
 import errno
 import select
 import socket
