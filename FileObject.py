@@ -44,3 +44,7 @@ class FileObject(base.Base):
     def check_read_all(self):
         """ Check if we read all the file"""
         return self.cursor_position == os.stat(self._file_name).st_size
+
+    def get_file_size(self):
+        """ Return the size of the file"""
+        return os.stat(self._file_name).st_size

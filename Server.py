@@ -1,4 +1,3 @@
-# TODO: switch use of dictionary to Client object
 import errno
 import select
 import socket
@@ -6,17 +5,12 @@ import traceback
 
 import base
 import Client
+import CustomExceptions
 import util
 
 CLOSE, SERVER, CLIENT = range(3)
 CRLF = "\r\n"
 END_HEARDER = 2 * CRLF
-
-
-class Disconnect(RuntimeError):
-
-    def __init__(self):
-        super(Disconnect, self).__init__("Disconnect")
 
 
 class Server(base.Base):
@@ -94,7 +88,7 @@ class Server(base.Base):
         if entry["state"] == CLIENT:
             if entry["peer"] is not None:
                 self._database[entry["peer"]].pop(s)
-            entry["buff"] = entry["client"].buff
+            entry["buff"] = entry["client"].get_send_buff()
             entry["peer"] = None
             entry.pop("client")
         elif entry["state"] == SERVER:
@@ -176,9 +170,12 @@ class Server(base.Base):
                 if e[0] != errno.EINTR:
                     self.logger.error(traceback.format_exc())
                     self._close_socket(s)
-            except Disconnect as e:
+            except CustomExceptions.Disconnect as e:
                 self._close_socket(s)
                 self.logger.error(traceback.format_exc())
+            except CustomExceptions.FinishedRequest as e:
+                self._database[s]["client"] = Client.Client(
+                    s, self._buff_size)
             except Exception as e:
                 self._close_socket(s)
                 self.logger.critical(traceback.format_exc)
