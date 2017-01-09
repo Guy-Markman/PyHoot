@@ -9,6 +9,8 @@ class Request(base.Base):
                     self._uri, the uri of the requested file
                     self._headers, a dictionary that contain the name of the
                                   header as key and the header itself as value
+                    self.sent_status, a boolean who say if we already sent
+                                      status or not
     """
 
     def __init__(self, method=None, uri=None):
@@ -22,6 +24,7 @@ class Request(base.Base):
         self._method = method
         self._uri = uri
         self.headers = {}
+        self.sent_status = False
 
     def set_method(self, method):
         """ Set self._method
@@ -31,7 +34,7 @@ class Request(base.Base):
         self._method = method
 
     def get_method(self):
-        """ Return self.method"""
+        """ Return self._method"""
         return self._method
 
     def set_uri(self, uri):
@@ -40,6 +43,10 @@ class Request(base.Base):
                         uri, the new uri
         """
         self._uri = uri
+
+    def get_uri(self):
+        """ Return self._uri"""
+        return self._uri
 
     def add_header(self, header, content):
         """ Add header

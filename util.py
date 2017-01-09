@@ -2,11 +2,13 @@ import errno
 import socket
 
 import constants
+import CustomExceptions
 
 MAX_HEADER_LENGTH = 4096
 
 
 def creat_nonblocking_socket(self):
+    """ Creat nonblocking socket"""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setblocking(0)
     return s
@@ -28,7 +30,7 @@ def recv_line(
                 break
             t = s.recv(block_size)
             if not t:
-                raise RuntimeError('Disconnect')
+                raise CustomExceptions.Disconnect
             buf += t
     except socket.error as e:
         if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
