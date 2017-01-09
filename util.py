@@ -3,7 +3,6 @@ import socket
 
 import constants
 
-MAX_BLOCK_SIZE = 1024
 MAX_HEADER_LENGTH = 4096
 
 
@@ -16,8 +15,9 @@ def creat_nonblocking_socket(self):
 def recv_line(
     s,
     max_length=MAX_HEADER_LENGTH,
-    block_size=MAX_BLOCK_SIZE,
+    block_size=constants.BUFF_SIZE,
 ):
+    """Recive a line from socket s, if unable return how much it did read"""
     buf = ""
     try:
         while True:

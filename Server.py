@@ -32,7 +32,6 @@ class Server(base.Base):
         self._run = True
         self.logger.info("Initialized server, buff size '%d'" % buff_size)
         self._base_directory = base_directory
-        self.add_server
 
     def add_server(
         self,
@@ -124,8 +123,6 @@ class Server(base.Base):
                              xlist = '%s'\n
                           """ % (rlist, wlist, xlist))
         return rlist, wlist, xlist
-
-        self._conn
 
     def _connect_socket(self, server):
         """accept socket to the system, add it to the database and add referene

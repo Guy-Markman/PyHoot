@@ -1,3 +1,4 @@
-HTTP_VERSION = "HTTP/1.1"
+BASE = '.'
+BUFF_SIZE = 1024
 CRLF = "\r\n"
-base = '.'
+HTTP_VERSION = "HTTP/1.1"

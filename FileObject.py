@@ -4,23 +4,29 @@ import traceback
 import base
 
 
-# This class reprsent an file that we read and send to the Server
-# name = the name of the file we want to send
-# buff_size = the size of the buff on server
-
-
 class FileObject(base.Base):
+    """ This class reprsent an file that we read and send to the Server
+        self._file_name = the name of the file
+        self.buff_size = the buff size of the server
+        self._cursor_position = The position of the cursor in the file,
+                                represent how much we read already
+    """
 
-    def __init__(self, file_name, buff_size):
+    def __init__(self, file_name, buff_size=1024):
+        """ Creat FileObject
+            Arguemnts:
+                        file_name: The name of the file for the FileObject
+                        buff_size: The size of the buff, default 1024
+        """
         self._file_name = file_name
         if not os.path.isfile(file_name):
             self.logger.error(traceback.format_exc)
             os.open(file_name, os.O_RDONLY)
 
-        self._cursor_position = 0  # The curson position right now
+        self._cursor_position = 0
 
-    # open the file and read it up to length of the file
     def read_buff(self, length):
+        """ Open the file and read it up to length of the file"""
         fd = os.open(self._file_name, os.O_RDONLY)
         ret = None
         try:
@@ -35,6 +41,6 @@ class FileObject(base.Base):
         self.cursor_position += len(ret)
         return ret
 
-    # Check if we finished reading
     def check_read_all(self):
+        """ Check if we read all the file"""
         return self.cursor_position == os.stat(self._file_name).st_size

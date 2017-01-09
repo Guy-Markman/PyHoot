@@ -5,6 +5,7 @@ import logging
 import signal
 
 import base
+import constants
 import Server
 
 
@@ -26,11 +27,11 @@ def parse_args():
         "--address",
         default=["128.0.0.1:80"],
         nargs="+",
-        help="The address(es) we will connect to, default %(default)d",
+        help="The address(es) we will connect to, default %(default)s",
     )
     parser.add_argument(
         "--buff-size",
-        default=1024,
+        default=constants.BUFF_SIZE,
         type=int,
         help="Buff size for each time, default %(default)d"
     )
