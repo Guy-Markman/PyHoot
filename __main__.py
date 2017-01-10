@@ -52,7 +52,7 @@ def parse_args():
     args = parser.parse_args()
     args.log_level = LOG_STR_LEVELS[args.log_level_str]
     address_list = []
-    for a in parser.proxy:
+    for a in parser.address:
         a = a.split(":")
         if len(a) != 2:
             raise ValueError(

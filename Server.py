@@ -40,7 +40,6 @@ class Server(base.Base):
         s.listen(1)
         self._add_to_database(s)
         self.logger.info("Created server on address '%s'" % our_address)
-        self._ad
 
     def _add_to_database(self, s, state=SERVER, peer=None):
         """
@@ -93,7 +92,7 @@ class Server(base.Base):
             entry.pop("client")
         elif entry["state"] == SERVER:
             for peer_s in self._database[s]["peer"].keys():
-                peer_s._change_to_close(peer_s)
+                self._change_to_close(peer_s)
 
     def _build_select(self):
         """build the three list (rlist, wlist, xlist) for select.select"""
@@ -101,17 +100,17 @@ class Server(base.Base):
         wlist = []
         xlist = []
         for s in self._database.keys():
-            xlist.append[s]
+            xlist.append(s)
             entry = self._database[s]
             if entry["state"] == CLOSE:
-                wlist.append[s]
+                wlist.append(s)
             if entry["state"] == SERVER:
-                rlist.append[s]
+                rlist.append(s)
             if entry["state"] == CLIENT:
                 if entry:
-                    wlist.append[s]
+                    wlist.append(s)
                 if self._database[s]["client"].buff:
-                    rlist.append[s]
+                    rlist.append(s)
         self.logger.debug("""rlist = '%s'\n
                              wlist = '%s'\n
                              xlist = '%s'\n
@@ -130,7 +129,7 @@ class Server(base.Base):
             self._database[server]["peer"].append(accepted)
             self.logger.info("connect the socket from '%s'" % addr)
         except Exception:
-            self.loggger.error(traceback.format_exc)
+            self.logger.error(traceback.format_exc)
             if accepted is not None:
                 accepted.close()
 
@@ -170,12 +169,12 @@ class Server(base.Base):
                 if e[0] != errno.EINTR:
                     self.logger.error(traceback.format_exc())
                     self._close_socket(s)
-            except CustomExceptions.Disconnect as e:
+            except CustomExceptions.Disconnect:
                 self._close_socket(s)
                 self.logger.error(traceback.format_exc())
-            except CustomExceptions.FinishedRequest as e:
+            except CustomExceptions.FinishedRequest:
                 self._database[s]["client"] = Client.Client(
                     s, self._buff_size)
-            except Exception as e:
+            except Exception:
                 self._close_socket(s)
                 self.logger.critical(traceback.format_exc)

@@ -81,7 +81,7 @@ class Client(base.Base):
                 if not uri or uri[0] != '/' or '\\' in uri:
                     raise RuntimeError("Invalid URI")
                 file_name = os.path.normapth(
-                    '%s%s' % (constants.base, os.path.normpath(uri)))
+                    '%s%s' % (constants.BASE, os.path.normpath(uri)))
                 self.file = FileObject.FileObject(
                     file_name, self._buff_size)
                 self.request = Request.Request(method, uri)
@@ -96,12 +96,12 @@ class Client(base.Base):
                     self._recv_buff += buf
                 lines = self._recv_buff.split(constants.CRLF)
                 for line in lines[:-1]:
-                    self.request.add_header(*line.split(": ", 2))
-                if ": " in line[-1]:
-                    self.request.add_header(*line.split(": ", 2))
+                    self.request.add_header(*lines.split(": ", 2))
+                if ": " in lines[-1]:
+                    self.request.add_header(*lines.split(": ", 2))
                     self._recv_buff = ""
                 else:
-                    self._recv_buff = line[-1]
+                    self._recv_buff = lines[-1]
 
         except IOError as e:
             self.logger.error(traceback.format_exc)
@@ -139,7 +139,7 @@ class Client(base.Base):
             if self.check_finished_request():
                 raise CustomExceptions.FinishedRequest
             free_space_in_buffer = self._buff_size - len(self._send_buff)
-            if not read_all and (free_space_in_buffer) > 0:
+            if not read_all and free_space_in_buffer > 0:
                 self._send_buff += self.file.read_buff(free_space_in_buffer)
             self._send_my_buff()
             if self.check_finished_request():
