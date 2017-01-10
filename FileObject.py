@@ -18,6 +18,7 @@ class FileObject(base.Base):
                         file_name: The name of the file for the FileObject
                         buff_size: The size of the buff, default 1024
         """
+        super(FileObject, self).__init__()
         self._file_name = file_name
         if not os.path.isfile(file_name):
             self.logger.error(traceback.format_exc)
@@ -30,7 +31,7 @@ class FileObject(base.Base):
         fd = os.open(self._file_name, os.O_RDONLY)
         ret = None
         try:
-            os.lseek(fd, self.cursor_position, os.SEEK_SET)
+            os.lseek(fd, self._cursor_position, os.SEEK_SET)
             while len(ret) < length:
                 buff = os.read(fd, length)
                 if buff == "":  # got to the end of the file
@@ -38,12 +39,12 @@ class FileObject(base.Base):
                 ret += buff
         finally:
             os.close(fd)
-        self.cursor_position += len(ret)
+        self._cursor_position += len(ret)
         return ret
 
     def check_read_all(self):
         """ Check if we read all the file"""
-        return self.cursor_position == os.stat(self._file_name).st_size
+        return self._cursor_position == os.stat(self._file_name).st_size
 
     def get_file_size(self):
         """ Return the size of the file"""

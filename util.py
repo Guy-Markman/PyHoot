@@ -7,7 +7,7 @@ import CustomExceptions
 MAX_HEADER_LENGTH = 4096
 
 
-def creat_nonblocking_socket(self):
+def creat_nonblocking_socket():
     """ Creat nonblocking socket"""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setblocking(0)
@@ -38,12 +38,13 @@ def recv_line(
     return buf
 
 
-def creat_error(self, code, message, extra):
+def creat_error(code, message, extra):
     """Creat the error we will send to the client"""
     return (
         """%s %s %s \r\n
             Content-Length: %s\r\n
             \r\n
+            %s
             %s""" % (
             constants.HTTP_VERSION,
             code,
