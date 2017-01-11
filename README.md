@@ -19,3 +19,8 @@ Arguements:
                           Log level
   
         --log-file FILE       Logfile to write to, otherwise will log to console.
+TODO:
+- [ ] Make server send html files
+- [ ] Test on other types of files
+- [ ] Clock service
+- [ ] Write down all the other HTML Advance

@@ -1,7 +1,5 @@
-# TODO: switch use of dictionary to Client object
 import errno
 import select
-import socket
 import traceback
 
 import base
@@ -37,11 +35,11 @@ class Server(base.Base):
                          format (address, port), default (localhost, 80)
         """
         s = util.creat_nonblocking_socket()
-        s.setnonblocking(0)
+        print our_address
+        s.bind(our_address)
         s.listen(1)
         self._add_to_database(s)
-        self.logger.info("Created server on address '%s'" % our_address)
-        self._ad
+        self.logger.info("Created server on address '%s:%s'" % our_address)
 
     def _add_to_database(self, s, state=SERVER, peer=None):
         """
@@ -94,7 +92,7 @@ class Server(base.Base):
             entry.pop("client")
         elif entry["state"] == SERVER:
             for peer_s in self._database[s]["peer"].keys():
-                peer_s._change_to_close(peer_s)
+                self._change_to_close(peer_s)
 
     def _build_select(self):
         """build the three list (rlist, wlist, xlist) for select.select"""
@@ -102,17 +100,17 @@ class Server(base.Base):
         wlist = []
         xlist = []
         for s in self._database.keys():
-            xlist.append[s]
+            xlist.append(s)
             entry = self._database[s]
             if entry["state"] == CLOSE:
-                wlist.append[s]
+                wlist.append(s)
             if entry["state"] == SERVER:
-                rlist.append[s]
+                rlist.append(s)
             if entry["state"] == CLIENT:
                 if entry:
-                    wlist.append[s]
-                if self._database[s]["client"].buff:
-                    rlist.append[s]
+                    wlist.append(s)
+                if self._database[s]["client"].get_send_buff():
+                    rlist.append(s)
         self.logger.debug("""rlist = '%s'\n
                              wlist = '%s'\n
                              xlist = '%s'\n
@@ -129,9 +127,9 @@ class Server(base.Base):
             accepted.setblocking(0)
             self._add_to_database(accepted, state=CLIENT, peer=server)
             self._database[server]["peer"].append(accepted)
-            self.logger.info("connect the socket from '%s'" % addr)
+            self.logger.info("connect the socket from '%s:%s'" % addr)
         except Exception:
-            self.loggger.error(traceback.format_exc)
+            self.logger.error(traceback.format_exc())
             if accepted is not None:
                 accepted.close()
 
@@ -155,10 +153,14 @@ class Server(base.Base):
                         self._close_socket(s)
 
                 # build and do select
-                rlist, wlist, xlist = select.select(self._build_select())
+                rlist, wlist, xlist = self._build_select()
+                print rlist
+                print wlist
+                print xlist
+                rlist, wlist, xlist = select.select(rlist, wlist, xlist)
                 # taking care of all the sockets in rlist
                 for s in rlist:
-                    socket_state = self._database[socket]["state"]
+                    socket_state = self._database[s]["state"]
                     if socket_state == SERVER:
                         self._connect_socket(s)
                     elif socket_state == CLIENT:
@@ -171,12 +173,11 @@ class Server(base.Base):
                 if e[0] != errno.EINTR:
                     self.logger.error(traceback.format_exc())
                     self._close_socket(s)
-            except CustomExceptions.Disconnect as e:
+            except CustomExceptions.Disconnect:
                 self._close_socket(s)
                 self.logger.error(traceback.format_exc())
-            except CustomExceptions.FinishedRequest as e:
-                self._database[s]["client"] = Client.Client(
-                    s, self._buff_size)
-            except Exception as e:
+            except CustomExceptions.FinishedRequest:
+                self._change_to_close(s)
+            except Exception:
                 self._close_socket(s)
-                self.logger.critical(traceback.format_exc)
+                self.logger.critical(traceback.format_exc())

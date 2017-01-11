@@ -23,7 +23,7 @@ class Request(base.Base):
         """
         self._method = method
         self._uri = uri
-        self.headers = {}
+        self._headers = {}
         self.sent_status = False
 
     def set_method(self, method):
@@ -65,4 +65,4 @@ class Request(base.Base):
             Arguemtns:
                         header, the name of the header
         """
-        self._header.pop(header)
+        self._headers.pop(header)
