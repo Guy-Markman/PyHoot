@@ -26,6 +26,9 @@ class Server(base.Base):
         self.logger.info("Initialized server, buff size '%d'" % buff_size)
         self._base_directory = base_directory
 
+    def terminate(self):
+        self._run = False
+
     def add_server(
         self,
         our_address=("localhost", 80)
