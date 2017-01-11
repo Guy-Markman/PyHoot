@@ -38,7 +38,6 @@ class Server(base.Base):
                          format (address, port), default (localhost, 80)
         """
         s = util.creat_nonblocking_socket()
-        print our_address
         s.bind(our_address)
         s.listen(1)
         self._add_to_database(s)
@@ -77,8 +76,7 @@ class Server(base.Base):
     def _close_socket(self, s):
         """ close the socket, remove it from it's from the database and remove
         references to it from it's peer"""
-        if self._database[s]["state"] != CLOSE:
-            self._change_to_close(s)
+        print self._database
         s.close()
         self._database.pop(s)
         self.logger.debug("Close success")
@@ -86,16 +84,17 @@ class Server(base.Base):
     def _change_to_close(self, s):
         """Change the socket s to close state"""
         entry = self._database[s]
-        entry["state"] = CLOSE
         if entry["state"] == CLIENT:
             if entry["peer"] is not None:
-                self._database[entry["peer"]].pop(s)
-            entry["buff"] = entry["client"].get_send_buff()
+                self._database[entry["peer"]]["peer"].remove(s)
             entry["peer"] = None
+            entry["buff"] = entry["client"].get_send_buff()
             entry.pop("client")
         elif entry["state"] == SERVER:
-            for peer_s in self._database[s]["peer"].keys():
+            for peer_s in self._database[s]["peer"]:
                 self._change_to_close(peer_s)
+            entry["buff"] = ""
+        entry["state"] = CLOSE
 
     def _build_select(self):
         """build the three list (rlist, wlist, xlist) for select.select"""
@@ -110,7 +109,7 @@ class Server(base.Base):
             if entry["state"] == SERVER:
                 rlist.append(s)
             if entry["state"] == CLIENT:
-                if entry:
+                if entry["client"].get_send_buff():
                     wlist.append(s)
                 if self._database[s]["client"].get_send_buff():
                     rlist.append(s)
@@ -152,22 +151,30 @@ class Server(base.Base):
                 # and in close mode)
                 for s in self._database.keys():
                     entry = self._database[s]
-                    if entry["state"] == CLOSE and entry["buff"] == "":
-                        self._close_socket(s)
+                    print entry
+                    if entry["state"] == CLOSE:
+                        if entry["buff"] == "":
+                            self._close_socket(s)
 
                 # build and do select
                 rlist, wlist, xlist = self._build_select()
-                print rlist
-                print wlist
-                print xlist
+                print "test 1"
                 rlist, wlist, xlist = select.select(rlist, wlist, xlist)
+                print "test 2"
                 # taking care of all the sockets in rlist
                 for s in rlist:
                     socket_state = self._database[s]["state"]
                     if socket_state == SERVER:
+                        self.logger.debug("Server read")
                         self._connect_socket(s)
                     elif socket_state == CLIENT:
-                        self._database[s]["client"].read()
+                        self.logger.debug("Client Read")
+                        self._database[s]["client"].recv()
+                for s in wlist:
+                    entry = self._database[s]
+                    if socket_state == CLIENT:
+                        self.logger.debug("Client send")
+                        entry["client"].send()
                 for s in xlist:
                     raise RuntimeError("Error in socket, closing it")
 

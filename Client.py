@@ -165,3 +165,7 @@ class Client(base.Base):
     def get_send_buff(self):
         """Return _send_buff"""
         return self._send_buff
+
+    def can_recv(self):
+        """Decide if it can recive more data or not"""
+        return len(self._recv_buff) < self._buff_size
