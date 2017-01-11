@@ -1,6 +1,5 @@
 import errno
 import select
-import socket
 import traceback
 
 import base
