@@ -36,10 +36,11 @@ class Server(base.Base):
                          format (address, port), default (localhost, 80)
         """
         s = util.creat_nonblocking_socket()
-        s.setnonblocking(0)
+        print our_address
+        s.bind(our_address)
         s.listen(1)
         self._add_to_database(s)
-        self.logger.info("Created server on address '%s'" % our_address)
+        self.logger.info("Created server on address '%s:%s'" % our_address)
 
     def _add_to_database(self, s, state=SERVER, peer=None):
         """
@@ -109,7 +110,7 @@ class Server(base.Base):
             if entry["state"] == CLIENT:
                 if entry:
                     wlist.append(s)
-                if self._database[s]["client"].buff:
+                if self._database[s]["client"].get_send_buff():
                     rlist.append(s)
         self.logger.debug("""rlist = '%s'\n
                              wlist = '%s'\n
@@ -127,9 +128,9 @@ class Server(base.Base):
             accepted.setblocking(0)
             self._add_to_database(accepted, state=CLIENT, peer=server)
             self._database[server]["peer"].append(accepted)
-            self.logger.info("connect the socket from '%s'" % addr)
+            self.logger.info("connect the socket from '%s:%s'" % addr)
         except Exception:
-            self.logger.error(traceback.format_exc)
+            self.logger.error(traceback.format_exc())
             if accepted is not None:
                 accepted.close()
 
@@ -153,10 +154,14 @@ class Server(base.Base):
                         self._close_socket(s)
 
                 # build and do select
-                rlist, wlist, xlist = select.select(self._build_select())
+                rlist, wlist, xlist = self._build_select()
+                print rlist
+                print wlist
+                print xlist
+                rlist, wlist, xlist = select.select(rlist, wlist, xlist)
                 # taking care of all the sockets in rlist
                 for s in rlist:
-                    socket_state = self._database[socket]["state"]
+                    socket_state = self._database[s]["state"]
                     if socket_state == SERVER:
                         self._connect_socket(s)
                     elif socket_state == CLIENT:
@@ -173,8 +178,7 @@ class Server(base.Base):
                 self._close_socket(s)
                 self.logger.error(traceback.format_exc())
             except CustomExceptions.FinishedRequest:
-                self._database[s]["client"] = Client.Client(
-                    s, self._buff_size)
+                self._change_to_close(s)
             except Exception:
                 self._close_socket(s)
-                self.logger.critical(traceback.format_exc)
+                self.logger.critical(traceback.format_exc())

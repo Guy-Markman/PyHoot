@@ -25,7 +25,7 @@ def parse_args():
     )
     parser.add_argument(
         "--address",
-        default=["128.0.0.1:80"],
+        default=["localhost:80"],
         nargs="+",
         help="The address(es) we will connect to, default %(default)s",
     )
@@ -34,6 +34,12 @@ def parse_args():
         default=constants.BUFF_SIZE,
         type=int,
         help="Buff size for each time, default %(default)d"
+    )
+    parser.add_argument(
+        "--base",
+        default=".",
+        type=str,
+        help="Base directory"
     )
     parser.add_argument(
         '--log-level',
@@ -52,25 +58,21 @@ def parse_args():
     args = parser.parse_args()
     args.log_level = LOG_STR_LEVELS[args.log_level_str]
     address_list = []
-    for a in parser.address:
+    for a in args.address:
         a = a.split(":")
         if len(a) != 2:
             raise ValueError(
                 """--Address need to be in the next format:
                     server_address:server_port"""
             )
-        address_list.append({
-            "our address": (a[0], int(a[1])),
-            "connect address": (a[2], int(a[3]))
-        })
-    parser.address = address_list
+        address_list.append((a[0], int(a[1])),)
+    args.address = address_list
     return args
 
 
 def main():
     args = parse_args()
 
-    print args
     if args.log_file:
         logger = base.setup_logging(
             stream=open(args.log_file, 'a'),
@@ -88,12 +90,8 @@ def main():
         server.terminate()
     signal.signal(signal.SIGINT, terminate_handler)
     signal.signal(signal.SIGTERM, terminate_handler)
-
-    for address_dict in args.proxy:
-        server.add_server(
-            address_dict["our address"],
-            address_dict["connect address"]
-        )
+    for address_list in args.address:
+        server.add_server(address_list)
     server.start_server()
 
 
