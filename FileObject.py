@@ -29,7 +29,7 @@ class FileObject(base.Base):
     def read_buff(self, length):
         """ Open the file and read it up to length of the file"""
         fd = os.open(self._file_name, os.O_RDONLY)
-        ret = None
+        ret = ""
         try:
             os.lseek(fd, self._cursor_position, os.SEEK_SET)
             while len(ret) < length:

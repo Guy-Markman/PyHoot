@@ -62,14 +62,19 @@ class Client(base.Base):
         """Recv data from the client socket and process it to Reqeust and
            FileObject, or put it in the buff"""
         try:
+            line = ""
             # If there is no request, get request line
-            if self.request is None and constants.CRLF not in self.buff:
-                self.buff += util.recv_line(self._socket)
-
+            if self.request is None and constants.CRLF not in self._recv_buff:
+                self._recv_buff += util.recv_lines(
+                    self._socket, self._recv_buff)
             # If we have the request line, but don't have request object, creat
             # one
-            if self.request is None and constants.CRLF in self.buff:
-                req = self.buff.split(' ', 2)
+            if self.request is None and constants.CRLF in self._recv_buff:
+
+                req = self._recv_buff.split(constants.CRLF)[0].split(' ', 2)
+                print req
+                self.logger.debug("Req")
+                self.logger.debug(req)
                 if req[2] != constants.HTTP_VERSION:
                     raise RuntimeError('Not HTTP protocol')
                 if len(req) != 3:
@@ -80,44 +85,57 @@ class Client(base.Base):
                         "HTTP unspported method '%s'" % method)
                 if not uri or uri[0] != '/' or '\\' in uri:
                     raise RuntimeError("Invalid URI")
-                file_name = os.path.normapth(
+                file_name = os.path.normpath(
                     '%s%s' % (constants.BASE, os.path.normpath(uri)))
                 self.file = FileObject.FileObject(
                     file_name, self._buff_size)
                 self.request = Request.Request(method, uri)
-                self.buff = ""
+                self.logger.debug("Created file and request")
 
             # If we do have request line, get headers
             if self.request is not None:
-                while True:
-                    buf = util.recv_line(self._socket)
-                    if constants.CRLF not in buf:
-                        break
-                    self._recv_buff += buf
-                lines = self._recv_buff.split(constants.CRLF)
-                for line in lines[:-1]:
-                    self.request.add_header(*lines.split(": ", 2))
-                if ": " in lines[-1]:
-                    self.request.add_header(*lines.split(": ", 2))
-                    self._recv_buff = ""
-                else:
-                    self._recv_buff = lines[-1]
+                self.logger.debug("start getting lines")
+                self._recv_buff += util.recv_lines(
+                    self._socket, self._recv_buff)
+                self.logger.debug("got lines")
+                if constants.CRLF in self._recv_buff:
+                    self.logger.debug(self._recv_buff)
+                    lines = self._recv_buff.split(constants.CRLF)
+                    for line in lines[:-1]:
+                        self.request.add_header(*line.split(": ", 2))
+                        self.logger.debug("Added header")
+                    if ": " in lines[-1]:
+                        self.request.add_header(*lines[-1].split(": ", 2))
+                        self._recv_buff = ""
+                        self.logger.debug("Added header")
+                    else:
+                        self._recv_buff = lines[-1]
 
         except IOError as e:
-            self.logger.error(traceback.format_exc)
+            self.logger.error(traceback.format_exc())
             if e.errno == errno.ENOENT:
                 self._send_buff = util.creat_error(404, 'File Not Found', e)
             else:
                 self._send_buff = util.creat_error(500, 'Internal Error', e)
+
+        except OSError as e:
+            print "OSError"
+            self.logger.error(traceback.format_exc())
+            if e.errno == errno.ENOENT:
+                self._send_buff = util.creat_error(404, 'File Not Found', e)
+                print 404
+            else:
+                self._send_buff = util.creat_error(500, 'Internal Error', e)
+            raise
         except Exception as e:
-            self.logger.error(traceback.format_exc)
+            self.logger.error(traceback.format_exc())
             self._send_buff = util.creat_error(500, "Internal Error", e)
-            raise e
 
     def send(self):
         """ Fill self.send_buff with all the data it needs and then send it
         """
         if self.request is not None and self.file is not None:
+            print 1
             if not self.request.sent_status:
                 self._send_buff += (
                     "%s 200 OK\r\n"
@@ -129,17 +147,18 @@ class Client(base.Base):
                     self.file.get_file_size(),
                     MIME_MAPPING.get(
                         os.path.splitext(
-                            self.request.get_uri
+                            self.request.get_uri()
                         )[1].lstrip('.'),
                         'application/octet-stream',
                     ),
                 )
                 self.request.sent_status = True
-            read_all = self.file.check_read_all()
+            print 3
             if self.check_finished_request():
                 raise CustomExceptions.FinishedRequest
+            print 4
             free_space_in_buffer = self._buff_size - len(self._send_buff)
-            if not read_all and free_space_in_buffer > 0:
+            if free_space_in_buffer > 0:
                 self._send_buff += self.file.read_buff(free_space_in_buffer)
             self._send_my_buff()
             if self.check_finished_request():
@@ -156,6 +175,7 @@ class Client(base.Base):
             try:
                 self._send_buff = self._send_buff[
                     self._socket.send(self._send_buff):]
+                print "send client"
             except socket.error as e:
                 if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
                     raise

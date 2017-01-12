@@ -25,7 +25,7 @@ def parse_args():
     )
     parser.add_argument(
         "--address",
-        default=["localhost:80"],
+        default=["localhost:8080"],
         nargs="+",
         help="The address(es) we will connect to, default %(default)s",
     )

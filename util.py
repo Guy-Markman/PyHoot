@@ -14,19 +14,17 @@ def creat_nonblocking_socket():
     return s
 
 
-def recv_line(
+def recv_lines(
     s,
+    buf,
     max_length=MAX_HEADER_LENGTH,
     block_size=constants.BUFF_SIZE,
 ):
-    """Recive a line from socket s, if unable return how much it did read"""
-    buf = ""
+    """Recive lines from socket s, if unable return how much it did read"""
     try:
         while True:
-            if len(buf) > max_length:
-                raise RuntimeError(
-                    'Exceeded maximum line length %s' % max_length)
-            if buf.find(constants.CRLF) != -1:
+            n = buf.find(constants.CRLF)
+            if n != -1:
                 break
             t = s.recv(block_size)
             if not t:
@@ -40,12 +38,11 @@ def recv_line(
 
 def creat_error(code, message, extra):
     """Creat the error we will send to the client"""
-    return (
-        """%s %s %s \r\n
-            Content-Length: %s\r\n
-            \r\n
-            %s
-            %s""" % (
+    message = (
+        "%s %s %s\r\n"
+        "Content-Length: %s\r\n\r\n"
+        "%s\r\n"
+        "%s \r\n" % (
             constants.HTTP_VERSION,
             code,
             message,
@@ -54,3 +51,4 @@ def creat_error(code, message, extra):
             extra
         )
     )
+    return message

@@ -1,5 +1,6 @@
 import errno
 import select
+import socket
 import traceback
 
 import base
@@ -76,25 +77,29 @@ class Server(base.Base):
     def _close_socket(self, s):
         """ close the socket, remove it from it's from the database and remove
         references to it from it's peer"""
-        print self._database
+        self.logger.debug(self._database)
         s.close()
         self._database.pop(s)
         self.logger.debug("Close success")
 
     def _change_to_close(self, s):
         """Change the socket s to close state"""
-        entry = self._database[s]
-        if entry["state"] == CLIENT:
-            if entry["peer"] is not None:
-                self._database[entry["peer"]]["peer"].remove(s)
-            entry["peer"] = None
-            entry["buff"] = entry["client"].get_send_buff()
-            entry.pop("client")
-        elif entry["state"] == SERVER:
-            for peer_s in self._database[s]["peer"]:
-                self._change_to_close(peer_s)
-            entry["buff"] = ""
-        entry["state"] = CLOSE
+        if s in self._database.keys():
+            entry = self._database[s]
+            if entry["state"] == CLIENT:
+                self.logger.debug(entry)
+                if entry["peer"] is not None and entry["peer"] in self._database.keys():
+                    self._database[entry["peer"]]["peer"].remove(s)
+                entry["peer"] = None
+                entry["buff"] = entry["client"].get_send_buff()
+                entry.pop("client")
+            elif entry["state"] == SERVER:
+                self.logger.debug(self._database)
+                for peer_s in self._database[s]["peer"]:
+                    self.logger.debug(peer_s)
+                    self._change_to_close(peer_s)
+                entry["buff"] = ""
+            entry["state"] = CLOSE
 
     def _build_select(self):
         """build the three list (rlist, wlist, xlist) for select.select"""
@@ -111,7 +116,7 @@ class Server(base.Base):
             if entry["state"] == CLIENT:
                 if entry["client"].get_send_buff():
                     wlist.append(s)
-                if self._database[s]["client"].get_send_buff():
+                if entry["client"].can_recv():
                     rlist.append(s)
         self.logger.debug("""rlist = '%s'\n
                              wlist = '%s'\n
@@ -151,16 +156,18 @@ class Server(base.Base):
                 # and in close mode)
                 for s in self._database.keys():
                     entry = self._database[s]
-                    print entry
                     if entry["state"] == CLOSE:
                         if entry["buff"] == "":
                             self._close_socket(s)
 
                 # build and do select
                 rlist, wlist, xlist = self._build_select()
-                print "test 1"
                 rlist, wlist, xlist = select.select(rlist, wlist, xlist)
-                print "test 2"
+                self.logger.debug("Passed select")
+                self.logger.debug("""rlist = '%s'\n
+                                     wlist = '%s'\n
+                                     xlist = '%s'\n
+                                  """ % (rlist, wlist, xlist))
                 # taking care of all the sockets in rlist
                 for s in rlist:
                     socket_state = self._database[s]["state"]
@@ -170,11 +177,17 @@ class Server(base.Base):
                     elif socket_state == CLIENT:
                         self.logger.debug("Client Read")
                         self._database[s]["client"].recv()
+                        self.logger.debug("finished reciving")
                 for s in wlist:
                     entry = self._database[s]
-                    if socket_state == CLIENT:
+                    if entry["state"] == CLIENT:
                         self.logger.debug("Client send")
                         entry["client"].send()
+                    if entry["state"] == CLOSE:
+                        self.logger.debug("Close send")
+
+                        entry["buff"] = self.send(s)
+
                 for s in xlist:
                     raise RuntimeError("Error in socket, closing it")
 
@@ -189,5 +202,24 @@ class Server(base.Base):
             except CustomExceptions.FinishedRequest:
                 self._change_to_close(s)
             except Exception:
-                self._close_socket(s)
+                self._change_to_close(s)
                 self.logger.critical(traceback.format_exc())
+        self.logger.debug("Finishing")
+        self.logger.debug(self._database)
+
+    def send(self, s):
+        print self._database[s]
+        entry_buff = self._database[s]["buff"]
+        while entry_buff:
+            try:
+                sent = s.send(entry_buff)
+                print "SENT!"
+                self.logger.debug("sent %s" % sent)
+                entry_buff = entry_buff[sent:]
+            except socket.error as e:
+                if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
+                    raise
+                else:
+                    break
+        self.logger.debug("left %s" % len(entry_buff))
+        return entry_buff
