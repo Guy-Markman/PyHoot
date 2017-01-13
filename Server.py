@@ -88,7 +88,8 @@ class Server(base.Base):
             entry = self._database[s]
             if entry["state"] == CLIENT:
                 self.logger.debug(entry)
-                if entry["peer"] is not None and entry["peer"] in self._database.keys():
+                if (entry["peer"] is not None and
+                        entry["peer"] in self._database.keys()):
                     self._database[entry["peer"]]["peer"].remove(s)
                 entry["peer"] = None
                 entry["buff"] = entry["client"].get_send_buff()
@@ -185,7 +186,6 @@ class Server(base.Base):
                         entry["client"].send()
                     if entry["state"] == CLOSE:
                         self.logger.debug("Close send")
-
                         entry["buff"] = self.send(s)
 
                 for s in xlist:
@@ -197,18 +197,19 @@ class Server(base.Base):
                     self.logger.error(traceback.format_exc())
                     self._close_socket(s)
             except CustomExceptions.Disconnect:
-                self._close_socket(s)
                 self.logger.error(traceback.format_exc())
+                self._close_socket(s)
             except CustomExceptions.FinishedRequest:
+                self.logger.info("Finished Request for %s" % s)
                 self._change_to_close(s)
             except Exception:
-                self._change_to_close(s)
                 self.logger.critical(traceback.format_exc())
+                self._close_socket(s)
         self.logger.debug("Finishing")
         self.logger.debug(self._database)
 
     def send(self, s):
-        print self._database[s]
+        self.logger.debug(self._database[s])
         entry_buff = self._database[s]["buff"]
         while entry_buff:
             try:
@@ -217,6 +218,7 @@ class Server(base.Base):
                 self.logger.debug("sent %s" % sent)
                 entry_buff = entry_buff[sent:]
             except socket.error as e:
+                self.logger.error(traceback.format_exc())
                 if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
                     raise
                 else:

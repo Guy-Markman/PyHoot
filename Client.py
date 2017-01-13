@@ -58,6 +58,14 @@ class Client(base.Base):
         """Get the socket of this client, private arguement"""
         return self._socket
 
+    def _parse_header(self, line):
+        # Take care of duble request
+        if line.split(" ", 1)[0] in SUPPORTED_METHODS:
+            self.request.add_header(*line.split(" ", 1))
+        self.logger.debug("line %s" % line)
+        self.request.add_header(*line.split(": ", 2))
+        self.logger.debug("Added header")
+
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and
            FileObject, or put it in the buff"""
@@ -102,12 +110,9 @@ class Client(base.Base):
                     self.logger.debug(self._recv_buff)
                     lines = self._recv_buff.split(constants.CRLF)
                     for line in lines[:-1]:
-                        self.request.add_header(*line.split(": ", 2))
-                        self.logger.debug("Added header")
+                        self._parse_header(line)
                     if ": " in lines[-1]:
-                        self.request.add_header(*lines[-1].split(": ", 2))
-                        self._recv_buff = ""
-                        self.logger.debug("Added header")
+                        self._parse_header(lines[-1])
                     else:
                         self._recv_buff = lines[-1]
 
@@ -123,10 +128,9 @@ class Client(base.Base):
             self.logger.error(traceback.format_exc())
             if e.errno == errno.ENOENT:
                 self._send_buff = util.creat_error(404, 'File Not Found', e)
-                print 404
             else:
                 self._send_buff = util.creat_error(500, 'Internal Error', e)
-            raise
+            raise CustomExceptions.FinishedRequest
         except Exception as e:
             self.logger.error(traceback.format_exc())
             self._send_buff = util.creat_error(500, "Internal Error", e)
@@ -166,21 +170,27 @@ class Client(base.Base):
 
     def check_finished_request(self):
         """Check if we finished the request"""
-        return (self.request.sent_status and self.file.check_read_all()
+        read_all = self.file.check_read_all()
+        self.logger.debug("sent_status %s, read all %s send buff" % (
+            self.request.sent_status, read_all, not self._send_buff))
+        return (self.request.sent_status and read_all
                 and not self._send_buff)
 
     def _send_my_buff(self):
         """Send the data in self._send_buff"""
+        self.logger.debug("start sending my buff")
         while self._send_buff:
             try:
                 self._send_buff = self._send_buff[
                     self._socket.send(self._send_buff):]
-                print "send client"
+                self.logger.debug("client sent")
             except socket.error as e:
                 if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
                     raise
                 else:
                     break
+        self.logger.debug("Sent all that I could, send_buff %s" %
+                          self._send_buff)
 
     def get_send_buff(self):
         """Return _send_buff"""

@@ -9,4 +9,4 @@ class FinishedRequest(RuntimeError):
     """Represetn an error when we finish the request"""
 
     def __init__(self):
-        super(Disconnect, self).__init__("Finished Request")
+        super(FinishedRequest, self).__init__("Finished Request")

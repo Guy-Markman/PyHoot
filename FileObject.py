@@ -39,6 +39,7 @@ class FileObject(base.Base):
                 ret += buff
         finally:
             os.close(fd)
+        self.logger.debug("read %s" % len(self._cursor_position))
         self._cursor_position += len(ret)
         return ret
 
