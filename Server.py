@@ -115,7 +115,7 @@ class Server(base.Base):
             if entry["state"] == SERVER:
                 rlist.append(s)
             if entry["state"] == CLIENT:
-                if entry["client"].get_send_buff():
+                if entry["client"].can_send():
                     wlist.append(s)
                 if entry["client"].can_recv():
                     rlist.append(s)
@@ -163,33 +163,34 @@ class Server(base.Base):
 
                 # build and do select
                 rlist, wlist, xlist = self._build_select()
-                rlist, wlist, xlist = select.select(rlist, wlist, xlist)
-                self.logger.debug("Passed select")
-                self.logger.debug("""rlist = '%s'\n
-                                     wlist = '%s'\n
-                                     xlist = '%s'\n
-                                  """ % (rlist, wlist, xlist))
-                # taking care of all the sockets in rlist
-                for s in rlist:
-                    socket_state = self._database[s]["state"]
-                    if socket_state == SERVER:
-                        self.logger.debug("Server read")
-                        self._connect_socket(s)
-                    elif socket_state == CLIENT:
-                        self.logger.debug("Client Read")
-                        self._database[s]["client"].recv()
-                        self.logger.debug("finished reciving")
-                for s in wlist:
-                    entry = self._database[s]
-                    if entry["state"] == CLIENT:
-                        self.logger.debug("Client send")
-                        entry["client"].send()
-                    if entry["state"] == CLOSE:
-                        self.logger.debug("Close send")
-                        entry["buff"] = self.send(s)
+                if (rlist or wlist or xlist):
+                    rlist, wlist, xlist = select.select(rlist, wlist, xlist)
+                    self.logger.debug("Passed select")
+                    self.logger.debug("""rlist = '%s'\n
+                                         wlist = '%s'\n
+                                         xlist = '%s'\n
+                                      """ % (rlist, wlist, xlist))
+                    # taking care of all the sockets in rlist
+                    for s in rlist:
+                        socket_state = self._database[s]["state"]
+                        if socket_state == SERVER:
+                            self.logger.debug("Server read")
+                            self._connect_socket(s)
+                        elif socket_state == CLIENT:
+                            self.logger.debug("Client Read")
+                            self._database[s]["client"].recv()
+                            self.logger.debug("finished reciving")
+                    for s in wlist:
+                        entry = self._database[s]
+                        if entry["state"] == CLIENT:
+                            self.logger.debug("Client send")
+                            entry["client"].send()
+                        if entry["state"] == CLOSE:
+                            self.logger.debug("Close send")
+                            self.send(s)
 
-                for s in xlist:
-                    raise RuntimeError("Error in socket, closing it")
+                    for s in xlist:
+                        raise RuntimeError("Error in socket, closing it")
 
             # taking care of errors
             except select.error as e:
@@ -210,18 +211,15 @@ class Server(base.Base):
 
     def send(self, s):
         self.logger.debug(self._database[s])
-        entry_buff = self._database[s]["buff"]
-        while entry_buff:
+        while self._database[s]["buff"]:
             try:
-                sent = s.send(entry_buff)
-                print "SENT!"
+                sent = s.send(self._database[s]["buff"])
                 self.logger.debug("sent %s" % sent)
-                entry_buff = entry_buff[sent:]
+                self._database[s]["buff"] = self._database[s]["buff"][sent:]
             except socket.error as e:
                 self.logger.error(traceback.format_exc())
                 if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
                     raise
                 else:
                     break
-        self.logger.debug("left %s" % len(entry_buff))
-        return entry_buff
+        self.logger.debug("left %s" % len(self._database[s]["buff"]))

@@ -59,12 +59,11 @@ class Client(base.Base):
         return self._socket
 
     def _parse_header(self, line):
-        # Take care of duble request
-        if line.split(" ", 1)[0] in SUPPORTED_METHODS:
-            self.request.add_header(*line.split(" ", 1))
-        self.logger.debug("line %s" % line)
-        self.request.add_header(*line.split(": ", 2))
-        self.logger.debug("Added header")
+        parsed = line.split(": ", 1)
+        if len(parsed) == 2:
+            self.logger.debug("line %s" % line)
+            self.request.add_header(*line.split(": ", 1))
+            self.logger.debug("Added header")
 
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and
@@ -73,14 +72,13 @@ class Client(base.Base):
             line = ""
             # If there is no request, get request line
             if self.request is None and constants.CRLF not in self._recv_buff:
-                self._recv_buff += util.recv_lines(
-                    self._socket, self._recv_buff)
+                self._recv_lines()
+                self.logger.debug("after recv %s" % self._recv_buff)
             # If we have the request line, but don't have request object, creat
             # one
             if self.request is None and constants.CRLF in self._recv_buff:
-
-                req = self._recv_buff.split(constants.CRLF)[0].split(' ', 2)
-                print req
+                parsed_lines = self._recv_buff.split(constants.CRLF, 1)
+                req = parsed_lines[0].split(' ', 2)
                 self.logger.debug("Req")
                 self.logger.debug(req)
                 if req[2] != constants.HTTP_VERSION:
@@ -99,22 +97,27 @@ class Client(base.Base):
                     file_name, self._buff_size)
                 self.request = Request.Request(method, uri)
                 self.logger.debug("Created file and request")
-
+                self._recv_buff = "" if len(
+                    parsed_lines) == 1 else parsed_lines[1]
             # If we do have request line, get headers
             if self.request is not None:
                 self.logger.debug("start getting lines")
-                self._recv_buff += util.recv_lines(
-                    self._socket, self._recv_buff)
+                self._recv_lines()
+                self.logger.debug("after recv %s" % self._recv_buff)
                 self.logger.debug("got lines")
                 if constants.CRLF in self._recv_buff:
                     self.logger.debug(self._recv_buff)
-                    lines = self._recv_buff.split(constants.CRLF)
+                    lines = self._recv_buff.split(constants.DOUBLE_CRLF)[
+                        0].split(constants.CRLF)
                     for line in lines[:-1]:
-                        self._parse_header(line)
+                        if ": " in line:
+                            self._parse_header(line)
                     if ": " in lines[-1]:
                         self._parse_header(lines[-1])
+                        self._recv_buff = ""
                     else:
                         self._recv_buff = lines[-1]
+                    self.logger.debug("Now recv_buff is %s" % self._recv_buff)
 
         except IOError as e:
             self.logger.error(traceback.format_exc())
@@ -124,7 +127,6 @@ class Client(base.Base):
                 self._send_buff = util.creat_error(500, 'Internal Error', e)
 
         except OSError as e:
-            print "OSError"
             self.logger.error(traceback.format_exc())
             if e.errno == errno.ENOENT:
                 self._send_buff = util.creat_error(404, 'File Not Found', e)
@@ -138,40 +140,39 @@ class Client(base.Base):
     def send(self):
         """ Fill self.send_buff with all the data it needs and then send it
         """
-        if self.request is not None and self.file is not None:
-            print 1
-            if not self.request.sent_status:
-                self._send_buff += (
-                    "%s 200 OK\r\n"
-                    "Content-Length: %s\r\n"
-                    "Content-Type: %s\r\n"
-                    "\r\n"
-                ) % (
-                    constants.HTTP_VERSION,
-                    self.file.get_file_size(),
-                    MIME_MAPPING.get(
-                        os.path.splitext(
-                            self.request.get_uri()
-                        )[1].lstrip('.'),
-                        'application/octet-stream',
-                    ),
-                )
-                self.request.sent_status = True
-            print 3
-            if self.check_finished_request():
-                raise CustomExceptions.FinishedRequest
-            print 4
-            free_space_in_buffer = self._buff_size - len(self._send_buff)
-            if free_space_in_buffer > 0:
-                self._send_buff += self.file.read_buff(free_space_in_buffer)
+        self.logger.debug("sent status %s" % self.request.sent_status)
+        if not self.request.sent_status:
+            self._send_buff += (
+                "%s 200 OK\r\n"
+                "Content-Length: %s\r\n"
+                "Content-Type: %s\r\n"
+                "\r\n"
+            ) % (
+                constants.HTTP_VERSION,
+                self.file.get_file_size(),
+                MIME_MAPPING.get(
+                    os.path.splitext(
+                        self.request.get_uri()
+                    )[1].lstrip('.'),
+                    'application/octet-stream',
+                ),
+            )
             self._send_my_buff()
-            if self.check_finished_request():
-                raise CustomExceptions.FinishedRequest
+            self.logger.debug("sent status")
+            self.request.sent_status = True
+        if self.check_finished_request():
+            raise CustomExceptions.FinishedRequest
+        free_space_in_buffer = self._buff_size - len(self._send_buff)
+        if free_space_in_buffer > 0:
+            self._send_buff += self.file.read_buff(free_space_in_buffer)
+        self._send_my_buff()
+        if self.check_finished_request():
+            raise CustomExceptions.FinishedRequest
 
     def check_finished_request(self):
         """Check if we finished the request"""
         read_all = self.file.check_read_all()
-        self.logger.debug("sent_status %s, read all %s send buff" % (
+        self.logger.debug("sent_status %s, read all %s send buff %s" % (
             self.request.sent_status, read_all, not self._send_buff))
         return (self.request.sent_status and read_all
                 and not self._send_buff)
@@ -186,8 +187,10 @@ class Client(base.Base):
                 self.logger.debug("client sent")
             except socket.error as e:
                 if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
+                    self.logger.error(traceback.format_exc())
                     raise
                 else:
+                    self.logger.debug(traceback.format_exc())
                     break
         self.logger.debug("Sent all that I could, send_buff %s" %
                           self._send_buff)
@@ -199,3 +202,25 @@ class Client(base.Base):
     def can_recv(self):
         """Decide if it can recive more data or not"""
         return len(self._recv_buff) < self._buff_size
+
+    def _recv_lines(
+        self,
+        max_length=constants.MAX_HEADER_LENGTH,
+        block_size=constants.BUFF_SIZE,
+    ):
+        """Recive lines from socket s, if unable return how much it did read"""
+        try:
+            while True:
+                n = self._recv_buff.find(constants.CRLF)
+                if n != -1:
+                    break
+                t = self._socket.recv(block_size)
+                if not t:
+                    raise CustomExceptions.Disconnect
+                self._recv_buff += t
+        except socket.error as e:
+            if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
+                raise
+
+    def can_send(self):
+        return self.request is not None and self.file is not None
