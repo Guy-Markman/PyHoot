@@ -221,5 +221,6 @@ class Server(base.Base):
                 if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
                     raise
                 else:
+                    self.logger.debug("ERROR WOULD BLOCK")
                     break
         self.logger.debug("left %s" % len(self._database[s]["buff"]))

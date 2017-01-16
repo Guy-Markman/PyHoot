@@ -125,7 +125,8 @@ class Client(base.Base):
                 self._send_buff = util.creat_error(404, 'File Not Found', e)
             else:
                 self._send_buff = util.creat_error(500, 'Internal Error', e)
-
+        except CustomExceptions.Disconnect:
+            raise
         except OSError as e:
             self.logger.error(traceback.format_exc())
             if e.errno == errno.ENOENT:
@@ -179,7 +180,8 @@ class Client(base.Base):
 
     def _send_my_buff(self):
         """Send the data in self._send_buff"""
-        self.logger.debug("start sending my buff")
+        self.logger.debug("start sending my buff, send_buff %s" %
+                          self._send_buff)
         while self._send_buff:
             try:
                 self._send_buff = self._send_buff[

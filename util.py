@@ -14,7 +14,8 @@ def creat_error(code, message, extra):
     """Creat the error we will send to the client"""
     message = (
         "%s %s %s\r\n"
-        "Content-Length: %s\r\n\r\n"
+        "Content-Length: %s\r\n"
+        "Connection: close\r\n\r\n"
         "%s\r\n"
         "%s \r\n" % (
             constants.HTTP_VERSION,

@@ -21,7 +21,7 @@ class FileObject(base.Base):
         super(FileObject, self).__init__()
         self._file_name = file_name
         if not os.path.isfile(file_name):
-            self.logger.error(traceback.format_exc)
+            self.logger.error(traceback.format_exc())
             os.open(file_name, os.O_RDONLY)
 
         self._cursor_position = 0
@@ -39,7 +39,7 @@ class FileObject(base.Base):
                 ret += buff
         finally:
             os.close(fd)
-        self.logger.debug("read %s" % self._cursor_position)
+        self.logger.debug("read %s" % ret)
         self._cursor_position += len(ret)
         return ret
 
