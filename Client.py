@@ -97,8 +97,13 @@ class Client(base.Base):
                     file_name, self._buff_size)
                 self.request = Request.Request(method, uri)
                 self.logger.debug("Created file and request")
-                self._recv_buff = "" if len(
-                    parsed_lines) == 1 else parsed_lines[1]
+                if len(parsed_lines) == 1: 
+                    self._recv_buff = ""
+                elif constants.DOUBLE_CRLF in parsed_lines[1]:
+                    parsed_lines[1].split(constants.DOUBLE_CRLF)[0]
+                else:
+                    parsed_lines[1]
+
             # If we do have request line, get headers
             if self.request is not None:
                 self.logger.debug("start getting lines")
@@ -117,7 +122,9 @@ class Client(base.Base):
                         self._recv_buff = ""
                     else:
                         self._recv_buff = lines[-1]
+                    
                     self.logger.debug("Now recv_buff is %s" % self._recv_buff)
+                    
 
         except IOError as e:
             self.logger.error(traceback.format_exc())

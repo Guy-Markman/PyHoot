@@ -1,5 +1,6 @@
 import os
 import traceback
+import platform
 
 import base
 
@@ -28,7 +29,10 @@ class FileObject(base.Base):
 
     def read_buff(self, length):
         """ Open the file and read it up to length of the file"""
-        fd = os.open(self._file_name, os.O_RDONLY)
+        if platform.system() == 'Windows':
+            fd = os.open(self._file_name, os.O_RDONLY | os.O_BINARY)
+        else:
+            fd = os.open(self._file_name, os.O_RDONLY)
         ret = ""
         try:
             os.lseek(fd, self._cursor_position, os.SEEK_SET)
@@ -39,13 +43,15 @@ class FileObject(base.Base):
                 ret += buff
         finally:
             os.close(fd)
-        self.logger.debug("read %s" % ret)
+        self.logger.debug("read %s, length %s" % (ret, len(ret)))
         self._cursor_position += len(ret)
         return ret
 
     def check_read_all(self):
         """ Check if we read all the file"""
-        return self._cursor_position == os.stat(self._file_name).st_size
+        file_length = os.stat(self._file_name).st_size
+        self.logger.debug("read: %s, from %s" % (self._cursor_position, file_length))
+        return self._cursor_position == file_length
 
     def get_file_size(self):
         """ Return the size of the file"""
