@@ -35,7 +35,7 @@ class Client(base.Base):
         self,
         s,
         buff_size,
-        file=None,
+        file_object=None,
         request=None
     ):
         """
@@ -51,7 +51,7 @@ class Client(base.Base):
         self._recv_buff = ""
         self._send_buff = ""
         self._buff_size = buff_size
-        self.file = file
+        self.file = file_object
         self.request = request
 
     def get_socket(self):
@@ -93,19 +93,34 @@ class Client(base.Base):
                     raise RuntimeError("Invalid URI")
                 file_name = os.path.normpath(
                     '%s%s' % (constants.BASE, os.path.normpath(uri)))
-                self.file = FileObject.FileObject(
-                    file_name, self._buff_size)
+                self.file = FileObject.FileObject(file_name)
                 self.request = Request.Request(method, uri)
+                self._send_buff += (
+                    "%s 200 OK\r\n"
+                    "Content-Length: %s\r\n"
+                    "Content-Type: %s\r\n"
+                    "\r\n"
+                ) % (
+                    constants.HTTP_VERSION,
+                    self.file.get_file_size(),
+                    MIME_MAPPING.get(
+                        os.path.splitext(
+                            self.request.get_uri()
+                        )[1].lstrip('.'),
+                        'application/octet-stream',
+                    ),
+                )
                 self.logger.debug("Created file and request")
-                if len(parsed_lines) == 1: 
+                if len(parsed_lines) == 1:
                     self._recv_buff = ""
-                elif constants.DOUBLE_CRLF in parsed_lines[1]:
-                    parsed_lines[1].split(constants.DOUBLE_CRLF)[0]
                 else:
-                    parsed_lines[1]
+                    self._recv_buff = parsed_lines[1]
 
             # If we do have request line, get headers
             if self.request is not None:
+                if not self.request.full_request and \
+                        constants.DOUBLE_CRLF in self._recv_buff:
+                    self.request.full_request = True
                 self.logger.debug("start getting lines")
                 self._recv_lines()
                 self.logger.debug("after recv %s" % self._recv_buff)
@@ -122,68 +137,55 @@ class Client(base.Base):
                         self._recv_buff = ""
                     else:
                         self._recv_buff = lines[-1]
-                    
-                    self.logger.debug("Now recv_buff is %s" % self._recv_buff)
-                    
 
-        except IOError as e:
-            self.logger.error(traceback.format_exc())
-            if e.errno == errno.ENOENT:
-                self._send_buff = util.creat_error(404, 'File Not Found', e)
-            else:
-                self._send_buff = util.creat_error(500, 'Internal Error', e)
+                    self.logger.debug("Now recv_buff is %s" % self._recv_buff)
+
         except CustomExceptions.Disconnect:
             raise
         except OSError as e:
             self.logger.error(traceback.format_exc())
             if e.errno == errno.ENOENT:
                 self._send_buff = util.creat_error(404, 'File Not Found', e)
+                self.request = Request.Request()
+                self.request.full_request = True
+                self._recv_buff = ""
             else:
                 self._send_buff = util.creat_error(500, 'Internal Error', e)
-            raise CustomExceptions.FinishedRequest
+                self.request = Request.Request()
+                self.request.full_request = True
+                self._recv_buff = ""
         except Exception as e:
             self.logger.error(traceback.format_exc())
-            self._send_buff = util.creat_error(500, "Internal Error", e)
+            raise
 
     def send(self):
         """ Fill self.send_buff with all the data it needs and then send it
         """
-        self.logger.debug("sent status %s" % self.request.sent_status)
-        if not self.request.sent_status:
-            self._send_buff += (
-                "%s 200 OK\r\n"
-                "Content-Length: %s\r\n"
-                "Content-Type: %s\r\n"
-                "\r\n"
-            ) % (
-                constants.HTTP_VERSION,
-                self.file.get_file_size(),
-                MIME_MAPPING.get(
-                    os.path.splitext(
-                        self.request.get_uri()
-                    )[1].lstrip('.'),
-                    'application/octet-stream',
-                ),
-            )
-            self._send_my_buff()
-            self.logger.debug("sent status")
-            self.request.sent_status = True
         if self.check_finished_request():
             raise CustomExceptions.FinishedRequest
         free_space_in_buffer = self._buff_size - len(self._send_buff)
-        if free_space_in_buffer > 0:
+        if free_space_in_buffer > 0 and self.file is not None:
             self._send_buff += self.file.read_buff(free_space_in_buffer)
-        self._send_my_buff()
+        if len(self._send_buff) > 0:
+            maybe_sent_status = False
+            if constants.DOUBLE_CRLF in self._send_buff:
+                maybe_sent_status = True
+            self._send_my_buff()
+            if constants.DOUBLE_CRLF in self._send_buff:
+                maybe_sent_status = False
+            if maybe_sent_status:
+                self.request.sent_status = True
         if self.check_finished_request():
             raise CustomExceptions.FinishedRequest
 
     def check_finished_request(self):
         """Check if we finished the request"""
-        read_all = self.file.check_read_all()
-        self.logger.debug("sent_status %s, read all %s send buff %s" % (
-            self.request.sent_status, read_all, not self._send_buff))
-        return (self.request.sent_status and read_all
-                and not self._send_buff)
+        if self.request.get_uri() is None:
+            ans = self.request.sent_status and not self._send_buff
+        else:
+            ans = self.request.sent_status and self.file.check_read_all() and\
+                not self._send_buff
+        return ans
 
     def _send_my_buff(self):
         """Send the data in self._send_buff"""
@@ -208,10 +210,6 @@ class Client(base.Base):
         """Return _send_buff"""
         return self._send_buff
 
-    def can_recv(self):
-        """Decide if it can recive more data or not"""
-        return len(self._recv_buff) < self._buff_size
-
     def _recv_lines(
         self,
         max_length=constants.MAX_HEADER_LENGTH,
@@ -231,5 +229,12 @@ class Client(base.Base):
             if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
                 raise
 
+    def can_recv(self):
+        """Decide if it can recive more data or not"""
+        ans = len(self._recv_buff) < self._buff_size
+        if self.request is not None:
+            ans = ans and not self.request.full_request
+        return ans
+
     def can_send(self):
-        return self.request is not None and self.file is not None
+        return len(self._send_buff) > 0
