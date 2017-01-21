@@ -15,13 +15,13 @@ def creat_error(code, message, extra):
     message = (
         "%s %s %s\r\n"
         "Content-Length: %s\r\n"
-        "Connection: close\r\n\r\n"
+        "\r\n"
         "%s\r\n"
-        "%s \r\n" % (
+        "%s\r\n" % (
             constants.HTTP_VERSION,
             code,
             message,
-            code,
+            len(message) + len(str(extra)) + 4,
             message,
             extra
         )

@@ -1,6 +1,5 @@
 import os
 import traceback
-import platform
 
 import base
 
@@ -13,7 +12,7 @@ class FileObject(base.Base):
                                 represent how much we read already
     """
 
-    def __init__(self, file_name, buff_size=1024):
+    def __init__(self, file_name):
         """ Creat FileObject
             Arguemnts:
                         file_name: The name of the file for the FileObject
@@ -29,7 +28,7 @@ class FileObject(base.Base):
 
     def read_buff(self, length):
         """ Open the file and read it up to length of the file"""
-        if platform.system() == 'Windows':
+        if os.name == 'nt':
             fd = os.open(self._file_name, os.O_RDONLY | os.O_BINARY)
         else:
             fd = os.open(self._file_name, os.O_RDONLY)
@@ -50,7 +49,8 @@ class FileObject(base.Base):
     def check_read_all(self):
         """ Check if we read all the file"""
         file_length = os.stat(self._file_name).st_size
-        self.logger.debug("read: %s, from %s" % (self._cursor_position, file_length))
+        self.logger.debug("read: %s, from %s" %
+                          (self._cursor_position, file_length))
         return self._cursor_position == file_length
 
     def get_file_size(self):

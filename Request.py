@@ -11,6 +11,7 @@ class Request(base.Base):
                                   header as key and the header itself as value
                     self.sent_status, a boolean who say if we already sent
                                       status or not
+                    self.full_request, We got the full request
     """
 
     def __init__(self, method=None, uri=None):
@@ -21,10 +22,12 @@ class Request(base.Base):
                                 version only GET)
                         uri, the uri of the requested file
         """
+        super(Request, self).__init__()
         self._method = method
         self._uri = uri
         self._headers = {}
         self.sent_status = False
+        self.full_request = False
 
     def set_method(self, method):
         """ Set self._method
