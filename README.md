@@ -20,7 +20,9 @@ Arguements:
   
         --log-file FILE       Logfile to write to, otherwise will log to console.
 TODO:
-- [ ] Make server send html files
-- [ ] Test on other types of files
+- [X] Make server send files
+- [ ] Test server sending images and text files
 - [ ] Clock service
-- [ ] Write down all the other HTML Advance
+- [ ] Cokie service
+- [ ] Creat XML class
+- [ ] Hide\Find string in picture
