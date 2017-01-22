@@ -46,8 +46,6 @@ class Server(base.Base):
         s = util.creat_nonblocking_socket()
         s.bind(our_address)
         s.listen(1)
-        self._add_to_databases(s)
-        self.logger.info("Created server on address %s:%s", *our_address)
 
     def _add_to_databases(self, s, state=SERVER):
         """
