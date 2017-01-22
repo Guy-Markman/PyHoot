@@ -2,6 +2,7 @@
 # Added logger
 import argparse
 import logging
+import os
 import signal
 
 import base
@@ -41,6 +42,16 @@ def parse_args():
         type=str,
         help="Base directory"
     )
+    if os.name == 'nt':
+        c = ["select"]
+    else:
+        c = ["select", "poll"]
+    parser.add_argument(
+        "--io-mode",
+        default="select",
+        choices=c,
+        help="IO that will be used, default %(default)s"
+    )
     parser.add_argument(
         '--log-level',
         dest='log_level_str',
@@ -71,6 +82,9 @@ def parse_args():
 
 
 def main():
+    if not getattr(os, 'O_BINARY'):
+        os.O_BINARY = 0
+
     args = parse_args()
 
     if args.log_file:
@@ -83,7 +97,7 @@ def main():
             level=args.log_level,
         )
     logger.info("Parsed args and created logger")
-    server = Server.Server(args.buff_size, args.base)
+    server = Server.Server(args.buff_size, args.base, args.io_mode)
 
     # Signals set and handlers for nice shutdown
     def terminate_handler(signo, frame):
