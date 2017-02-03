@@ -53,6 +53,8 @@ class Client(base.Base):
         self._base_directory = base_directory
 
         self._file = None
+        self._send_buff = ""
+        self._recv_buff = ""
         self._request = None
         self._state = INITIALIZED
 

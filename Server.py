@@ -7,7 +7,7 @@ import base
 import Client
 import CustomExceptions
 import util
-from common_events import CommontEvents
+from CommonEvents import CommonEvents
 
 CLOSE, SERVER, CLIENT = range(3)
 
@@ -203,14 +203,14 @@ class Server(base.Base):
                             self._database[s]["client"].recv()
                             self.logger.debug("finished reciving")
 
-                    if flag % CommonEvents.POLLHUP:
+                    if flag & CommonEvents.POLLHUP:
                         raise CustomExceptions.Disconnect()
 
-                    if flag & select.POLLERR:
+                    if flag & CommonEvents.POLLERR:
                         raise RuntimeError(
                             "Error in socket %s , closing it", s)
 
-                    if flag & select.POLLOUT:
+                    if flag & CommonEvents.POLLOUT:
                         entry = self._database[s]
                         if entry["state"] == CLIENT:
                             self.logger.debug("Client send")
