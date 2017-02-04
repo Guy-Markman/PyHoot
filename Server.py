@@ -94,18 +94,6 @@ class Server(base.Base):
                 entry["buff"] = ""
             entry["state"] = CLOSE
 
-    def _build_select(self):
-        """build the three list (rlist, wlist, xlist) for select.select"""
-        rlist = []
-        wlist = []
-        xlist = []
-        for s in self._database.keys():
-            if self._database[s]["state"] != CLOSE:
-                rlist.append(s)
-            wlist.append(s)
-            xlist.append(s)
-        return rlist, wlist, xlist
-
     def _connect_socket(self, server):
         """accept socket to the system and add it to the database
         """
@@ -120,9 +108,52 @@ class Server(base.Base):
             if accepted is not None:
                 accepted.close()
 
+    def _build_select(self):
+        """build the three list (rlist, wlist, xlist) for select.select"""
+        rlist = []
+        wlist = []
+        xlist = []
+        for s in self._database.keys():
+            entry = self._database[s]
+            if entry["state"] == CLOSE:
+                wlist.append(s)
+            if entry["state"] == SERVER:
+                rlist.append(s)
+            if entry["state"] == CLIENT:
+                cl = entry["client"]
+                if cl.can_recv():
+                    rlist.append(s)
+                if cl.can_send():
+                    wlist.append(s)
+        self.logger.debug(
+            "build select\n rlist %s\nwlist %s\n xlist %s",
+            rlist, wlist, xlist
+        )
+        return rlist, wlist, xlist
+
     def _io_select(self):
         """Build select and use it"""
-        return select.select(*self._build_select())
+        rlist, wlist, xlist = self._build_select()
+        return select.select(rlist, wlist, xlist)
+
+    def _select_to_poll(self):
+        """Turn the results of a select into the format of poll"""
+        rlist, wlist, xlist = self._io_select()
+        self.logger.debug(
+            "select to poll \n rlist %s\nwlist %s\n xlist %s",
+            rlist, wlist, xlist
+        )
+        polled = {}
+        for s in rlist + wlist + xlist:
+            fd = self._database[s]["fd"]
+            if s in rlist:
+                polled[fd] = CommonEvents.POLLIN
+            if s in wlist:
+                polled[fd] = CommonEvents.POLLOUT
+            if s in xlist:
+                polled[fd] = CommonEvents.POLLERR
+        events = polled.items()
+        return events
 
     def _build_poller(self):
         """Creat and register poll"""
@@ -142,21 +173,6 @@ class Server(base.Base):
             self.logger.debug("reistered %s with events %s", entry["socket"])
             poller.register(entry["fd"], events)
         return poller
-
-    def _select_to_poll(self):
-        """Turn the results of a select into the format of poll"""
-        rlist, wlist, xlist = self._io_select()
-        polled = {}
-        for s in rlist + wlist + xlist:
-            fd = s.fileno()
-            if s in rlist:
-                polled[fd] = CommonEvents.POLLIN
-            if s in wlist:
-                polled[fd] = CommonEvents.POLLOUT
-            if s in xlist:
-                polled[fd] = CommonEvents.POLLERR
-        events = polled.items()
-        return events
 
     def _io_poller(self):
         """Build poll and use it"""

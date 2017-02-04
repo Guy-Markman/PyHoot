@@ -82,9 +82,7 @@ class Client(base.Base):
                 "HTTP unspported method '%s'" % method)
         if not uri or uri[0] != '/' or '\\' in uri:
             raise RuntimeError("Invalid URI")
-        file_name = os.path.normpath(
-            '%s%s' % (constants.BASE, os.path.normpath(uri)))
-        self._file = FileObject.FileObject(file_name)
+        self._file = FileObject.FileObject(uri, self._base_directory)
         self._request = Request.Request(method, uri)
         self._send_buff += (
             "%s 200 OK\r\n"
@@ -105,7 +103,7 @@ class Client(base.Base):
         if len(parsed_lines) == 1:
             self._recv_buff = ""
         else:
-            self._recv_buff = parsed_lines[1]
+            self._recv_buff = parsed_lines[1].split()
         self._state = SENDING_STATUS
 
     def _get_headers(self):
@@ -117,6 +115,7 @@ class Client(base.Base):
             for line in lines:
                 if ": " in line:
                     self._parse_header(line)
+            self._recv_buff = ""
 
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and
@@ -204,6 +203,7 @@ class Client(base.Base):
     ):
         """Recive data from socket s, if unable return how much it did read"""
         try:
+            self.logger.debug("_recv_data %s", self._recv_buff)
             while True:
                 n = self._recv_buff.find(constants.CRLF)
                 if n != -1:
@@ -224,7 +224,10 @@ class Client(base.Base):
         return ans
 
     def can_send(self):
-        return len(self._send_buff) > 0
+        return (
+            len(self._send_buff) > 0 or
+            self._state in (SENDING_DATA, SENDING_STATUS)
+        )
 
     def get_file(self):
         """Return self._file"""

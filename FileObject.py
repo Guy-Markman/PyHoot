@@ -17,12 +17,11 @@ class FileObject(base.Base):
                                 locations
         """
         super(FileObject, self).__init__()
-        self._fd = os.open(
-            os.path.normpath(
-                '%s%s' %
-                (base_directory,
-                 os.path.normpath(file_name)),
-                os.O_RDONLY | os.O_BINARY))
+        # Build the address and open the file
+        self._fd = os.open(os.path.normpath('%s%s' % (
+            base_directory, os.path.normpath(file_name))),
+            os.O_RDONLY | os.O_BINARY
+        )
         self.finished_reading = False
 
     def read_buff(self, length):
