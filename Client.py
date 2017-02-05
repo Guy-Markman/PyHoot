@@ -103,7 +103,7 @@ class Client(base.Base):
         if len(parsed_lines) == 1:
             self._recv_buff = ""
         else:
-            self._recv_buff = parsed_lines[1].split()
+            self._recv_buff = parsed_lines[1]
         self._state = SENDING_STATUS
 
     def _get_headers(self):
@@ -134,6 +134,7 @@ class Client(base.Base):
                 self._test_http_and_creat_objects()
 
             # If we do have request line, get headers
+
             if self._state in (SENDING_DATA, SENDING_STATUS):
                 self._get_headers()
 

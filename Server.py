@@ -170,7 +170,7 @@ class Server(base.Base):
                     events |= CommonEvents.POLLIN
                 if cl.can_send():
                     events |= CommonEvents.POLLOUT
-            self.logger.debug("reistered %s with events %s", entry["socket"])
+            self.logger.debug("reistered %s with events %s", entry["fd"], events)
             poller.register(entry["fd"], events)
         return poller
 
