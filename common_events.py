@@ -1,7 +1,7 @@
 import os
 import select
 
-import base
+from . import base
 
 
 class CommonEvents(base.Base):

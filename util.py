@@ -1,6 +1,6 @@
 import socket
 
-import constants
+from . import constants
 
 
 def creat_nonblocking_socket():

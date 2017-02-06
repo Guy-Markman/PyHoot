@@ -2,14 +2,15 @@ import errno
 import os.path
 import socket
 
-import base
-import constants
-import CustomExceptions
-import FileObject
-import Request
-import util
+from . import base
+from . import constants
+from . import custom_exceptions
+from . import file_object
+from . import request
+from . import util
 
 SUPPORTED_METHODS = ('GET')
+SERVICES_HEADERS = {}
 
 MIME_MAPPING = {
     'html': 'text/html',
@@ -62,12 +63,6 @@ class Client(base.Base):
         """Get the socket of this client, private arguement"""
         return self._socket
 
-    def _parse_header(self, line):
-        parsed = line.split(":", 1)
-        if len(parsed) == 2:
-            self._request.add_header(*parsed)
-            self.logger.debug("Added header, %s", line)
-
     def _test_http_and_creat_objects(self):
         parsed_lines = self._recv_buff.split(constants.CRLF, 1)
         req = parsed_lines[0].split(' ', 2)
@@ -82,8 +77,8 @@ class Client(base.Base):
                 "HTTP unspported method '%s'" % method)
         if not uri or uri[0] != '/' or '\\' in uri:
             raise RuntimeError("Invalid URI")
-        self._file = FileObject.FileObject(uri, self._base_directory)
-        self._request = Request.Request(method, uri)
+        self._file = file_object.FileObject(uri, self._base_directory)
+        self._request = request.Request(method, uri)
         self._send_buff += (
             "%s 200 OK\r\n"
             "Content-Length: %s\r\n"
@@ -110,12 +105,15 @@ class Client(base.Base):
         self._recv_data()
         self.logger.debug("after recv lines %s" % self._recv_buff)
         if constants.CRLF in self._recv_buff:
-            lines = self._recv_buff.split(constants.DOUBLE_CRLF)[
-                0].split(constants.CRLF)
-            for line in lines:
-                if ": " in line:
-                    self._parse_header(line)
-            self._recv_buff = ""
+            uri = self._request.get_uri()
+            if uri in SERVICES_HEADERS.keys():
+                for line in self._recv_buff.split(constants.CRLF):
+                    parsed = line.split(":", 1)
+                    if ": " in line and parsed[0] in SERVICES_HEADERS[uri]:
+                        if len(parsed) == 2:
+                            self._request.add_header(*parsed)
+                            self.logger.debug("Added header, %s", line)
+        self._recv_buff = ""
 
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and
@@ -211,7 +209,7 @@ class Client(base.Base):
                     break
                 t = self._socket.recv(block_size)
                 if not t:
-                    raise CustomExceptions.Disconnect()
+                    raise custom_exceptions.CustomExceptions.Disconnect()
                 self._recv_buff += t
         except socket.error as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):

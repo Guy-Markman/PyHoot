@@ -1,13 +1,15 @@
-# Changes since last commit:
-# Added logger
 import argparse
 import logging
 import os
 import signal
 
-import base
-import constants
-import Server
+from . import base
+from . import constants
+from . import server
+from . import compat
+
+# TODO: small letters
+# TODO: from .
 
 
 def parse_args():
@@ -38,17 +40,17 @@ def parse_args():
     )
     parser.add_argument(
         "--base",
-        default="PyHoot/",
+        default="PyHoot/Files/",
         type=str,
         help="Base directory"
     )
-    if os.name == 'nt':
-        c = ["select"]
-    else:
-        c = ["select", "poll"]
+    c = []
+    if os.name != 'nt':
+        c.append("poll")
+    c.append("select")
     parser.add_argument(
         "--io-mode",
-        default="select",
+        default=c[0],
         choices=c,
         help="IO that will be used, default %(default)s"
     )
@@ -83,14 +85,13 @@ def parse_args():
 
 
 def main():
-    if not getattr(os, 'O_BINARY'):
-        os.O_BINARY = 0
-
+    compat.__init__()
     args = parse_args()
-
+    close_file = []
     if args.log_file:
+        close_file.append(open(args.log_file, 'a'))
         logger = base.setup_logging(
-            stream=open(args.log_file, 'a'),
+            stream=close_file[0],
             level=args.log_level,
         )
     else:
@@ -98,16 +99,18 @@ def main():
             level=args.log_level,
         )
     logger.info("Parsed args and created logger")
-    server = Server.Server(args.buff_size, args.base, args.io_mode)
+    Server = server.Server(args.buff_size, args.base, args.io_mode)
 
     # Signals set and handlers for nice shutdown
     def terminate_handler(signo, frame):
-        server.terminate()
+        Server.terminate()
     signal.signal(signal.SIGINT, terminate_handler)
     signal.signal(signal.SIGTERM, terminate_handler)
     for address_list in args.address:
-        server.add_server(address_list)
-    server.start_server()
+        Server.add_server(address_list)
+    Server.start_server()
+    for f in close_file:
+        f.close()
 
 
 if __name__ == "__main__":
