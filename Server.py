@@ -3,11 +3,7 @@ import select
 import socket
 import traceback
 
-from . import base
-from . import client
-from . import custom_exceptions
-from . import util
-from . import common_events
+from . import async_io, base, client, common_events, custom_exceptions, util
 
 
 class Server(base.Base):
@@ -23,10 +19,7 @@ class Server(base.Base):
     ):
         super(Server, self).__init__()
         self._buff_size = buff_size
-        self._io_function = (  # TODO: Select and poll need to be classes + father
-            self._select_to_poll if io_mode == "select" else
-            self._io_poller
-        )
+        self._async_io_object = async_io.AsyncIO(io_mode)
         self._run = True
         self.logger.info("Initialized server, buff size '%d'", buff_size)
         self._base_directory = base_directory
@@ -202,9 +195,8 @@ class Server(base.Base):
                         if entry["buff"] == "":
                             self._close_socket(s)
 
-                # build and do select
-                # TODO: Implemnt the io-s and change the format down here
-                events = self._io_function()
+                self._async_io_object.creat_object()
+                events = self._async_io_object.poll()
                 self.logger.debug("Events \n%s", events)
                 for fd, flag in events:
                     # taking care of all the sockets in rlist

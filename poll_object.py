@@ -9,8 +9,8 @@ class Poll(base.Base):
         super(Poll, self).__init__()
         self._poll = select.poll
 
-    def register(self, fd, eventmask):
-        self._poll.register(fd, eventmask)
+    def register(self, fd_socket, eventmask):
+        self._poll.register(fd_socket[0], eventmask)
 
     def poll(self):
         return self._poll.poll()

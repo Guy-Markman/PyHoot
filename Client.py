@@ -2,12 +2,7 @@ import errno
 import os.path
 import socket
 
-from . import base
-from . import constants
-from . import custom_exceptions
-from . import file_object
-from . import request
-from . import util
+from . import base, constants, custom_exceptions, file_object, request, util
 
 SUPPORTED_METHODS = ('GET')
 SERVICES_HEADERS = {}
