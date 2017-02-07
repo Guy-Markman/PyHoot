@@ -8,9 +8,6 @@ from . import constants
 from . import server
 from . import compat
 
-# TODO: small letters
-# TODO: from .
-
 
 def parse_args():
     LOG_STR_LEVELS = {

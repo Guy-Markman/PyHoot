@@ -13,11 +13,11 @@ class Select(base.Base):
 
     def register(self, fd_socket, eventmask):
         socket = fd_socket[1]
-        if eventmask & common_events.POLLIN:
+        if eventmask & common_events.CommonEvents.POLLIN:
             self._rlist.append(socket)
-        if eventmask & common_events.POLLOUT:
+        if eventmask & common_events.CommonEvents.POLLOUT:
             self._wlist.append(socket)
-        if eventmask & common_events.POLLERR:
+        if eventmask & common_events.CommonEvents.POLLERR:
             self._xlist.append(socket)
 
     def poll(self):

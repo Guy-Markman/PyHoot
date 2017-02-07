@@ -3,11 +3,11 @@ import select
 import socket
 import traceback
 
-from . import async_io, base, client, common_events, custom_exceptions, util
+from . import async_io, base, client, common_events, constants, custom_exceptions, util
 
 
 class Server(base.Base):
-    CLOSE, SERVER, CLIENT = range(3)
+
     _database = {}
     _fd_socket = {}
 
@@ -41,7 +41,7 @@ class Server(base.Base):
         self._add_to_databases(s)
         self.logger.info("Created server on address %s:%s", *our_address)
 
-    def _add_to_databases(self, s, state=SERVER):
+    def _add_to_databases(self, s, state=constants.SERVER):
         """
                 Add the socket to the database, structre will be:
                 {socket :  {
@@ -50,7 +50,7 @@ class Server(base.Base):
                 "fd": file descriptor of the socket
                 }
         """
-        if state not in (self.CLOSE, self.SERVER, self.CLIENT):
+        if state not in (constants.CLOSE, constants.SERVER, constants.CLIENT):
             raise RuntimeError("State not found")
         self._database[s] = {
             "buff": "",
@@ -58,7 +58,7 @@ class Server(base.Base):
             "fd": s.fileno(),
         }
         entry = self._database[s]
-        if state == self.CLIENT:
+        if state == constants.CLIENT:
             entry["client"] = client.Client(
                 s, self._buff_size, self._base_directory)
         self._fd_socket[s.fileno()] = s
@@ -77,12 +77,12 @@ class Server(base.Base):
         """Change the socket s to close state"""
         entry = self._database[s]
         self.logger.debug("Current entry %s", entry)
-        if entry["state"] == self.CLIENT:
+        if entry["state"] == constants.CLIENT:
             entry["buff"] = entry["client"].get_send_buff()
             if entry["client"].get_file() is not None:
                 entry["client"].get_file().close()
             entry.pop("client")
-        entry["state"] = self.CLOSE
+        entry["state"] = constants.CLOSE
 
     def _connect_socket(self, server):
         """accept socket to the system and add it to the database
@@ -91,85 +91,12 @@ class Server(base.Base):
         try:
             accepted, addr = server.accept()
             accepted.setblocking(0)
-            self._add_to_databases(accepted, state=self.CLIENT)
+            self._add_to_databases(accepted, state=constants.CLIENT)
             self.logger.info("connect the socket from '%s:%s'", *addr)
         except Exception:
             self.logger.error("Exception ", exc_info=True)
             if accepted is not None:
                 accepted.close()
-
-    def _build_select(self):
-        """build the three list (rlist, wlist, xlist) for select.select"""
-        rlist = []
-        wlist = []
-        xlist = []
-        for s in self._database.keys():
-            entry = self._database[s]
-            if entry["state"] == self.CLOSE:
-                wlist.append(s)
-            if entry["state"] == self.SERVER:
-                rlist.append(s)
-            if entry["state"] == self.CLIENT:
-                cl = entry["client"]
-                if cl.can_recv():
-                    rlist.append(s)
-                if cl.can_send():
-                    wlist.append(s)
-        self.logger.debug(
-            "build select\n rlist %s\nwlist %s\n xlist %s",
-            rlist, wlist, xlist
-        )
-        return rlist, wlist, xlist
-
-    def _io_select(self):
-        """Build select and use it"""
-        rlist, wlist, xlist = self._build_select()
-        return select.select(rlist, wlist, xlist)
-
-    def _select_to_poll(self):
-        """Turn the results of a select into the format of poll"""
-        rlist, wlist, xlist = self._io_select()
-        self.logger.debug(
-            "select to poll \n rlist %s\nwlist %s\n xlist %s",
-            rlist, wlist, xlist
-        )
-        polled = {}
-        for s in rlist + wlist + xlist:
-            fd = self._database[s]["fd"]
-            if s in rlist:
-                polled[fd] = common_events.CommonEvents.POLLIN
-            if s in wlist:
-                polled[fd] = common_events.CommonEvents.POLLOUT
-            if s in xlist:
-                polled[fd] = common_events.CommonEvents.POLLERR
-        events = polled.items()
-        return events
-
-    def _build_poller(self):
-        """Creat and register poll"""
-        poller = select.poll()
-        for entry in self._database.values():
-            events = common_events.CommonEvents.POLLERR
-            if entry["state"] == self.CLOSE:
-                events |= common_events.CommonEvents.POLLOUT
-            elif entry["state"] == self.SERVER:
-                events |= common_events.CommonEvents.POLLIN
-            elif entry["state"] == self.CLIENT:
-                cl = entry["client"]
-                if cl.can_recv():
-                    events |= common_events.CommonEvents.POLLIN
-                if cl.can_send():
-                    events |= common_events.CommonEvents.POLLOUT
-            self.logger.debug(
-                "reistered %s with events %s",
-                entry["fd"],
-                events)
-            poller.register(entry["fd"], events)
-        return poller
-
-    def _io_poller(self):
-        """Build poll and use it"""
-        return self._build_poller().poll()
 
     def start_server(self):
         """The main function of the class, makes everything work"""
@@ -187,11 +114,11 @@ class Server(base.Base):
                 # and in close mode)
                 for s in self._database.keys():
                     entry = self._database[s]
-                    if entry["state"] == self.CLIENT:
+                    if entry["state"] == constants.CLIENT:
                         if entry["client"].check_finished_request():
                             self.logger.info("Finished Request for %s" % s)
                             self._change_to_close(s)
-                    if entry["state"] == self.CLOSE:
+                    if entry["state"] == constants.CLOSE:
                         if entry["buff"] == "":
                             self._close_socket(s)
 
@@ -203,10 +130,10 @@ class Server(base.Base):
                     s = self._fd_socket[fd]
                     if flag & common_events.CommonEvents.POLLIN:
                         socket_state = self._database[s]["state"]
-                        if socket_state == self.SERVER:
+                        if socket_state == constants.SERVER:
                             self.logger.debug("Server read")
                             self._connect_socket(s)
-                        elif socket_state == self.CLIENT:
+                        elif socket_state == constants.CLIENT:
                             self.logger.debug("Client Read")
                             self._database[s]["client"].recv()
                             self.logger.debug("finished reciving")
@@ -220,13 +147,13 @@ class Server(base.Base):
 
                     if flag & common_events.CommonEvents.POLLOUT:
                         entry = self._database[s]
-                        if entry["state"] == self.CLIENT:
+                        if entry["state"] == constants.CLIENT:
                             self.logger.debug("Client send")
                             entry["client"].send()
                             if entry["client"].check_finished_request():
                                 self.logger.info("Finished Request for %s" % s)
                                 self._change_to_close(s)
-                        if entry["state"] == self.CLOSE:
+                        if entry["state"] == constants.CLOSE:
                             self.logger.debug("Close send")
                             self.send(s)
 

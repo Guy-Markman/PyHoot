@@ -204,7 +204,7 @@ class Client(base.Base):
                     break
                 t = self._socket.recv(block_size)
                 if not t:
-                    raise custom_exceptions.CustomExceptions.Disconnect()
+                    raise custom_exceptions.Disconnect()
                 self._recv_buff += t
         except socket.error as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
