@@ -38,4 +38,4 @@ class Select(base.Base):
                 polled[fd] = common_events.CommonEvents.POLLOUT
             if s in xlist:
                 polled[fd] = common_events.CommonEvents.POLLERR
-        return polled.items
+        return polled.items()

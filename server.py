@@ -122,8 +122,9 @@ class Server(base.Base):
                         if entry["buff"] == "":
                             self._close_socket(s)
 
-                self._async_io_object.creat_object()
-                events = self._async_io_object.poll()
+                self._async_io_object.create_object()
+                events = self._async_io_object.poll({k: {d: self._database[k][d] for d in (
+                    "state", "fd", "client") if d in self._database[k]} for k in self._database if k in self._database})
                 self.logger.debug("Events \n%s", events)
                 for fd, flag in events:
                     # taking care of all the sockets in rlist
