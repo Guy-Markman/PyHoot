@@ -73,9 +73,8 @@ class Server(base.Base):
         self._database.pop(s)
         self.logger.debug("Close success on socket %s", s)
 
-    def _change_to_close(self, s):  # TODO: pass entry
+    def _change_to_close(self, entry):
         """Change the socket s to close state"""
-        entry = self._database[s]
         self.logger.debug("Current entry %s", entry)
         if entry["state"] == constants.CLIENT:
             entry["buff"] = entry["client"].get_send_buff()
@@ -108,7 +107,7 @@ class Server(base.Base):
                 if not self._run:
                     self.logger.debug("closing all")
                     for s in self._database.keys():
-                        self._change_to_close(s)
+                        self._change_to_close(self._database[s])
 
                 # closing every socket that is ready for close (sent everything
                 # and in close mode)
@@ -117,7 +116,7 @@ class Server(base.Base):
                     if entry["state"] == constants.CLIENT:
                         if entry["client"].check_finished_request():
                             self.logger.info("Finished Request for %s" % s)
-                            self._change_to_close(s)
+                            self._change_to_close(self._database[s])
                     if entry["state"] == constants.CLOSE:
                         if entry["buff"] == "":
                             self._close_socket(s)
@@ -153,7 +152,7 @@ class Server(base.Base):
                             entry["client"].send()
                             if entry["client"].check_finished_request():
                                 self.logger.info("Finished Request for %s" % s)
-                                self._change_to_close(s)
+                                self._change_to_close(self._database[s])
                         if entry["state"] == constants.CLOSE:
                             self.logger.debug("Close send")
                             self.send(s)

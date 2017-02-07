@@ -4,6 +4,14 @@ from . import base, common_events
 
 
 class Select(base.Base):
+    """
+    Select protocol for async_io.
+    Return events in the same protocol of Poll protocol
+    Args:
+        self._rlist: All the sockets that will be registered for reading
+        self._wlist: All the sockets that will be registered for writing
+        self._xlist: All the sockets that will be registered for errors
+    """
 
     def __init__(self):
         super(Select, self).__init__()
@@ -12,6 +20,11 @@ class Select(base.Base):
         self._xlist = []
 
     def register(self, fd_socket, eventmask):
+        """Add sockets to the lists it needs to be added
+        Args:
+            fd_socket: list of [file_descriptor of socket, socket]
+            eventmask: The events we want to register it with (poll protocol)
+        """
         socket = fd_socket[1]
         if eventmask & common_events.CommonEvents.POLLIN:
             self._rlist.append(socket)
