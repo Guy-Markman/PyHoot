@@ -32,20 +32,19 @@ def setup_logging(stream=None, level=logging.INFO):
     logger.setLevel(level)
 
     try:
-        if stream is not None:
-            h = logging.StreamHandler(stream)
-            h.setLevel(logging.DEBUG)
-            h.setFormatter(
-                logging.Formatter(
-                    fmt=(
-                        '%(asctime)-15s '
-                        '[%(levelname)-7s] '
-                        '%(name)s::%(funcName)s:%(lineno)d '
-                        '%(message)s'
-                    ),
+        h = logging.StreamHandler(stream)
+        h.setLevel(logging.DEBUG)
+        h.setFormatter(
+            logging.Formatter(
+                fmt=(
+                    '%(asctime)-15s '
+                    '[%(levelname)-7s] '
+                    '%(name)s::%(funcName)s:%(lineno)d '
+                    '%(message)s'
                 ),
-            )
-            logger.addHandler(h)
+            ),
+        )
+        logger.addHandler(h)
     except IOError:
         logging.warning('Cannot initialize logging', exc_info=True)
 
