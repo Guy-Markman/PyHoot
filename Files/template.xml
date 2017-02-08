@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<settings>
+    <name>Name of the Quiz, example: example</Name>
+    <number_of_questions>Number of questions in the quiz, example: 1</number_of_questions>
+</settings>
+<quiz>
+    <question number="1">
+        <question_text>the question itself, exmaple: 1</question_text>
+        <number_of_answers> number of answers for the question </number_of_answers>
+        <answer number= "1">
+            <answer_text>the text of the answer, example: 1</answer_text>
+            <right_wrong>Is the answer currect or not, exmaple: False </right_wrong>
+        </answer>
+        <answer number = "2">
+            <answer_text>2</answer_text>
+            <right_wrong>True</right_wrong>
+        </answer>
+    </question>
+</quiz>
