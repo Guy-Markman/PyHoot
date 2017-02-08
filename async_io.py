@@ -1,14 +1,27 @@
-from . import base, constants, common_events, poll_object, select_object
+from . import base, common_events, constants, poll_object, select_object
 
 
 class AsyncIO(base.Base):
+    """AsyncIO object (will with select_object or poll_object).
+    Return fd like poll no matter what protocol we use.
+    Args:
+        self.protocol, the protocol we are using
+        self._protocol, the object we will use, depent on protocol.
+                        if we use, poll we will have poll_object,
+                        if we use select, select object
+    """
 
     def __init__(self, protocol):
+        """Create AsyncIO object
+        Parameters:
+            protocol, the protocol we will use
+        """
         super(AsyncIO, self).__init__()
         self.protocol = protocol
         self._protocol_object = None
 
     def register_all(self, database):
+        """Register all the sockets in the database"""
         for s in database.keys():
             entry = database[s]
             events = common_events.CommonEvents.POLLERR
@@ -29,13 +42,23 @@ class AsyncIO(base.Base):
             self._protocol_object.register([entry["fd"], s], events)
 
     def create_object(self):
+        """Create or re-create the protocol object
+        Args:
+            database, the database with all the socket we will use
+        """
         self._protocol_object = (
             poll_object.Poll() if self.protocol == "poll" else
             select_object.Select()
         )
 
     def poll(self, database):
+        """Register all the sockets in database and return file descriptor we
+        can use
+        Args:
+            database, the database with all the socket we will use
+
+        Return:
+            events in the same protocol of poll
+        """
         self.register_all(database)
         return self._protocol_object.poll()
-
-
