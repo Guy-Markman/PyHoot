@@ -13,17 +13,21 @@ Arguements:
 		--buff-size BUFF_SIZE
 							Buff size for each time, default 1024
 		--base BASE           Base directory
-		--io-mode {select,poll}
+		--io-mode {select, poll}
 							IO that will be used, default select.
-							In windows only select availiable.
+							In windows only select available.
 		--log-level {DEBUG,INFO,WARNING,CRITICAL,ERROR}
 							Log level
 		--log-file FILE       Logfile to write to, otherwise will log to console.
 
 TODO:
 - [X] Make server send files
-- [ ] Test server sending images and text files
-- [ ] Clock service
-- [ ] Cokie service
-- [ ] Creat XML class
-- [ ] Hide\Find string in picture
+- [X] Create XML class
+- [ ] Quiz editor (independent)
+- [ ] Registrater players
+- [ ] Show question on the screen and move to the next part (timer)
+- [ ] Get answers and analyze them
+- [ ] Update database of player with score
+- [ ] Show answer and leaderboard
+- [ ] End of game
+- [ ] Hide\ Find string in picture
