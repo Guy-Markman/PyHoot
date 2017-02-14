@@ -11,6 +11,7 @@ MIME_MAPPING = {
     'html': 'text/html',
     'png': 'image/png',
     'txt': 'text/plain',
+    'py': 'application/octet-stream'
 }
 
 INITIALIZED, SENDING_STATUS, SENDING_DATA, FINISHED, ERROR = range(5)
@@ -72,6 +73,9 @@ class Client(base.Base):
                 "HTTP unspported method '%s'" % method)
         if not uri or uri[0] != '/' or '\\' in uri:
             raise RuntimeError("Invalid URI")
+        file_type = os.path.splitext(uri)[1].lstrip('.')
+        if file_type not in MIME_MAPPING.keys():
+            raise custom_exceptions.AccessDenied()
         self._file = file_object.FileObject(uri, self._base_directory)
         self._request = request.Request(method, uri)
         self._send_buff += (
@@ -82,12 +86,7 @@ class Client(base.Base):
         ) % (
             constants.HTTP_VERSION,
             self._file.get_file_size(),
-            MIME_MAPPING.get(
-                os.path.splitext(
-                    self._request.get_uri()
-                )[1].lstrip('.'),
-                'application/octet-stream',
-            ),
+            MIME_MAPPING.get(file_type),
         )
         self.logger.debug("Created file and request")
         if len(parsed_lines) == 1:
@@ -108,6 +107,11 @@ class Client(base.Base):
                         if len(parsed) == 2:
                             self._request.add_header(*parsed)
                             self.logger.debug("Added header, %s", line)
+        self._recv_buff = ""
+
+    def _change_to_error(self, error_messege):
+        self._send_buff = error_messege
+        self._state = ERROR
         self._recv_buff = ""
 
     def recv(self):
@@ -136,13 +140,16 @@ class Client(base.Base):
         except OSError as e:
             self.logger.error('Exception ', exc_info=True)
             if e.errno == errno.ENOENT:
-                self._send_buff = util.creat_error(404, 'File Not Found', e)
-                self._state = ERROR
-                self._recv_buff = ""
+                self._change_to_error(
+                    util.creat_error(
+                        404, 'File Not Found', e))
             else:
-                self._send_buff = util.creat_error(500, 'Internal Error', e)
-                self._state = ERROR
-                self._recv_buff = ""
+                self._change_to_error(
+                    util.creat_error(
+                        500, 'Internal Error', e))
+        except custom_exceptions.AccessDenied as e:
+            self.logger.error('Exception ', exc_info=True)
+            self._change_to_error(util.creat_error(403, 'Forbidden', e))
 
     def send(self):
         """ Fill self.send_buff with all the data it needs and then send it
