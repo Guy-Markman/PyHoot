@@ -28,7 +28,7 @@ def main():
                 "Is the answer right or wrong? ")
     build = prettify(quiz)
     print build
-    fd = os.open("../Files/%s.xml" % name, os.O_CREAT | os.O_WRONLY)
+    fd = os.open("%s.xml" % name, os.O_CREAT | os.O_WRONLY)
     try:
         while build:
             build = build[os.write(fd, build):]

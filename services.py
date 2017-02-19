@@ -55,3 +55,14 @@ class Clock(Service):
             self.content(),
             'text/html',
         )
+
+class Creat_new_game(Service):
+    NAME = '/new'
+    
+    
+    <form action="/register_quiz" method = "get">
+    Name of quiz:<br>
+    <input type="text" name="quiz-name"><br>
+    <input type="submit" value="Start game!"
+    </form>
+    #WIP

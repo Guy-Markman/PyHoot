@@ -24,6 +24,7 @@ TODO:
 - [X] Make server send files
 - [X] Create XML class
 - [X] Quiz editor (independent)
+- [X] Add support to services
 - [ ] Registrater players
 - [ ] Show question on the screen and move to the next part (timer)
 - [ ] Get answers and analyze them
