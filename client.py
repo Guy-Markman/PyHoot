@@ -2,8 +2,8 @@ import errno
 import os.path
 import socket
 
-from . import base, constants, custom_exceptions, file_object, request, util
-from . import services
+from . import (base, constants, custom_exceptions, file_object, request,
+               services, util)
 
 SUPPORTED_METHODS = ('GET')
 SERVICES_HEADERS = {}
@@ -15,9 +15,14 @@ MIME_MAPPING = {
     'py': 'application/octet-stream'
 }
 
+NON_ALLOWED_TYPES = ['xml']
+
 INITIALIZED, SENDING_STATUS, SENDING_DATA, FINISHED, ERROR = range(5)
 SERVICES_LIST = {service.NAME: service for service in
                  services.Service.__subclasses__()}
+
+# Argument call can use f(*[dic[arg] for arg in f.__code__.co_varnames if
+# arg in dic])
 
 
 class Client(base.Base):
@@ -79,7 +84,7 @@ class Client(base.Base):
             raise RuntimeError("Invalid URI")
         if uri not in SERVICES_LIST.keys():
             file_type = os.path.splitext(uri)[1].lstrip('.')
-            if file_type not in MIME_MAPPING.keys():
+            if file_type in NON_ALLOWED_TYPES:
                 raise custom_exceptions.AccessDenied()
             self._file = file_object.FileObject(uri, self._base_directory)
             self._send_buff += (
@@ -179,10 +184,13 @@ class Client(base.Base):
                     if len(r) < self._buff_size:
                         self._file.finished_reading = True
                 else:
-                    self._send_buff += self._service.content()
+                    self._send_buff += self._service.read()
             if self._send_buff != "":
                 self._send_my_buff()
-            if self._file.check_read_all:
+            if (
+                (self._file is not None and self._file.check_read_all) or
+                (self._service is not None and self._service.get_status)
+            ):
                 self._state = FINISHED
 
     def check_finished_request(self):

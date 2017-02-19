@@ -2,7 +2,10 @@
 """
 
 import time
+
 from . import constants
+
+
 BASE_HTTP = """<HTML>
     <head>
         <title>%s</title>
@@ -18,18 +21,37 @@ class Service(object):
     NAME = 'base'
 
     def __init__(self):
-        pass
+        self.sent_all = False
 
     def content(self):
         pass
 
     def headers(self):
-        pass
+        return (
+            "%s 200 OK\r\n"
+            "Content-Length: %s\r\n"
+            "Content-Type: %s\r\n"
+            "\r\n"
+        ) % (
+            constants.HTTP_VERSION,
+            len(self.content()),
+            'text/html',
+        )
+
+    def read(self):
+        self.sent_all = True
+        return self.content()
+
+    def get_status(self):
+        return self.sent_all
 
 
 class Clock(Service):
 
     NAME = '/clock'
+
+    def __init__(self):
+        super(Clock, self).__init__()
 
     def content(self):
         return BASE_HTTP % (
@@ -44,25 +66,16 @@ class Clock(Service):
                     time.gmtime()))
         )
 
-    def headers(self):
-        return (
-            "%s 200 OK\r\n"
-            "Content-Length: %s\r\n"
-            "Content-Type: %s\r\n"
-            "\r\n"
-        ) % (
-            constants.HTTP_VERSION,
-            self.content(),
-            'text/html',
-        )
 
 class Creat_new_game(Service):
     NAME = '/new'
-    
-    
-    <form action="/register_quiz" method = "get">
-    Name of quiz:<br>
-    <input type="text" name="quiz-name"><br>
-    <input type="submit" value="Start game!"
-    </form>
-    #WIP
+
+    def content(self):
+        return BASE_HTTP % ("New Game!", """
+        <form action = "/register_quiz" method = "get" >
+        Name of quiz:
+            <br >
+        <input type = "text" name = "quiz-name" > <br><br >
+        <input type = "submit" value = "Start game!"
+        </form >"""
+                            )
