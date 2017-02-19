@@ -1,7 +1,8 @@
-"""All the services get the method we need and return the data 
+"""All the services get the method we need and return the data
 """
 
 import time
+from . import constants
 BASE_HTTP = """<HTML>
     <head>
         <title>%s</title>
@@ -10,6 +11,47 @@ BASE_HTTP = """<HTML>
         %s
     </BODY>
 </HTML>"""
-def clock():
-    return BASE_HTTP % (clock.__name__, "local timezone %s\nUTC timezone%s" % (time.strftime("%z %H:%M:%S"), time.strftime("%H:%M:%S", time.gmtime())))
-    
+
+
+class Service(object):
+
+    NAME = 'base'
+
+    def __init__(self):
+        pass
+
+    def content(self):
+        pass
+
+    def headers(self):
+        pass
+
+
+class Clock(Service):
+
+    NAME = '/clock'
+
+    def content(self):
+        return BASE_HTTP % (
+            Clock.__name__,
+            """local timezone %s<br>
+            UTC timezone %s""" % (
+                time.strftime(
+                    "%z %H:%M:%S"
+                ),
+                time.strftime(
+                    "%H:%M:%S",
+                    time.gmtime()))
+        )
+
+    def headers(self):
+        return (
+            "%s 200 OK\r\n"
+            "Content-Length: %s\r\n"
+            "Content-Type: %s\r\n"
+            "\r\n"
+        ) % (
+            constants.HTTP_VERSION,
+            self.content(),
+            'text/html',
+        )

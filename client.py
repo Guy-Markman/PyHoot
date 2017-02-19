@@ -3,6 +3,7 @@ import os.path
 import socket
 
 from . import base, constants, custom_exceptions, file_object, request, util
+from . import services
 
 SUPPORTED_METHODS = ('GET')
 SERVICES_HEADERS = {}
@@ -15,6 +16,8 @@ MIME_MAPPING = {
 }
 
 INITIALIZED, SENDING_STATUS, SENDING_DATA, FINISHED, ERROR = range(5)
+SERVICES_LIST = {service.NAME: service for service in
+                 services.Service.__subclasses__()}
 
 
 class Client(base.Base):
@@ -50,6 +53,7 @@ class Client(base.Base):
         self._base_directory = base_directory
 
         self._file = None
+        self._service = None
         self._send_buff = ""
         self._recv_buff = ""
         self._request = None
@@ -73,22 +77,26 @@ class Client(base.Base):
                 "HTTP unspported method '%s'" % method)
         if not uri or uri[0] != '/' or '\\' in uri:
             raise RuntimeError("Invalid URI")
-        file_type = os.path.splitext(uri)[1].lstrip('.')
-        if file_type not in MIME_MAPPING.keys():
-            raise custom_exceptions.AccessDenied()
-        self._file = file_object.FileObject(uri, self._base_directory)
+        if uri not in SERVICES_LIST.keys():
+            file_type = os.path.splitext(uri)[1].lstrip('.')
+            if file_type not in MIME_MAPPING.keys():
+                raise custom_exceptions.AccessDenied()
+            self._file = file_object.FileObject(uri, self._base_directory)
+            self._send_buff += (
+                "%s 200 OK\r\n"
+                "Content-Length: %s\r\n"
+                "Content-Type: %s\r\n"
+                "\r\n"
+            ) % (
+                constants.HTTP_VERSION,
+                self._file.get_file_size(),
+                MIME_MAPPING.get(file_type),
+            )
+        else:
+            self._service = SERVICES_LIST[uri]()
+            self._send_buff += self._service.headers()
         self._request = request.Request(method, uri)
-        self._send_buff += (
-            "%s 200 OK\r\n"
-            "Content-Length: %s\r\n"
-            "Content-Type: %s\r\n"
-            "\r\n"
-        ) % (
-            constants.HTTP_VERSION,
-            self._file.get_file_size(),
-            MIME_MAPPING.get(file_type),
-        )
-        self.logger.debug("Created file and request")
+        self.logger.debug("Created file\service and request")
         if len(parsed_lines) == 1:
             self._recv_buff = ""
         else:
@@ -164,11 +172,14 @@ class Client(base.Base):
             else:
                 self._state = SENDING_DATA
         if self._state == SENDING_DATA:
-            if self._send_buff == "" and self._file is not None:
-                r = self._file.read_buff(self._buff_size)
-                self._send_buff += r
-                if len(r) < self._buff_size:
-                    self._file.finished_reading = True
+            if self._send_buff == "":
+                if self._file is not None:
+                    r = self._file.read_buff(self._buff_size)
+                    self._send_buff += r
+                    if len(r) < self._buff_size:
+                        self._file.finished_reading = True
+                else:
+                    self._send_buff += self._service.content()
             if self._send_buff != "":
                 self._send_my_buff()
             if self._file.check_read_all:
