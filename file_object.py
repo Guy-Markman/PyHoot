@@ -25,7 +25,7 @@ class FileObject(base.Base):
         self.finished_reading = False
 
     def read_buff(self, length):
-        """ Open the file and read it up to length of the file"""
+        """ Read the file up to length of the file"""
 
         ret = ""
         while len(ret) < length:
@@ -35,10 +35,6 @@ class FileObject(base.Base):
             ret += buff
         self.logger.debug("read %s, length %s", ret, len(ret))
         return ret
-
-    def check_read_all(self):
-        """ Check if we read all the file"""
-        return self.finished_reading
 
     def get_file_size(self):
         """ Return the size of the file"""

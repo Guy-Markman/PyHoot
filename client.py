@@ -34,11 +34,11 @@ class Client(base.Base):
                 self._send_buff = All the data that needed to be sent but
                                   hadn't sent yet
                 self._buff_size = The buff size of the server
-                self._file = FileObject of the file the request wants
+                self._file = FileObject or service object of the file\service
+                             the request wants
                 self._request = Request object of the request we got
                 self._base_directory: The base directory whice we will use for
                                       file locations
-                self._service: an object from services
     """
 
     def __init__(
@@ -47,8 +47,7 @@ class Client(base.Base):
         buff_size,
         base_directory,
     ):
-        """
-        Client of Server, handle everything by itself
+        """Client of Server, handle everything by itself
         Arguements:
         s: the socket of this client, CANNOT BE MODIFIED
         buff_size: The buff size of the server
@@ -60,7 +59,6 @@ class Client(base.Base):
         self._base_directory = base_directory
 
         self._file = None
-        self._service = None
         self._send_buff = ""
         self._recv_buff = ""
         self._request = None
@@ -112,12 +110,12 @@ class Client(base.Base):
 
             # Creat a tupple of the arguments for service_function that
             # are in dic_argument
-            self._service = service_function(
+            self._file = service_function(
                 *(dic_argument[arg] for arg in
                   service_function.__init__.__code__.co_varnames if
                   arg in dic_argument)
             )
-            self._send_buff += self._service.headers()
+            self._send_buff += self._file.headers()
         self._request = request.Request(method, uri)
         self.logger.debug("Created file\service and request")
         if len(parsed_lines) == 1:
@@ -195,20 +193,14 @@ class Client(base.Base):
             else:
                 self._state = SENDING_DATA
         if self._state == SENDING_DATA:
-            if self._send_buff == "":
-                if self._file is not None:
-                    r = self._file.read_buff(self._buff_size)
-                    self._send_buff += r
-                    if len(r) < self._buff_size:
-                        self._file.finished_reading = True
-                else:
-                    self._send_buff += self._service.read()
+            if self._send_buff == "" and self._file is not None:
+                r = self._file.read_buff(self._buff_size)
+                self._send_buff += r
+                if len(r) < self._buff_size:
+                    self._file.finished_reading = True
             if self._send_buff != "":
                 self._send_my_buff()
-            if (
-                (self._file is not None and self._file.check_read_all) or
-                (self._service is not None and self._service.get_status)
-            ):
+            if self._file is not None and self._file.finished_reading:
                 self._state = FINISHED
 
     def check_finished_request(self):

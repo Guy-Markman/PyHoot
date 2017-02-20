@@ -71,7 +71,9 @@ class Server(base.Base):
     def _close_socket(self, s):
         """ close the socket, remove it from it's from the database"""
         s.close()
-        self._database.pop(s)
+        print self._database.keys()
+        if s in self._database.keys():
+            self._database.pop(s)
         self.logger.debug("Close success on socket %s", s)
 
     def _change_to_close(self, entry):
@@ -102,26 +104,6 @@ class Server(base.Base):
         """The main function of the class, makes everything work"""
         while self._database:
             try:
-                # check if the program need to stop, if it does starts the
-                # process of shuting down everything by changing all the states
-                # to close
-                if not self._run:
-                    self.logger.debug("closing all")
-                    for s in self._database.keys():
-                        self._change_to_close(self._database[s])
-
-                # closing every socket that is ready for close (sent everything
-                # and in close mode)
-                for s in self._database.keys():
-                    entry = self._database[s]
-                    if entry["state"] == constants.CLIENT:
-                        if entry["client"].check_finished_request():
-                            self.logger.info("Finished Request for %s" % s)
-                            self._change_to_close(self._database[s])
-                    if entry["state"] == constants.CLOSE:
-                        if entry["buff"] == "":
-                            self._close_socket(s)
-
                 self._async_io_object.create_object()
                 events = self._async_io_object.poll(self._database)
                 self.logger.debug("Events \n%s", events)
@@ -157,7 +139,25 @@ class Server(base.Base):
                             self.logger.debug("Close send")
                             self.send(s)
 
-            # taking care of errors
+                # check if the program need to stop, if it does starts the
+                # process of shuting down everything by changing all the states
+                # to close
+                if not self._run:
+                    self.logger.debug("closing all")
+                    for s in self._database.keys():
+                        self._change_to_close(self._database[s])
+
+                # closing every socket that is ready for close (sent everything
+                # and in close mode)
+                for s in self._database.keys():
+                    entry = self._database[s]
+                    if entry["state"] == constants.CLIENT:
+                        if entry["client"].check_finished_request():
+                            self.logger.info("Finished Request for %s" % s)
+                            self._change_to_close(self._database[s])
+                    if entry["state"] == constants.CLOSE:
+                        if entry["buff"] == "":
+                            self._close_socket(s)
             except select.error as e:
                 if e[0] != errno.EINTR:
                     self.logger.error(traceback.format_exc())

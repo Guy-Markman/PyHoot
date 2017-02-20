@@ -22,10 +22,14 @@ class Service(object):
     NAME = 'base'  # The uri path needed to use this services
 
     def __init__(self):
-        self.sent_all = False  # Did we read everything from read?
+        self.finished_reading = False  # Did we read everything from read?
+        self.read_pointer = 0  # How much did we read from read
 
     def content(self):
         """The body of the service"""
+        pass
+
+    def close(self):
         pass
 
     def headers(self):
@@ -41,14 +45,14 @@ class Service(object):
             'text/html',
         )
 
-    def read(self):
-        """return the content page and update self._sent_all"""
-        self._sent_all = True
-        return self.content()
+    def read_buff(self, buff_size):
+        """return the content page and update self._finished_reading"""
+        self.read_pointer += buff_size
+        return self.content()[self.read_pointer - buff_size:self.read_pointer]
 
     def get_status(self):
-        """Return self._sent_all"""
-        return self._sent_all
+        """Return self._finished_reading"""
+        return self._finished_reading
 
 
 class Clock(Service):
