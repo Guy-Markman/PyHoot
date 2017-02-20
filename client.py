@@ -1,6 +1,7 @@
 import errno
 import os.path
 import socket
+import urlparse
 
 from . import (base, constants, custom_exceptions, file_object, request,
                services, util)
@@ -9,10 +10,10 @@ SUPPORTED_METHODS = ('GET')
 SERVICES_HEADERS = {}
 
 MIME_MAPPING = {
-    'html': 'text/html',
-    'png': 'image/png',
-    'txt': 'text/plain',
-    'py': 'application/octet-stream'
+    '.html': 'text/html',
+    '.png': 'image/png',
+    '.txt': 'text/plain',
+    '.py': 'application/octet-stream'
 }
 
 NON_ALLOWED_TYPES = ['xml']
@@ -37,6 +38,7 @@ class Client(base.Base):
                 self._request = Request object of the request we got
                 self._base_directory: The base directory whice we will use for
                                       file locations
+                self._service: an object from services
     """
 
     def __init__(
@@ -82,11 +84,13 @@ class Client(base.Base):
                 "HTTP unspported method '%s'" % method)
         if not uri or uri[0] != '/' or '\\' in uri:
             raise RuntimeError("Invalid URI")
-        if uri not in SERVICES_LIST.keys():
-            file_type = os.path.splitext(uri)[1].lstrip('.')
+        uri = urlparse.urlparse(uri)
+        uri_path = uri.path
+        if uri_path not in SERVICES_LIST.keys():
+            file_type = os.path.splitext(uri_path)[1]
             if file_type in NON_ALLOWED_TYPES:
                 raise custom_exceptions.AccessDenied()
-            self._file = file_object.FileObject(uri, self._base_directory)
+            self._file = file_object.FileObject(uri_path, self._base_directory)
             self._send_buff += (
                 "%s 200 OK\r\n"
                 "Content-Length: %s\r\n"
@@ -98,7 +102,21 @@ class Client(base.Base):
                 MIME_MAPPING.get(file_type),
             )
         else:
-            self._service = SERVICES_LIST[uri]()
+            # The service initialzor
+            service_function = SERVICES_LIST[uri_path]
+
+            # dictionary of the query of uri
+            dic_argument = urlparse.parse_qs(uri.query)
+            # Remove un-usable keys
+            dic_argument.pop('self', None)
+
+            # Creat a tupple of the arguments for service_function that
+            # are in dic_argument
+            self._service = service_function(
+                *(dic_argument[arg] for arg in
+                  service_function.__init__.__code__.co_varnames if
+                  arg in dic_argument)
+            )
             self._send_buff += self._service.headers()
         self._request = request.Request(method, uri)
         self.logger.debug("Created file\service and request")

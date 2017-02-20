@@ -6,6 +6,7 @@ import time
 from . import constants
 
 
+# Base for  any HTTP page, you give it the title and the body of the page
 BASE_HTTP = """<HTML>
     <head>
         <title>%s</title>
@@ -17,16 +18,18 @@ BASE_HTTP = """<HTML>
 
 
 class Service(object):
-
-    NAME = 'base'
+    """Base class to all services"""
+    NAME = 'base'  # The uri path needed to use this services
 
     def __init__(self):
-        self.sent_all = False
+        self.sent_all = False  # Did we read everything from read?
 
     def content(self):
+        """The body of the service"""
         pass
 
     def headers(self):
+        """Headers of the service, base if for any HTTP page"""
         return (
             "%s 200 OK\r\n"
             "Content-Length: %s\r\n"
@@ -39,15 +42,17 @@ class Service(object):
         )
 
     def read(self):
-        self.sent_all = True
+        """return the content page and update self._sent_all"""
+        self._sent_all = True
         return self.content()
 
     def get_status(self):
-        return self.sent_all
+        """Return self._sent_all"""
+        return self._sent_all
 
 
 class Clock(Service):
-
+    """HTTP page of local time and UTC time"""
     NAME = '/clock'
 
     def __init__(self):
@@ -69,6 +74,7 @@ class Clock(Service):
 
 class Creat_new_game(Service):
     NAME = '/new'
+    """Let the manager of the game choose the quiz he wants"""
 
     def content(self):
         return BASE_HTTP % ("New Game!", """
@@ -76,6 +82,6 @@ class Creat_new_game(Service):
         Name of quiz:
             <br >
         <input type = "text" name = "quiz-name" > <br><br >
-        <input type = "submit" value = "Start game!"
+        <input type = "submit" value = "Start game!">
         </form >"""
                             )
