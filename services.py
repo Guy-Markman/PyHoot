@@ -1,6 +1,7 @@
 """All the services get the method we need and return the data
 """
 
+import os.path
 import time
 
 from . import constants
@@ -81,11 +82,33 @@ class Creat_new_game(Service):
     """Let the manager of the game choose the quiz he wants"""
 
     def content(self):
-        return BASE_HTTP % ("New Game!", """
-        <form action = "/register_quiz" method = "get" >
-        Name of quiz:
-            <br >
-        <input type = "text" name = "quiz-name" > <br><br >
-        <input type = "submit" value = "Start game!">
-        </form >"""
+        return BASE_HTTP % ("New Game!", """<form action = "/register_quiz" method = "get" >
+<font size="4">Name of quiz:</font><br>
+<input type = "text" name = "quiz_name" size="21"> <br><br >
+<input type = "submit" value = "Start game!" style="height:50px; width:150px">
+</form >"""
                             )
+
+
+class register_quiz(Service):
+    NAME = "/register_quiz"
+
+    def __init__(self, quiz_name):
+        self.finished_reading = False  # Did we read everything from read?
+        self.read_pointer = 0  # How much did we read from read
+        self._quiz_name = quiz_name[0]
+        if os.path.isfile(os.path.normpath("PyHoot\Files\%s.xml" %
+                                           os.path.normpath(self._quiz_name))):
+            self.content = self.right
+        else:
+            self.content = self.wrong
+
+    def right(self):
+        return BASE_HTTP % ("right", "WIP")
+
+    def wrong(self):
+        return BASE_HTTP % ("No such quiz", """<form action = "/register_quiz" method = "get" >
+<font size="4">No such quiz!<br>Name of quiz:</font><br>
+<input type = "text" name = "quiz_name" size="21"> <br><br >
+<input type = "submit" value = "Start game!" style="height:50px; width:150px">
+</form >""")
