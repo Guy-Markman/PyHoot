@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<quiz>
+  <settings>
+    <name>test</name>
+    <number_of_questions>1</number_of_questions>
+  </settings>
+  <questions>
+    <question number="1">
+      <question_text>1+1</question_text>
+      <answer number="A">
+        <answer_text>1</answer_text>
+        <right_wrong>false</right_wrong>
+      </answer>
+      <answer number="B">
+        <answer_text>2</answer_text>
+        <right_wrong>true</right_wrong>
+      </answer>
+      <answer number="C">
+        <answer_text>3</answer_text>
+        <right_wrong>false</right_wrong>
+      </answer>
+      <answer number="D">
+        <answer_text>4</answer_text>
+        <right_wrong>false</right_wrong>
+      </answer>
+    </question>
+  </questions>
+</quiz>

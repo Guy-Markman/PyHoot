@@ -25,7 +25,7 @@ def main():
             ElementTree.SubElement(
                 answer, "answer_text").text = raw_input("Enter the answer ")
             ElementTree.SubElement(answer, "right_wrong").text = raw_input(
-                "Is the answer right or wrong? ")
+                "Is the answer right or wrong? (answer in true or false)")
     build = prettify(quiz)
     print build
     fd = os.open("%s.xml" % name, os.O_CREAT | os.O_WRONLY)

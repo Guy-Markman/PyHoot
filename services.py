@@ -10,8 +10,9 @@ from . import constants
 # Base for  any HTTP page, you give it the title and the body of the page
 BASE_HTTP = """<HTML>
     <head>
-        <title>%s</title>
+    <title>%s</title>
     </head>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <BODY>
         %s
     </BODY>
@@ -65,7 +66,7 @@ class Clock(Service):
 
     def content(self):
         return BASE_HTTP % (
-            Clock.__name__,
+            """clock""",
             """local timezone %s<br>
             UTC timezone %s""" % (
                 time.strftime(
@@ -82,11 +83,15 @@ class Creat_new_game(Service):
     """Let the manager of the game choose the quiz he wants"""
 
     def content(self):
-        return BASE_HTTP % ("New Game!", """<form action = "/register_quiz" method = "get" >
-<font size="4">Name of quiz:</font><br>
-<input type = "text" name = "quiz_name" size="21"> <br><br >
-<input type = "submit" value = "Start game!" style="height:50px; width:150px">
-</form >"""
+        return BASE_HTTP % ("New Game!",
+                            """<form action = "/register_quiz" method = "get" >
+                               <font size="4">Name of quiz:</font><br>
+                               <input type = "text" name = "quiz_name"
+                                size="21">
+                               <br><br>
+                               <input type = "submit" value = "Start game!"
+                                style="height:50px; width:150px">
+                                </form >"""
                             )
 
 
@@ -107,8 +112,40 @@ class register_quiz(Service):
         return BASE_HTTP % ("right", "WIP")
 
     def wrong(self):
-        return BASE_HTTP % ("No such quiz", """<form action = "/register_quiz" method = "get" >
-<font size="4">No such quiz!<br>Name of quiz:</font><br>
-<input type = "text" name = "quiz_name" size="21"> <br><br >
-<input type = "submit" value = "Start game!" style="height:50px; width:150px">
-</form >""")
+        return BASE_HTTP % (
+            "No such quiz",
+            """<form action = "/register_quiz" method = "get" >
+               <font size="4">No such quiz!<br>Name of quiz:</font><br>
+               <input type = "text" name = "quiz_name" size="21"> <br><br >
+               <input type = "submit" value = "Start game!"
+               style="height:50px; width:150px">
+               </form >"""
+        )
+
+
+class join_quiz(Service):
+    NAME = "/"  # This is the homepage
+    # Phone style
+
+    def content(self):
+        return BASE_HTTP % (
+            """Join game!""",
+            """<form action = "/waiting_room" method = "get">
+               <font size ="7">Game Pin</font><br>
+               <input type="number" name="pid" style="width: 200px;"
+                min="100000000" max="999999999">
+               <br><br><input type="submit" value="Join!">
+           """
+
+        )
+
+
+class waiting_room(Service):
+    NAME = "/waiting_room"  # TODO: Write this
+
+
+class answer(Service):
+    NAME = "/answer"
+
+    def content(self):
+        pass  # TODO: write this
