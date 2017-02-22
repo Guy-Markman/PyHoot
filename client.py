@@ -6,7 +6,7 @@ import urlparse
 from . import (base, constants, custom_exceptions, file_object, request,
                services, util)
 
-SUPPORTED_METHODS = ('GET')
+SUPPORTED_METHODS = ('GET', 'POST')
 SERVICES_HEADERS = {}
 
 MIME_MAPPING = {
@@ -100,11 +100,19 @@ class Client(base.Base):
                 MIME_MAPPING.get(file_type),
             )
         else:
+
             # The service initialzor
             service_function = SERVICES_LIST[uri_path]
 
             # dictionary of the query of uri
-            dic_argument = urlparse.parse_qs(uri.query)
+            if method == "GET":
+                dic_argument = urlparse.parse_qs(uri.query)
+            else:
+                dic_argument = urlparse.parse_qs(
+                    self._recv_buff.split(constants.DOUBLE_CRLF)[-1]
+                )
+                print "DIIIIIIIIIIIIIIIIIIIIICCCCCCCCCCCCCCC!"
+                print dic_argument
             # Remove un-usable keys
             dic_argument.pop('self', None)
 
@@ -129,10 +137,14 @@ class Client(base.Base):
         self.logger.debug("after recv lines %s" % self._recv_buff)
         if constants.CRLF in self._recv_buff:
             uri = self._request.get_uri()
-            if uri in SERVICES_HEADERS.keys():
+            if (
+                uri in SERVICES_HEADERS.keys() or
+                self._request.get_method == "POST"
+            ):
                 for line in self._recv_buff.split(constants.CRLF):
                     parsed = line.split(":", 1)
-                    if ": " in line and parsed[0] in SERVICES_HEADERS[uri]:
+                    if ": " in line and parsed[0] in SERVICES_HEADERS[
+                            uri] + ["Content-Length"]:
                         if len(parsed) == 2:
                             self._request.add_header(*parsed)
                             self.logger.debug("Added header, %s", line)
@@ -179,6 +191,9 @@ class Client(base.Base):
         except custom_exceptions.AccessDenied as e:
             self.logger.error('Exception ', exc_info=True)
             self._change_to_error(util.creat_error(403, 'Forbidden', e))
+        except Exception as e:
+            self.logger.error('Exception ', exc_info=True)
+            self._change_to_error(util.creat_error(500, 'Internal Error', e))
 
     def send(self):
         """ Fill self.send_buff with all the data it needs and then send it

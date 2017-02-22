@@ -26,6 +26,7 @@ class Service(object):
     def __init__(self):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
+        self._content_page = self.content()
 
     def content(self):
         """The body of the service"""
@@ -50,7 +51,8 @@ class Service(object):
     def read_buff(self, buff_size):
         """return the content page and update self._finished_reading"""
         self.read_pointer += buff_size
-        return self.content()[self.read_pointer - buff_size:self.read_pointer]
+        return self._content_page[self.read_pointer - buff_size:
+                                  self.read_pointer]
 
     def get_status(self):
         """Return self._finished_reading"""
@@ -87,7 +89,7 @@ class Creat_new_game(Service):
                             """<form action = "/register_quiz" method = "get" >
                                <font size="4">Name of quiz:</font><br>
                                <input type = "text" name = "quiz_name"
-                                size="21">
+                                size="21" autocomplete="off">
                                <br><br>
                                <input type = "submit" value = "Start game!"
                                 style="height:50px; width:150px">
@@ -102,6 +104,7 @@ class register_quiz(Service):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
         self._quiz_name = quiz_name[0]
+        self._content_page = self.content()
         if os.path.isfile(os.path.normpath("PyHoot\Files\%s.xml" %
                                            os.path.normpath(self._quiz_name))):
             self.content = self.right
@@ -116,7 +119,8 @@ class register_quiz(Service):
             "No such quiz",
             """<form action = "/register_quiz" method = "get" >
                <font size="4">No such quiz!<br>Name of quiz:</font><br>
-               <input type = "text" name = "quiz_name" size="21"> <br><br >
+               <input type = "text" name = "quiz_name" size="21"
+               autocomplete="off"> <br><br >
                <input type = "submit" value = "Start game!"
                style="height:50px; width:150px">
                </form >"""
@@ -133,8 +137,9 @@ class join_quiz(Service):
             """<form action = "/waiting_room" method = "get">
                <font size ="7">Game Pin</font><br>
                <input type="number" name="pid" style="width: 200px;"
-                min="100000000" max="999999999">
-               <br><br><input type="submit" value="Join!">
+                min="100000000" max="999999999" autocomplete="off">
+               <br><br><input type="submit" value="Join!" style="height:50px;
+                width:150px">
            """
 
         )
@@ -148,4 +153,42 @@ class answer(Service):
     NAME = "/answer"
 
     def content(self):
-        pass  # TODO: write this
+        return BASE_HTTP % (
+            "Play!",
+            """<form action="/wait_answer" style="float:left;" method="GET">
+                <input type="hidden" name="answer" value="A" >
+                <input type="submit" value="A" style="height:150px;
+                 width:150px; font-size: 50px;"/>
+            </form >
+            <form action="/wait_answer" method="GET">
+                <input type="hidden" name="answer" value="B" >
+                <input type="submit" value="B" style="height:150px;
+                 width:150px; font-size: 50px;"/>
+            </form >
+            <form action="/wait_answer" style="float:left;" method="GET">
+                <input type="hidden" name="answer" value="C" >
+                <input type="submit" value="C" style="height:150px;
+                 width:150px; font-size: 50px;"/>
+            </form >
+            <form action="/wait_answer" method="GET">
+                <input type="hidden" name="answer" value="D" >
+                <input type="submit" value="D" style="height:150px;
+                 width:150px; font-size: 50px;"/>
+            </form >"""
+        )
+
+
+class wait_answer(Service):
+    NAME = "/wait_answer"
+
+    def __init__(self, answer):
+        self.finished_reading = False  # Did we read everything from read?
+        self.read_pointer = 0  # How much did we read from read
+        self.answer = answer
+        self._content_page = self.content()
+
+    def content(self):
+        return BASE_HTTP % (
+            "Please wait",
+            """<font size="6"> Please wait </font>"""
+        )
