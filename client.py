@@ -3,7 +3,7 @@ import os.path
 import socket
 import urlparse
 
-from . import (base, constants, custom_exceptions, file_object, request,
+from . import (base, constants, custom_exceptions, file_object, game, request,
                services, util)
 
 SUPPORTED_METHODS = ('GET', 'POST')
@@ -46,6 +46,7 @@ class Client(base.Base):
         s,
         buff_size,
         base_directory,
+        server
     ):
         """Client of Server, handle everything by itself
         Arguements:
@@ -57,12 +58,15 @@ class Client(base.Base):
         self._socket = s
         self._buff_size = buff_size
         self._base_directory = base_directory
+        self._server = server
 
         self._file = None
+        self._game = None
         self._send_buff = ""
         self._recv_buff = ""
         self._request = None
         self._state = INITIALIZED
+        self._game_state = constants.NONE
 
     def get_socket(self):
         """Get the socket of this client, private arguement"""
@@ -111,8 +115,6 @@ class Client(base.Base):
                 dic_argument = urlparse.parse_qs(
                     self._recv_buff.split(constants.DOUBLE_CRLF)[-1]
                 )
-                print "DIIIIIIIIIIIIIIIIIIIIICCCCCCCCCCCCCCC!"
-                print dic_argument
             # Remove un-usable keys
             dic_argument.pop('self', None)
 
@@ -131,6 +133,20 @@ class Client(base.Base):
         else:
             self._recv_buff = parsed_lines[1]
         self._state = SENDING_STATUS
+
+        if self._game_state == constants.NONE:
+            if (
+                self._request.get_uri == "/register_quiz" and
+                self._request.new_game
+            ):
+                self._game = game.Game(
+                    self._request.get_quiz(),
+                    self._base_directory,
+                    constants.MASTER
+                )
+                self._server.pid_client[self._service.get_]
+            elif self._request.get_uri == "/waiting_room" and self._request.get_pid() in self.
+                pass
 
     def _get_headers(self):
         self._recv_data()

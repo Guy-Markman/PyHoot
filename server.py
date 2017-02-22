@@ -25,6 +25,8 @@ class Server(base.Base):
         self.logger.info("Initialized server, buff size '%d'", buff_size)
         self._base_directory = base_directory
 
+        self.pid_client = {}
+
     def terminate(self):
         self._run = False
 

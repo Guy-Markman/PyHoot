@@ -108,8 +108,10 @@ class register_quiz(Service):
         if os.path.isfile(os.path.normpath("PyHoot\Files\%s.xml" %
                                            os.path.normpath(self._quiz_name))):
             self.content = self.right
+            self.new_quiz = True
         else:
             self.content = self.wrong
+            self.new_quiz = False
 
     def right(self):
         return BASE_HTTP % ("right", "WIP")
@@ -125,6 +127,9 @@ class register_quiz(Service):
                style="height:50px; width:150px">
                </form >"""
         )
+
+    def get_quiz(self):
+        return self._quiz_name
 
 
 class join_quiz(Service):
@@ -147,6 +152,15 @@ class join_quiz(Service):
 
 class waiting_room(Service):
     NAME = "/waiting_room"  # TODO: Write this
+
+    def __init__(self, pid):
+        self.finished_reading = False  # Did we read everything from read?
+        self.read_pointer = 0  # How much did we read from read
+        self._content_page = self.content()
+        self._pid = pid
+
+    def get_pid(self):
+        return self._pid
 
 
 class answer(Service):
