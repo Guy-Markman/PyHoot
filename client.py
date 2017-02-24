@@ -3,7 +3,7 @@ import os.path
 import socket
 import urlparse
 
-from . import (base, constants, custom_exceptions, file_object, game, request,
+from . import (base, constants, custom_exceptions, file_object, request,
                services, util)
 
 SUPPORTED_METHODS = ('GET', 'POST')
@@ -82,12 +82,10 @@ class Client(base.Base):
         self.logger.debug("Req, %s", req)
         method, uri, signature = req
         if method not in SUPPORTED_METHODS:
-            raise RuntimeError(
-                "HTTP unspported method '%s'" % method)
+            raise RuntimeError("HTTP unspported method '%s'" % method)
         if not uri or uri[0] != '/' or '\\' in uri:
             raise RuntimeError("Invalid URI")
-        uri = urlparse.urlparse(uri)
-        uri_path = uri.path
+        uri_path = urlparse.urlparse(uri).path
         if uri_path not in SERVICES_LIST.keys():
             file_type = os.path.splitext(uri_path)[1]
             if file_type in NON_ALLOWED_TYPES:
@@ -134,20 +132,6 @@ class Client(base.Base):
             self._recv_buff = parsed_lines[1]
         self._state = SENDING_STATUS
 
-        if self._game_state == constants.NONE:
-            if (
-                self._request.get_uri == "/register_quiz" and
-                self._request.new_game
-            ):
-                self._game = game.Game(
-                    self._request.get_quiz(),
-                    self._base_directory,
-                    constants.MASTER
-                )
-                self._server.pid_client[self._service.get_]
-            elif self._request.get_uri == "/waiting_room" and self._request.get_pid() in self.
-                pass
-
     def _get_headers(self):
         self._recv_data()
         self.logger.debug("after recv lines %s" % self._recv_buff)
@@ -160,7 +144,7 @@ class Client(base.Base):
                 for line in self._recv_buff.split(constants.CRLF):
                     parsed = line.split(":", 1)
                     if ": " in line and parsed[0] in SERVICES_HEADERS[
-                            uri] + ["Content-Length"]:
+                            uri] + ["cookie"]:
                         if len(parsed) == 2:
                             self._request.add_header(*parsed)
                             self.logger.debug("Added header, %s", line)
@@ -170,6 +154,11 @@ class Client(base.Base):
         self._send_buff = error_messege
         self._state = ERROR
         self._recv_buff = ""
+
+    def _set_game(self):
+        headers = self._request.get_all_header()
+        if "cookie" not in headers:
+            # TODO: add a way to add headers for responce
 
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and
@@ -191,7 +180,8 @@ class Client(base.Base):
 
             if self._state in (SENDING_DATA, SENDING_STATUS):
                 self._get_headers()
-
+            if urlparse.urlparse(self._request.get_uri).path in SERVICES_LIST:
+                self._set_game()
             self.logger.debug("Now recv_buff is %s" % self._recv_buff)
 
         except OSError as e:
