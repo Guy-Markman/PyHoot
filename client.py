@@ -9,12 +9,6 @@ from . import (base, constants, custom_exceptions, file_object, request,
 SUPPORTED_METHODS = ('GET', 'POST')
 SERVICES_HEADERS = {}
 
-MIME_MAPPING = {
-    '.html': 'text/html',
-    '.png': 'image/png',
-    '.txt': 'text/plain',
-    '.py': 'application/octet-stream'
-}
 
 NON_ALLOWED_TYPES = ['xml']
 
@@ -67,6 +61,7 @@ class Client(base.Base):
         self._request = None
         self._state = INITIALIZED
         self._game_state = constants.NONE
+        self._extra_headers = []
 
     def get_socket(self):
         """Get the socket of this client, private arguement"""
@@ -92,15 +87,14 @@ class Client(base.Base):
                 raise custom_exceptions.AccessDenied()
             self._file = file_object.FileObject(uri_path, self._base_directory)
             self._send_buff += (
-                "%s 200 OK\r\n"
-                "Content-Length: %s\r\n"
-                "Content-Type: %s\r\n"
-                "\r\n"
-            ) % (
-                constants.HTTP_VERSION,
-                self._file.get_file_size(),
-                MIME_MAPPING.get(file_type),
+                util.create_headers_response("200",
+                                             "ok",
+                                             self._file.get_file_size(),
+                                             self._extra_headers,
+                                             type=file_type)
             )
+            self._extra_headers = []
+
         else:
 
             # The service initialzor
@@ -136,10 +130,10 @@ class Client(base.Base):
         self._recv_data()
         self.logger.debug("after recv lines %s" % self._recv_buff)
         if constants.CRLF in self._recv_buff:
-            uri = self._request.get_uri()
+            uri = self._request.uri()
             if (
                 uri in SERVICES_HEADERS.keys() or
-                self._request.get_method == "POST"
+                self._request.method == "POST"
             ):
                 for line in self._recv_buff.split(constants.CRLF):
                     parsed = line.split(":", 1)
@@ -157,8 +151,17 @@ class Client(base.Base):
 
     def _set_game(self):
         headers = self._request.get_all_header()
-        if "cookie" not in headers:
-            # TODO: add a way to add headers for responce
+        parsed_uri = urlparse.urlparse(self._request.uri)
+        # TODO: find the existing game
+        if parsed_uri.path in (self.services.join_quiz.NAME,
+                               self.services.new.NAME):
+            if "cookie" in headers:  # Remove existing user
+                self._server.pid_client.pop(headers["cookie"])
+                if self._file.NAME == "MASTER":
+                    for player in self._server.pid_client.values():
+                        player.game_master = None
+                if self._file.NAME == "PLAYER":
+                    self.remove_player()
 
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and
@@ -180,7 +183,7 @@ class Client(base.Base):
 
             if self._state in (SENDING_DATA, SENDING_STATUS):
                 self._get_headers()
-            if urlparse.urlparse(self._request.get_uri).path in SERVICES_LIST:
+            if urlparse.urlparse(self._request.uri).path in SERVICES_LIST:
                 self._set_game()
             self.logger.debug("Now recv_buff is %s" % self._recv_buff)
 

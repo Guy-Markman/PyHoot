@@ -29,27 +29,31 @@ class Request(base.Base):
         self.sent_status = False
         self.full_request = False
 
-    def set_method(self, method):
+    @property
+    def method(self):
+        """ Return self._method"""
+        return self._method
+
+    @method.setter
+    def method(self, method):
         """ Set self._method
             Arguments:
                         method, the new method
         """
         self._method = method
 
-    def get_method(self):
-        """ Return self._method"""
-        return self._method
+    @property
+    def uri(self):
+        """Return self._uri"""
+        return self._uri
 
-    def set_uri(self, uri):
+    @uri.setter
+    def uri(self, uri):
         """ Set self.uri
             Arguments:
                         uri, the new uri
         """
         self._uri = uri
-
-    def get_uri(self):
-        """ Return self._uri"""
-        return self._uri
 
     def add_header(self, header, content):
         """ Add header
