@@ -102,7 +102,7 @@ class Client(base.Base):
 
             # dictionary of the query of uri
             if method == "GET":
-                dic_argument = urlparse.parse_qs(uri.query)
+                dic_argument = urlparse.parse_qs(urlparse.urlparse(uri).query)
             else:
                 dic_argument = urlparse.parse_qs(
                     self._recv_buff.split(constants.DOUBLE_CRLF)[-1]
@@ -130,7 +130,7 @@ class Client(base.Base):
         self._recv_data()
         self.logger.debug("after recv lines %s" % self._recv_buff)
         if constants.CRLF in self._recv_buff:
-            uri = self._request.uri()
+            uri = self._request.uri
             if (
                 uri in SERVICES_HEADERS.keys() or
                 self._request.method == "POST"
@@ -150,6 +150,7 @@ class Client(base.Base):
         self._recv_buff = ""
 
     def _set_game(self):
+        return  # Hotfix without deleting
         headers = self._request.get_all_header()
         parsed_uri = urlparse.urlparse(self._request.uri)
         # TODO: find the existing game

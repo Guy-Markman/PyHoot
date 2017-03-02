@@ -63,7 +63,7 @@ class Server(base.Base):
         entry = self._database[s]
         if state == constants.CLIENT:
             entry["client"] = client.Client(
-                s, self._buff_size, self._base_directory)
+                s, self._buff_size, self._base_directory, self)
         self._fd_socket[s.fileno()] = s
         self.logger.debug(
             "s added to database, {'%s': '%s'}",
@@ -73,7 +73,6 @@ class Server(base.Base):
     def _close_socket(self, s):
         """ close the socket, remove it from it's from the database"""
         s.close()
-        print self._database.keys()
         if s in self._database.keys():
             self._database.pop(s)
         self.logger.debug("Close success on socket %s", s)

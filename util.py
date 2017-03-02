@@ -30,10 +30,10 @@ def create_headers_response(
     """
     message = ("%s %s %s\r\n"
                "Content-Length: %s\r\n" % (constants.HTTP_VERSION,
-                                           code, message)
+                                           code, message, length)
                )
     if type is not None:
-        message += "Content-Type: %s\r\n" % constants.MIME_MAPPING(type)
+        message += "Content-Type: %s\r\n" % constants.MIME_MAPPING[type]
     if extra_headers is not None:
         for extra in extra_headers:
             message += "%s: %s\r\n" % (extra[0], extra[1])
@@ -52,8 +52,8 @@ def creat_error(code, message, extra):
                 message,
                 len(message) + len(str(extra)) + 4,
             ),
-
-
+            message,
+            extra
         )
     )
     message = (
