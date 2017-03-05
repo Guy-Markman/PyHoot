@@ -1,9 +1,11 @@
+import random
 
 
 class Game(object):
 
-    def __init__(self, pid):
+    def __init__(self):
         super(Game, self).__init__()
+        self._pid = random.randint(100000000, 999999999)
 
     @property
     def pid(self):
@@ -13,9 +15,9 @@ class Game(object):
 class GameMaster(Game):
     NAME = "MASTER"
 
-    def __init__(self, quiz_address, pid):
-        super(GameMaster, self).__init__(pid)
-        self._quiz = quiz_address
+    def __init__(self, quiz_name):
+        super(GameMaster, self).__init__()
+        self._quiz = quiz_name
         self._players_list = {}  # {pid: GamePlayer}
 
     def add_player(self, new_pid, game_player):
@@ -31,8 +33,8 @@ class GameMaster(Game):
 class GamePlayer(Game):
     NAME = "PLAYER"
 
-    def __init__(self, master, pid, name=None):
-        super(GamePlayer, self).__init__(pid)
+    def __init__(self, master, name=None):
+        super(GamePlayer, self).__init__()
         self._name = name
         self._game_master = master
 

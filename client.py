@@ -4,7 +4,7 @@ import os.path
 import socket
 import urlparse
 
-from . import (base, constants, custom_exceptions, file_object, request,
+from . import (base, constants, custom_exceptions, file_object, game, request,
                services, util)
 
 SUPPORTED_METHODS = ('GET', 'POST')
@@ -102,11 +102,12 @@ class Client(base.Base):
 
             # dictionary of the query of uri
             if method == "GET":
-                dic_argument = urlparse.parse_qs(urlparse.urlparse(uri).query)
+                dic_argument = urlparse.parse_qs(
+                    urlparse.urlparse(uri).query) + {"server": self._server}
             else:
                 dic_argument = urlparse.parse_qs(
                     self._recv_buff.split(constants.DOUBLE_CRLF)[-1]
-                )
+                ) + {"server": self._server}
             # Remove un-usable keys
             dic_argument.pop('self', None)
 
@@ -159,7 +160,7 @@ class Client(base.Base):
         return  # Will stay until I will finish it
         headers = self._request.get_all_header()
         parsed_uri = urlparse.urlparse(self._request.uri)
-        if headers["cookie"]:
+        if headers["cookie"]:  # Setting game object
             self._find_game_object(headers)
         if parsed_uri.path in (
             self.services.choose_name.NAME,
@@ -173,7 +174,15 @@ class Client(base.Base):
                 if self._game.NAME == "PLAYER":
                     self._game.game_master.remove_player(headers["cookie"])
                 # TODO: creat new game object
-                # Date choosen as something in the past
+                if parsed_uri.path == self.services.choose_name.NAME:
+                    self._game = game.GamePlayer(
+                        self._server.pid_client[urlparse.parse_qs(
+                            parsed_uri.query)[0]])
+                else:
+                    self._game = game.GameMaster(
+                        urlparse.parse_qs(parsed_uri.query)[0])
+                self._extra_headers[
+                    "Set-Cookie"] = "pid=%d" % self._game.pid
 
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and

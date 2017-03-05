@@ -63,9 +63,6 @@ class Clock(Service):
     """HTTP page of local time and UTC time"""
     NAME = '/clock'
 
-    def __init__(self):
-        super(Clock, self).__init__()
-
     def content(self):
         return BASE_HTTP % (
             """clock""",
@@ -145,17 +142,25 @@ class join_quiz(Service):
                <br><br><input type="submit" value="Join!" style="height:50px;
                 width:150px">
            """
-
         )
 
 
 class choose_name(Service):
     NAME = "/choose_name"
 
-    def content(self):
+    def __init__(self, server, pid):
+        self.finished_reading = False  # Did we read everything from read?
+        self.read_pointer = 0  # How much did we read from read
+        if server.pid_client.get(pid) is not None:
+            self.content = self.right
+        else:
+            self.content = self.wrong
+        self._content_page = self.content()
+
+    def right(self):
         return BASE_HTTP % (
             "Choose name",
-            """<form action = "/waiting_room" method = "get">
+            """<form action = "/waiting_room_start" method = "get">
                <font size = "6"> Choose name</font></br>
                <input type="text" style="width: 200px;">
                <br><br><input type="submit" value="Start Playing!"
@@ -163,18 +168,48 @@ class choose_name(Service):
            """
         )
 
+    def wrong(self):
+        return BASE_HTTP % (
+            """Join game!""",
+            """<form action = "/choose_name" method = "get">
+               <font size ="7">No such Game Pin, enter right one</font><br>
+               <input type="number" name="pid" style="width: 200px;"
+                min="100000000" max="999999999" autocomplete="off">
+               <br><br><input type="submit" value="Join!" style="height:50px;
+                width:150px">
+           """
+        )
 
-class waiting_room(Service):
-    NAME = "/waiting_room"  # TODO: Write this
 
-    def __init__(self, pid):
+class waiting_room_start(Service):
+    NAME = "/waiting_room_start"  # TODO: Write this
+
+    # TODO: Make it work
+    def __init__(self, name, server, ):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
+        if self.server.pid_client
         self._content_page = self.content()
-        self._pid = pid
 
     def get_pid(self):
         return self._pid
+
+    def right():
+        return BASE_HTTP % (
+            "Please wait",
+            """ < font size="6" > Please wait < /font >"""
+        )
+
+    def wrong():
+        return BASE_HTTP % (
+            "Choose name",
+            """<form action = "/waiting_room_start" method = "get">
+               <font size = "6"> Name taken, Choose name</font></br>
+               <input type="text" style="width: 200px;">
+               <br><br><input type="submit" value="Start Playing!"
+                style="height:50px;width:150px">
+           """
+        )
 
 
 class answer(Service):
