@@ -8,6 +8,7 @@ class FileObject(base.Base):
         self._fd = the file descriptor of the file
         self.finished_reading: Did we finished reading the file?
     """
+    NAME = "FILE"
 
     def __init__(self, file_name, base_directory):
         """ Creat FileObject

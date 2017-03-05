@@ -1,3 +1,4 @@
+import Cookie
 import errno
 import os.path
 import socket
@@ -96,7 +97,6 @@ class Client(base.Base):
             self._extra_headers = []
 
         else:
-
             # The service initialzor
             service_function = SERVICES_LIST[uri_path]
 
@@ -149,20 +149,31 @@ class Client(base.Base):
         self._state = ERROR
         self._recv_buff = ""
 
+    def _set_game_object(self, headers):
+        cookie = Cookie.SimpleCookie(headers["cookie"])
+        if ("pid" in cookie and
+                self._server.pid_client[cookie["pid"]] is not None):
+            self._game = self._server.pid_client[cookie["pid"]]
+
     def _set_game(self):
-        return  # Hotfix without deleting
+        return  # Will stay until I will finish it
         headers = self._request.get_all_header()
         parsed_uri = urlparse.urlparse(self._request.uri)
-        # TODO: find the existing game
-        if parsed_uri.path in (self.services.join_quiz.NAME,
-                               self.services.new.NAME):
+        if headers["cookie"]:
+            self._find_game_object(headers)
+        if parsed_uri.path in (
+            self.services.choose_name.NAME,
+            self.services.register_quiz.NAME
+        ):
             if "cookie" in headers:  # Remove existing user
                 self._server.pid_client.pop(headers["cookie"])
-                if self._file.NAME == "MASTER":
+                if self._game.NAME == "MASTER":
                     for player in self._server.pid_client.values():
                         player.game_master = None
-                if self._file.NAME == "PLAYER":
-                    self.remove_player()
+                if self._game.NAME == "PLAYER":
+                    self._game.game_master.remove_player(headers["cookie"])
+                # TODO: creat new game object
+                # Date choosen as something in the past
 
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and
@@ -208,6 +219,7 @@ class Client(base.Base):
     def send(self):
         """ Fill self.send_buff with all the data it needs and then send it
         """
+
         if self._state == ERROR:
             self._send_my_buff()
             if self._send_buff == "":
