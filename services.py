@@ -4,7 +4,7 @@
 import os.path
 import time
 
-from . import constants
+from . import util
 
 
 # Base for  any HTTP page, you give it the title and the body of the page
@@ -35,18 +35,10 @@ class Service(object):
     def close(self):
         pass
 
-    def headers(self):
+    def headers(self, extra):
         """Headers of the service, base if for any HTTP page"""
-        return (
-            "%s 200 OK\r\n"
-            "Content-Length: %s\r\n"
-            "Content-Type: %s\r\n"
-            "\r\n"
-        ) % (
-            constants.HTTP_VERSION,
-            len(self.content()),
-            'text/html',
-        )
+        return util.create_headers_response("200", "OK", len(self.content()),
+                                            extra_headers=extra, type=".html")
 
     def read_buff(self, buff_size):
         """return the content page and update self._finished_reading"""
@@ -97,10 +89,11 @@ class Creat_new_game(Service):
 class register_quiz(Service):
     NAME = "/register_quiz"
 
-    def __init__(self, quiz_name):
+    def __init__(self, quiz_name, quiz_pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
         self._quiz_name = quiz_name[0]
+        self._quiz_pid = quiz_pid
         if os.path.isfile(os.path.normpath("PyHoot\Files\%s.xml" %
                                            os.path.normpath(self._quiz_name))):
             self.content = self.right
@@ -111,7 +104,8 @@ class register_quiz(Service):
         self._content_page = self.content()
 
     def right(self):
-        return BASE_HTTP % ("right", "WIP")
+        <font size = 7>Now you can join the Game!<br>
+        Pid %d</font>""" % self._quiz_pid)
 
     def wrong(self):
         return BASE_HTTP % (
@@ -151,7 +145,7 @@ class choose_name(Service):
     def __init__(self, common, pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
-        if common.pid_client.get(pid) is not None:
+        if common.pid_client.get(pid[0]) is not None:
             self.content = self.right
             self.right_page = True
         else:

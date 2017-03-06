@@ -36,7 +36,7 @@ def create_headers_response(
         message += "Content-Type: %s\r\n" % constants.MIME_MAPPING[type]
     if extra_headers is not None:
         for extra in extra_headers:
-            message += "%s: %s\r\n" % (extra[0], extra[1])
+            message += "%s: %s\r\n" % (extra, extra_headers[extra])
     message += "\r\n"
     return message
 

@@ -62,7 +62,7 @@ class Client(base.Base):
         self._request = None
         self._state = INITIALIZED
         self._game_state = constants.NONE
-        self._extra_headers = []
+        self._extra_headers = {}
 
     def get_socket(self):
         """Get the socket of this client, private arguement"""
@@ -81,35 +81,31 @@ class Client(base.Base):
             raise RuntimeError("HTTP unspported method '%s'" % method)
         if not uri or uri[0] != '/' or '\\' in uri:
             raise RuntimeError("Invalid URI")
+        self._request = request.Request(method, uri)
+        self._set_game()
         uri_path = urlparse.urlparse(uri).path
         if uri_path not in SERVICES_LIST.keys():
             file_type = os.path.splitext(uri_path)[1]
             if file_type in NON_ALLOWED_TYPES:
                 raise custom_exceptions.AccessDenied()
             self._file = file_object.FileObject(uri_path, self._base_directory)
-            self._send_buff += (
-                util.create_headers_response("200",
-                                             "ok",
-                                             self._file.get_file_size(),
-                                             self._extra_headers,
-                                             type=file_type)
-            )
-            self._extra_headers = []
-
         else:
             # The service initialzor
             service_function = SERVICES_LIST[uri_path]
 
             # dictionary of the query of uri
-            query = urlparse.parse_qs((urlparse.urlparse(uri)))
+            query = urlparse.parse_qs(urlparse.urlparse(uri).query)
             if method == "GET":
                 dic_argument = urlparse.parse_qs(
-                    urlparse.urlparse(uri).query) + {"common": self._common,
-                                                     "pid": query.get("pid")}
+                    urlparse.urlparse(uri).query)
             else:
                 dic_argument = urlparse.parse_qs(
-                    self._recv_buff.split(constants.DOUBLE_CRLF)[-1]
-                ) + {"server": self._server, "pid": query.get("pid")}
+                    self._recv_buff.split(constants.DOUBLE_CRLF)[-1])
+            dic_argument.update(
+                {"common": self.common, "pid": query.get("pid")}
+            )
+            if self._game is not None:
+                dic_argument.update({"quiz_pid": self._game.pid})
             # Remove un-usable keys
             dic_argument.pop('self', None)
 
@@ -120,9 +116,19 @@ class Client(base.Base):
                   service_function.__init__.__code__.co_varnames if
                   arg in dic_argument)
             )
-            self._send_buff += self._file.headers()
-        self._request = request.Request(method, uri)
-        self.logger.debug("Created file\service and request")
+        if self._file.NAME == "FILE":
+            self._send_buff += (
+                util.create_headers_response("200",
+                                             "ok",
+                                             self._file.get_file_size(),
+                                             self._extra_headers,
+                                             type=file_type)
+            )
+        else:
+            self._send_buff += self._file.headers(self._extra_headers)
+        self._extra_headers
+        self.logger.debug(
+            "Created file\service and request and might setted game")
         if len(parsed_lines) == 1:
             self._recv_buff = ""
         else:
@@ -155,15 +161,15 @@ class Client(base.Base):
     def _set_game_object(self, headers):
         cookie = Cookie.SimpleCookie(headers["cookie"])
         if ("pid" in cookie and
-                self._server.pid_client[cookie["pid"]] is not None):
-            self._game = self._server.pid_client[cookie["pid"]]
+                self.common.pid_client[cookie["pid"]] is not None):
+            self._game = self.common.pid_client[cookie["pid"]]
+            self.logger.debug("Set game as %s" % self._game)
 
     def _set_game(self):
-        return  # Will stay until I will finish it
         headers = self._request.get_all_header()
         parsed_uri = urlparse.urlparse(self._request.uri)
         querry = urlparse.parse_qs(parsed_uri.query)
-        if headers["cookie"]:  # Setting game object
+        if "cookie" in headers:  # Setting game object
             self._find_game_object(headers)
         if parsed_uri.path in (
             services.choose_name.NAME,
@@ -176,13 +182,16 @@ class Client(base.Base):
                         player.game_master = None
                 if self._game.NAME == "PLAYER":
                     self._game.game_master.remove_player(headers["cookie"])
-
+            self.logger.debug("Removed existing user")
             if parsed_uri.path == services.choose_name.NAME:  # new one
+                print self.common.pid_client
                 self._game = game.GamePlayer(
-                    self._server.pid_client.get(int(querry["pid"])))
+                    self.common.pid_client.get(int(querry["pid"][0])))
 
             else:
-                self._game = game.GameMaster(querry["quiz_name"])
+                print self.common.pid_client
+                self._game = game.GameMaster(querry["quiz_name"][0])
+                self.common.pid_client[self._game.pid] = self._game
             self._extra_headers[
                 "Set-Cookie"] = "pid=%d" % self._game.pid
 
@@ -212,8 +221,6 @@ class Client(base.Base):
 
             if self._state in (SENDING_DATA, SENDING_STATUS):
                 self._get_headers()
-            if urlparse.urlparse(self._request.uri).path in SERVICES_LIST:
-                self._set_game()
             self.logger.debug("Now recv_buff is %s" % self._recv_buff)
 
         except OSError as e:
