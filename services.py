@@ -104,7 +104,8 @@ class register_quiz(Service):
         self._content_page = self.content()
 
     def right(self):
-        <font size = 7>Now you can join the Game!<br>
+        return BASE_HTTP % ("Join!", 
+        """<font size = 7>Now you can join the Game!<br>
         Pid %d</font>""" % self._quiz_pid)
 
     def wrong(self):
@@ -145,7 +146,8 @@ class choose_name(Service):
     def __init__(self, common, pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
-        if common.pid_client.get(pid[0]) is not None:
+        print common.pid_client.get(int(pid[0]))
+        if common.pid_client.get(int(pid[0])) is not None:
             self.content = self.right
             self.right_page = True
         else:
@@ -180,19 +182,11 @@ class choose_name(Service):
 class waiting_room_start(Service):
     NAME = "/waiting_room_start"  # TODO: Write this
 
-    def __init__(self, name, common, pid):
+    def __init__(self, name, common, server_pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
         name_list = []
-        for player in common.pid_client[pid].get_play_list:
-            name_list.append(player.name)
-        if name not in name_list:
-            self.content = self.right
-            self.right_page = True
-        else:
-            self.content = self.wrong
-            self.right_page = False
-        self._content_page = self.content()
+        
 
     def get_pid(self):
         return self._pid

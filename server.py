@@ -24,7 +24,7 @@ class Server(base.Base):
         self._run = True
         self.logger.info("Initialized server, buff size '%d'", buff_size)
         self._base_directory = base_directory
-        self.common = common
+        self.common = common.Common()
 
     def terminate(self):
         self._run = False
@@ -62,7 +62,7 @@ class Server(base.Base):
         entry = self._database[s]
         if state == constants.CLIENT:
             entry["client"] = client.Client(
-                s, self._buff_size, self._base_directory, common)
+                s, self._buff_size, self._base_directory, self.common)
         self._fd_socket[s.fileno()] = s
         self.logger.debug(
             "s added to database, {'%s': '%s'}",

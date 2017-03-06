@@ -101,14 +101,17 @@ class Client(base.Base):
             else:
                 dic_argument = urlparse.parse_qs(
                     self._recv_buff.split(constants.DOUBLE_CRLF)[-1])
-            dic_argument.update(
-                {"common": self.common, "pid": query.get("pid")}
-            )
+            dic_argument.update({"common": self.common})
+            print self._game
             if self._game is not None:
                 dic_argument.update({"quiz_pid": self._game.pid})
+                print self._game.NAME == "PLAYER"
+                if self._game.NAME == "PLAYER":
+                    dic_argument.update({"server_pid": self._game.game_master.pid})
             # Remove un-usable keys
             dic_argument.pop('self', None)
-
+            self.logger.debug("dic arguement %s", dic_argument)
+            print dic_argument
             # Creat a tupple of the arguments for service_function that
             # are in dic_argument
             self._file = service_function(
@@ -183,17 +186,17 @@ class Client(base.Base):
                 if self._game.NAME == "PLAYER":
                     self._game.game_master.remove_player(headers["cookie"])
             self.logger.debug("Removed existing user")
+            
             if parsed_uri.path == services.choose_name.NAME:  # new one
-                print self.common.pid_client
                 self._game = game.GamePlayer(
-                    self.common.pid_client.get(int(querry["pid"][0])))
-
+                    self.common.pid_client.get(int(querry["pid"][0]))
+                )
             else:
-                print self.common.pid_client
                 self._game = game.GameMaster(querry["quiz_name"][0])
-                self.common.pid_client[self._game.pid] = self._game
+            self.common.pid_client[self._game.pid] = self._game
             self._extra_headers[
                 "Set-Cookie"] = "pid=%d" % self._game.pid
+            
 
         # Set name for player
         if (parsed_uri.path == services.waiting_room_start.NAME
