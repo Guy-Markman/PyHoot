@@ -41,7 +41,7 @@ class Client(base.Base):
         s,
         buff_size,
         base_directory,
-        server
+        common
     ):
         """Client of Server, handle everything by itself
         Arguements:
@@ -53,7 +53,7 @@ class Client(base.Base):
         self._socket = s
         self._buff_size = buff_size
         self._base_directory = base_directory
-        self._server = server
+        self.common = common
 
         self._file = None
         self._game = None
@@ -101,13 +101,15 @@ class Client(base.Base):
             service_function = SERVICES_LIST[uri_path]
 
             # dictionary of the query of uri
+            query = urlparse.parse_qs((urlparse.urlparse(uri)))
             if method == "GET":
                 dic_argument = urlparse.parse_qs(
-                    urlparse.urlparse(uri).query) + {"server": self._server}
+                    urlparse.urlparse(uri).query) + {"common": self._common,
+                                                     "pid": query.get("pid")}
             else:
                 dic_argument = urlparse.parse_qs(
                     self._recv_buff.split(constants.DOUBLE_CRLF)[-1]
-                ) + {"server": self._server}
+                ) + {"server": self._server, "pid": query.get("pid")}
             # Remove un-usable keys
             dic_argument.pop('self', None)
 
@@ -160,11 +162,12 @@ class Client(base.Base):
         return  # Will stay until I will finish it
         headers = self._request.get_all_header()
         parsed_uri = urlparse.urlparse(self._request.uri)
+        querry = urlparse.parse_qs(parsed_uri.query)
         if headers["cookie"]:  # Setting game object
             self._find_game_object(headers)
         if parsed_uri.path in (
-            self.services.choose_name.NAME,
-            self.services.register_quiz.NAME
+            services.choose_name.NAME,
+            services.register_quiz.NAME
         ):
             if "cookie" in headers:  # Remove existing user
                 self._server.pid_client.pop(headers["cookie"])
@@ -173,16 +176,21 @@ class Client(base.Base):
                         player.game_master = None
                 if self._game.NAME == "PLAYER":
                     self._game.game_master.remove_player(headers["cookie"])
-                # TODO: creat new game object
-                if parsed_uri.path == self.services.choose_name.NAME:
-                    self._game = game.GamePlayer(
-                        self._server.pid_client[urlparse.parse_qs(
-                            parsed_uri.query)[0]])
-                else:
-                    self._game = game.GameMaster(
-                        urlparse.parse_qs(parsed_uri.query)[0])
-                self._extra_headers[
-                    "Set-Cookie"] = "pid=%d" % self._game.pid
+
+            if parsed_uri.path == services.choose_name.NAME:  # new one
+                self._game = game.GamePlayer(
+                    self._server.pid_client.get(int(querry["pid"])))
+
+            else:
+                self._game = game.GameMaster(querry["quiz_name"])
+            self._extra_headers[
+                "Set-Cookie"] = "pid=%d" % self._game.pid
+
+        # Set name for player
+        if (parsed_uri.path == services.waiting_room_start.NAME
+                and self._game is not None and self._game.NAME == "PLAYER"):
+            self._game.name = querry.name
+            self._game.game_master.add_player(self._game.pid, self._game)
 
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and

@@ -101,14 +101,14 @@ class register_quiz(Service):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
         self._quiz_name = quiz_name[0]
-        self._content_page = self.content()
         if os.path.isfile(os.path.normpath("PyHoot\Files\%s.xml" %
                                            os.path.normpath(self._quiz_name))):
             self.content = self.right
-            self.new_quiz = True
+            self.right_page = True
         else:
             self.content = self.wrong
-            self.new_quiz = False
+            self.right_page = False
+        self._content_page = self.content()
 
     def right(self):
         return BASE_HTTP % ("right", "WIP")
@@ -148,13 +148,15 @@ class join_quiz(Service):
 class choose_name(Service):
     NAME = "/choose_name"
 
-    def __init__(self, server, pid):
+    def __init__(self, common, pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
-        if server.pid_client.get(pid) is not None:
+        if common.pid_client.get(pid) is not None:
             self.content = self.right
+            self.right_page = True
         else:
             self.content = self.wrong
+            self.right_page = False
         self._content_page = self.content()
 
     def right(self):
@@ -162,7 +164,7 @@ class choose_name(Service):
             "Choose name",
             """<form action = "/waiting_room_start" method = "get">
                <font size = "6"> Choose name</font></br>
-               <input type="text" style="width: 200px;">
+               <input type="text" name="name" style="width: 200px;">
                <br><br><input type="submit" value="Start Playing!"
                 style="height:50px;width:150px">
            """
@@ -184,11 +186,18 @@ class choose_name(Service):
 class waiting_room_start(Service):
     NAME = "/waiting_room_start"  # TODO: Write this
 
-    # TODO: Make it work
-    def __init__(self, name, server, ):
+    def __init__(self, name, common, pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
-        if self.server.pid_client
+        name_list = []
+        for player in common.pid_client[pid].get_play_list:
+            name_list.append(player.name)
+        if name not in name_list:
+            self.content = self.right
+            self.right_page = True
+        else:
+            self.content = self.wrong
+            self.right_page = False
         self._content_page = self.content()
 
     def get_pid(self):
@@ -205,7 +214,7 @@ class waiting_room_start(Service):
             "Choose name",
             """<form action = "/waiting_room_start" method = "get">
                <font size = "6"> Name taken, Choose name</font></br>
-               <input type="text" style="width: 200px;">
+               <input type="text" name="name" style="width: 200px;">
                <br><br><input type="submit" value="Start Playing!"
                 style="height:50px;width:150px">
            """
