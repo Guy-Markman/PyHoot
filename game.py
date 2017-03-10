@@ -36,7 +36,7 @@ class GamePlayer(Game):
     def __init__(self, master, name=None):
         super(GamePlayer, self).__init__()
         self._name = name
-        self._game_master = master # Game object GameMaster
+        self._game_master = master  # Game object GameMaster
 
     @property
     def name(self):

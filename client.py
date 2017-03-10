@@ -94,7 +94,6 @@ class Client(base.Base):
             service_function = SERVICES_LIST[uri_path]
 
             # dictionary of the query of uri
-            query = urlparse.parse_qs(urlparse.urlparse(uri).query)
             if method == "GET":
                 dic_argument = urlparse.parse_qs(
                     urlparse.urlparse(uri).query)
@@ -107,7 +106,8 @@ class Client(base.Base):
                 dic_argument.update({"quiz_pid": self._game.pid})
                 print self._game.NAME == "PLAYER"
                 if self._game.NAME == "PLAYER":
-                    dic_argument.update({"server_pid": self._game.game_master.pid})
+                    dic_argument.update(
+                        {"server_pid": self._game.game_master.pid})
             # Remove un-usable keys
             dic_argument.pop('self', None)
             self.logger.debug("dic arguement %s", dic_argument)
@@ -186,7 +186,7 @@ class Client(base.Base):
                 if self._game.NAME == "PLAYER":
                     self._game.game_master.remove_player(headers["cookie"])
             self.logger.debug("Removed existing user")
-            
+
             if parsed_uri.path == services.choose_name.NAME:  # new one
                 self._game = game.GamePlayer(
                     self.common.pid_client.get(int(querry["pid"][0]))
@@ -196,7 +196,6 @@ class Client(base.Base):
             self.common.pid_client[self._game.pid] = self._game
             self._extra_headers[
                 "Set-Cookie"] = "pid=%d" % self._game.pid
-            
 
         # Set name for player
         if (parsed_uri.path == services.waiting_room_start.NAME

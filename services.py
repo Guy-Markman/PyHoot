@@ -104,8 +104,8 @@ class register_quiz(Service):
         self._content_page = self.content()
 
     def right(self):
-        return BASE_HTTP % ("Join!", 
-        """<font size = 7>Now you can join the Game!<br>
+        return BASE_HTTP % ("Join!",
+                            """<font size = 7>Now you can join the Game!<br>
         Pid %d</font>""" % self._quiz_pid)
 
     def wrong(self):
@@ -185,8 +185,6 @@ class waiting_room_start(Service):
     def __init__(self, name, common, server_pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
-        name_list = []
-        
 
     def get_pid(self):
         return self._pid
