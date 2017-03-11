@@ -7,11 +7,8 @@ import urlparse
 from . import (base, constants, custom_exceptions, file_object, game, request,
                services, util)
 
-SUPPORTED_METHODS = ('GET', 'POST')
+SUPPORTED_METHODS = ('GET')
 SERVICES_HEADERS = {}
-
-
-NON_ALLOWED_TYPES = ['xml']
 
 INITIALIZED, SENDING_STATUS, SENDING_DATA, FINISHED, ERROR = range(5)
 SERVICES_LIST = {service.NAME: service for service in
@@ -86,8 +83,6 @@ class Client(base.Base):
         uri_path = urlparse.urlparse(uri).path
         if uri_path not in SERVICES_LIST.keys():
             file_type = os.path.splitext(uri_path)[1]
-            if file_type in NON_ALLOWED_TYPES:
-                raise custom_exceptions.AccessDenied()
             self._file = file_object.FileObject(uri_path, self._base_directory)
         else:
             # The service initialzor
@@ -101,17 +96,14 @@ class Client(base.Base):
                 dic_argument = urlparse.parse_qs(
                     self._recv_buff.split(constants.DOUBLE_CRLF)[-1])
             dic_argument.update({"common": self.common})
-            print self._game
             if self._game is not None:
                 dic_argument.update({"quiz_pid": self._game.pid})
-                print self._game.NAME == "PLAYER"
                 if self._game.NAME == "PLAYER":
                     dic_argument.update(
                         {"server_pid": self._game.game_master.pid})
             # Remove un-usable keys
             dic_argument.pop('self', None)
             self.logger.debug("dic arguement %s", dic_argument)
-            print dic_argument
             # Creat a tupple of the arguments for service_function that
             # are in dic_argument
             self._file = service_function(
@@ -129,7 +121,6 @@ class Client(base.Base):
             )
         else:
             self._send_buff += self._file.headers(self._extra_headers)
-        self._extra_headers
         self.logger.debug(
             "Created file\service and request and might setted game")
         if len(parsed_lines) == 1:
@@ -141,19 +132,20 @@ class Client(base.Base):
     def _get_headers(self):
         self._recv_data()
         self.logger.debug("after recv lines %s" % self._recv_buff)
+        uri = self._request.uri
         if constants.CRLF in self._recv_buff:
-            uri = self._request.uri
-            if (
-                uri in SERVICES_HEADERS.keys() or
-                self._request.method == "POST"
-            ):
-                for line in self._recv_buff.split(constants.CRLF):
-                    parsed = line.split(":", 1)
-                    if ": " in line and parsed[0] in SERVICES_HEADERS[
-                            uri] + ["cookie"]:
-                        if len(parsed) == 2:
-                            self._request.add_header(*parsed)
-                            self.logger.debug("Added header, %s", line)
+            dic_headers = {}
+            for line in self._recv_buff.splitlines():
+                if line != "":
+                    split_line = line.split(":")
+                    dic_headers[split_line[0].lower()] = split_line[1].lstrip(' ')
+            if uri in SERVICES_HEADERS.keys():
+                for header in SERVICES_HEADERS[uri]:
+                    self._request.add_header(header, dic_headers[header])
+                    self.logger.debug("Added header, %s", line)
+            if "cookie" in dic_headers:
+                self._request.add_header("cookie", dic_headers["cookie"])
+                self.logger.debug("Added cookie, %s", line)
         self._recv_buff = ""
 
     def _change_to_error(self, error_messege):
@@ -161,19 +153,21 @@ class Client(base.Base):
         self._state = ERROR
         self._recv_buff = ""
 
-    def _set_game_object(self, headers):
-        cookie = Cookie.SimpleCookie(headers["cookie"])
+    def _set_game_object(self):
+        cookie = self._request.get_all_header()["cookie"]
         if ("pid" in cookie and
-                self.common.pid_client[cookie["pid"]] is not None):
+                self.common.pid_client[int(cookie["pid"])] is not None):
             self._game = self.common.pid_client[cookie["pid"]]
             self.logger.debug("Set game as %s" % self._game)
+        else:
+            self.logger.debug("Game object not found")
 
     def _set_game(self):
         headers = self._request.get_all_header()
         parsed_uri = urlparse.urlparse(self._request.uri)
         querry = urlparse.parse_qs(parsed_uri.query)
         if "cookie" in headers:  # Setting game object
-            self._find_game_object(headers)
+            self._set_game_object(headers)
         if parsed_uri.path in (
             services.choose_name.NAME,
             services.register_quiz.NAME
@@ -235,9 +229,6 @@ class Client(base.Base):
                 self._change_to_error(
                     util.creat_error(
                         500, 'Internal Error', e))
-        except custom_exceptions.AccessDenied as e:
-            self.logger.error('Exception ', exc_info=True)
-            self._change_to_error(util.creat_error(403, 'Forbidden', e))
         except Exception as e:
             self.logger.error('Exception ', exc_info=True)
             self._change_to_error(util.creat_error(500, 'Internal Error', e))

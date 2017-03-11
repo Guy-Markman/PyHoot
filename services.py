@@ -94,7 +94,7 @@ class register_quiz(Service):
         self.read_pointer = 0  # How much did we read from read
         self._quiz_name = quiz_name[0]
         self._quiz_pid = quiz_pid
-        if os.path.isfile(os.path.normpath("PyHoot\Files\%s.xml" %
+        if os.path.isfile(os.path.normpath("PyHoot\Quizes\%s.xml" %
                                            os.path.normpath(self._quiz_name))):
             self.content = self.right
             self.right_page = True

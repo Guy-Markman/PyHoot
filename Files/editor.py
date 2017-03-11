@@ -1,5 +1,6 @@
 import os
 import string
+import getpass
 from xml.dom import minidom
 from xml.etree import ElementTree
 
@@ -28,7 +29,10 @@ def main():
                 "Is the answer right or wrong? (answer in true or false)")
     build = prettify(quiz)
     print build
-    fd = os.open("%s.xml" % name, os.O_CREAT | os.O_WRONLY)
+    try:
+        fd = os.open("../Quizes/%s.xml" % name, os.O_CREAT | os.O_WRONLY)
+    except OSError:
+        fd = os.open("%s.xml" % name, os.O_CREAT | os.O_WRONLY)
     try:
         while build:
             build = build[os.write(fd, build):]
