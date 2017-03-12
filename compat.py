@@ -1,3 +1,5 @@
+"""Setting up os for the program"""
+
 import os
 
 

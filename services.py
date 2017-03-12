@@ -37,7 +37,7 @@ class Service(object):
 
     def headers(self, extra):
         """Headers of the service, base if for any HTTP page"""
-        return util.create_headers_response("200", "OK",
+        return util.create_headers_response(200,
                                             len(self._content_page),
                                             extra_headers=extra, type=".html")
 

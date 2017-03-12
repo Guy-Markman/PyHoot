@@ -114,8 +114,7 @@ class Client(base.Base):
             )
         if self._file.NAME == "FILE":
             self._send_buff += (
-                util.create_headers_response("200",
-                                             "ok",
+                util.create_headers_response(200,
                                              self._file.get_file_size(),
                                              self._extra_headers,
                                              type=file_type)
@@ -127,6 +126,7 @@ class Client(base.Base):
         self._state = SENDING_STATUS
 
     def _get_headers(self):
+        """Getting and setting the headers"""
         self.logger.debug("Start _get_headers")
         uri = self._request.uri
         if constants.CRLF in self._recv_buff:
@@ -148,15 +148,14 @@ class Client(base.Base):
         self._recv_buff = ""
 
     def _change_to_error(self, error_messege):
+        """Changeing the status to error"""
         self._send_buff = error_messege
         self._state = ERROR
         self._recv_buff = ""
 
     def _set_game_object(self):
+        """Setting the game object to self._game using the cookies"""
         cookie = Cookie.BaseCookie(self._request.get_all_header()["cookie"])
-        print type(self.common.pid_client)
-        print self.common.pid_client
-        print cookie
         if "pid" in cookie:
             pid = int(cookie["pid"].value)
             if pid in self.common.pid_client:
@@ -166,6 +165,8 @@ class Client(base.Base):
             self.logger.debug("Game object not found")
 
     def _set_game(self):
+        """Setting the game. Creating new game object if needed and deleting
+        unneeded"""
         headers = self._request.get_all_header()
         parsed_uri = urlparse.urlparse(self._request.uri)
         querry = urlparse.parse_qs(parsed_uri.query)
@@ -229,14 +230,14 @@ class Client(base.Base):
             if e.errno == errno.ENOENT:
                 self._change_to_error(
                     util.creat_error(
-                        404, 'File Not Found', e))
+                        404, e))
             else:
                 self._change_to_error(
                     util.creat_error(
-                        500, 'Internal Error', e))
+                        500, e))
         except Exception as e:
             self.logger.error('Exception ', exc_info=True)
-            self._change_to_error(util.creat_error(500, 'Internal Error', e))
+            self._change_to_error(util.creat_error(500, e))
 
     def send(self):
         """ Fill self.send_buff with all the data it needs and then send it

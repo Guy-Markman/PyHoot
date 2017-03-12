@@ -1,15 +1,14 @@
+"""main file"""
 import argparse
 import logging
 import os
 import signal
 
-from . import base
-from . import constants
-from . import server
-from . import compat
+from . import base, compat, constants, server
 
 
 def parse_args():
+    """parse args"""
     LOG_STR_LEVELS = {
         'DEBUG': logging.DEBUG,
         'INFO': logging.INFO,
@@ -82,6 +81,7 @@ def parse_args():
 
 
 def main():
+    """main function. Parsing args, setting up servers and starting them"""
     compat.__init__()
     args = parse_args()
     close_file = []
@@ -98,8 +98,8 @@ def main():
     logger.info("Parsed args and created logger")
     Server = server.Server(args.buff_size, args.base, args.io_mode)
 
-    # Signals set and handlers for nice shutdown
     def terminate_handler(signo, frame):
+        """Signals set and handlers for nice shutdown"""
         Server.terminate()
     signal.signal(signal.SIGINT, terminate_handler)
     signal.signal(signal.SIGTERM, terminate_handler)

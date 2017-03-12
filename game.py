@@ -1,22 +1,30 @@
+"""Game objects for the game, there is both player and master"""
+
 import random
 
 
 class Game(object):
+    """Base game object, for the pid"""
 
-    def __init__(self):
+    def __init__(self, common):
         super(Game, self).__init__()
-        self._pid = random.randint(100000000, 999999999)
+        while True:
+            pid = random.randint(100000000, 999999999)
+            if pid not in common.pid_client.keys():
+                break
+        self._pid = pid
 
     @property
     def pid(self):
+        """The number of the object in the database"""
         return self._pid
 
 
 class GameMaster(Game):
     NAME = "MASTER"
 
-    def __init__(self, quiz_name):
-        super(GameMaster, self).__init__()
+    def __init__(self, quiz_name, commmon):
+        super(GameMaster, self).__init__(commmon)
         self._quiz = quiz_name
         self._players_list = {}  # {pid: GamePlayer}
 

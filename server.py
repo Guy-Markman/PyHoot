@@ -172,6 +172,7 @@ class Server(base.Base):
         self.logger.debug(self._database)
 
     def send(self, s):
+        """Sending in case of a big error"""
         while self._database[s]["buff"]:
             try:
                 sent = s.send(self._database[s]["buff"])

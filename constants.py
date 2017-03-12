@@ -1,3 +1,4 @@
+"""Constants for the program"""
 BASE = '.'
 BUFF_SIZE = 1024
 CRLF = "\r\n"

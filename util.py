@@ -1,3 +1,5 @@
+
+import httplib
 import mimetypes
 import socket
 
@@ -13,7 +15,6 @@ def creat_nonblocking_socket():
 
 def create_headers_response(
     code,
-    message,
     length,
     extra_headers=None,
     type=None
@@ -21,7 +22,6 @@ def create_headers_response(
     """create the headers part of the request
         Args:
             code - The HTTP code for the request
-            message - The HTTP code message for the request
             length - length of the message
             extra_headers - a list of lists where every list is the header name
                             and then header content.
@@ -29,50 +29,49 @@ def create_headers_response(
             type - The type of the file (is we send a file).
                    example: ".py"
     """
-    message = ("%s %s %s\r\n"
-               "Content-Length: %s\r\n" % (constants.HTTP_VERSION,
-                                           code, message, length)
+    message = ("%s %s %s%s"
+               "Content-Length: %s%s" % (
+                   constants.HTTP_VERSION,
+                   code,
+                   httplib.responses[code],
+                   constants.CRLF,
+                   length,
+                   constants.CRLF
+               )
                )
     if type is not None:
         mimetypes.init()
-        message += "Content-Type: %s\r\n" % (
-            mimetypes.types_map[type] if type in mimetypes.types_map and type != ".py"
-            else
-            'application/octet-stream')
+        if type in mimetypes.types_map and type != ".py":
+            content_type = mimetypes.types_map[type]
+        else:
+            content_type = 'application/octet-stream'
+        message += "Content-Type: %s%s" % (content_type, constants.CRLF)
     if extra_headers is not None:
         for extra in extra_headers:
-            message += "%s: %s\r\n" % (extra, extra_headers[extra])
-    message += "\r\n"
+            message += "%s: %s%s" % (extra,
+                                     extra_headers[extra], constants.CRLF)
+    message += constants.CRLF
     return message
 
 
-def creat_error(code, message, extra):
-    """Creat the error we will send to the client"""
+def creat_error(code, extra):
+    """Creat the error we will send to the client
+    Arguemesnt:
+    code: HTTP status code
+    extra: any thing you want to put after the status message
+    """
+    http_message = httplib.responses[code]
     message = (
         "%s"
         "%s\r\n"
         "%s\r\n" % (
             create_headers_response(
                 code,
-                message,
-                len(message) + len(str(extra)) + 4,
+                len(http_message) + len(str(extra)) + 4,
             ),
-            message,
+            http_message,
             extra
         )
     )
-    message = (
-        "%s %s %s\r\n"
-        "Content-Length: %s\r\n"
-        "\r\n"
-        "%s\r\n"
-        "%s\r\n" % (
-            constants.HTTP_VERSION,
-            code,
-            message,
-            len(message) + len(str(extra)) + 4,
-            message,
-            extra
-        )
-    )
+
     return message
