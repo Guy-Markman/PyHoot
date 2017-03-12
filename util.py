@@ -1,5 +1,6 @@
-import socket
 import mimetypes
+import socket
+
 from . import constants
 
 
@@ -35,7 +36,8 @@ def create_headers_response(
     if type is not None:
         mimetypes.init()
         message += "Content-Type: %s\r\n" % (
-            mimetypes.types_map[type] if type in mimetypes.types_map else
+            mimetypes.types_map[type] if type in mimetypes.types_map and type != ".py"
+            else
             'application/octet-stream')
     if extra_headers is not None:
         for extra in extra_headers:
