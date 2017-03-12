@@ -1,6 +1,5 @@
 import os
 import string
-import getpass
 from xml.dom import minidom
 from xml.etree import ElementTree
 

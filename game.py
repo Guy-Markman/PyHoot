@@ -26,7 +26,7 @@ class GameMaster(Game):
     def remove_player(self, pid):
         self._players_list.pop[pid]
 
-    def get_player_list(self):
+    def get_player_dict(self):
         return self._players_list
 
 

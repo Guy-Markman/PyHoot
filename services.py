@@ -37,7 +37,8 @@ class Service(object):
 
     def headers(self, extra):
         """Headers of the service, base if for any HTTP page"""
-        return util.create_headers_response("200", "OK", len(self.content()),
+        return util.create_headers_response("200", "OK",
+                                            len(self._content_page),
                                             extra_headers=extra, type=".html")
 
     def read_buff(self, buff_size):
@@ -108,7 +109,8 @@ class register_quiz(Service):
                             """<font size = 7>Now you can join the Game!<br>
         Pid %d</font>""" % self._quiz_pid)
 
-    def wrong(self):
+    @staticmethod
+    def wrong():
         return BASE_HTTP % (
             "No such quiz",
             """<form action = "/register_quiz" method = "get" >
@@ -146,7 +148,6 @@ class choose_name(Service):
     def __init__(self, common, pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
-        print common.pid_client.get(int(pid[0]))
         if common.pid_client.get(int(pid[0])) is not None:
             self.content = self.right
             self.right_page = True
@@ -155,7 +156,8 @@ class choose_name(Service):
             self.right_page = False
         self._content_page = self.content()
 
-    def right(self):
+    @staticmethod
+    def right():
         return BASE_HTTP % (
             "Choose name",
             """<form action = "/waiting_room_start" method = "get">
@@ -166,7 +168,8 @@ class choose_name(Service):
            """
         )
 
-    def wrong(self):
+    @staticmethod
+    def wrong():
         return BASE_HTTP % (
             """Join game!""",
             """<form action = "/choose_name" method = "get">
@@ -185,16 +188,26 @@ class waiting_room_start(Service):
     def __init__(self, name, common, server_pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
+        print type(server_pid)
+        if name[0] not in common.pid_client[server_pid].get_player_dict():
+            self.content = self.right
+            self.right_page = True
+        else:
+            self.content = self.wrong
+            self.right_page = False
+        self._content_page = self.content()
 
     def get_pid(self):
         return self._pid
 
+    @staticmethod
     def right():
         return BASE_HTTP % (
             "Please wait",
-            """ < font size="6" > Please wait < /font >"""
+            """<font size="6">Please wait</font>"""
         )
 
+    @staticmethod
     def wrong():
         return BASE_HTTP % (
             "Choose name",

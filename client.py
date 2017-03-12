@@ -78,7 +78,12 @@ class Client(base.Base):
             raise RuntimeError("HTTP unspported method '%s'" % method)
         if not uri or uri[0] != '/' or '\\' in uri:
             raise RuntimeError("Invalid URI")
+        if len(parsed_lines) == 1:
+            self._recv_buff = ""
+        else:
+            self._recv_buff = parsed_lines[1]
         self._request = request.Request(method, uri)
+        self._get_headers()
         self._set_game()
         uri_path = urlparse.urlparse(uri).path
         if uri_path not in SERVICES_LIST.keys():
@@ -89,12 +94,8 @@ class Client(base.Base):
             service_function = SERVICES_LIST[uri_path]
 
             # dictionary of the query of uri
-            if method == "GET":
-                dic_argument = urlparse.parse_qs(
-                    urlparse.urlparse(uri).query)
-            else:
-                dic_argument = urlparse.parse_qs(
-                    self._recv_buff.split(constants.DOUBLE_CRLF)[-1])
+            dic_argument = urlparse.parse_qs(
+                urlparse.urlparse(uri).query)
             dic_argument.update({"common": self.common})
             if self._game is not None:
                 dic_argument.update({"quiz_pid": self._game.pid})
@@ -123,29 +124,27 @@ class Client(base.Base):
             self._send_buff += self._file.headers(self._extra_headers)
         self.logger.debug(
             "Created file\service and request and might setted game")
-        if len(parsed_lines) == 1:
-            self._recv_buff = ""
-        else:
-            self._recv_buff = parsed_lines[1]
         self._state = SENDING_STATUS
 
     def _get_headers(self):
-        self._recv_data()
-        self.logger.debug("after recv lines %s" % self._recv_buff)
+        self.logger.debug("Start _get_headers")
         uri = self._request.uri
         if constants.CRLF in self._recv_buff:
+            self.logger.debug("Inside crlf")
             dic_headers = {}
             for line in self._recv_buff.splitlines():
                 if line != "":
                     split_line = line.split(":")
-                    dic_headers[split_line[0].lower()] = split_line[1].lstrip(' ')
+                    dic_headers[split_line[0].lower()] = split_line[
+                        1].lstrip(' ')
+            self.logger.debug("dic_headers %s" % dic_headers)
             if uri in SERVICES_HEADERS.keys():
                 for header in SERVICES_HEADERS[uri]:
                     self._request.add_header(header, dic_headers[header])
                     self.logger.debug("Added header, %s", line)
             if "cookie" in dic_headers:
                 self._request.add_header("cookie", dic_headers["cookie"])
-                self.logger.debug("Added cookie, %s", line)
+                self.logger.debug("Added cookie, %s", dic_headers["cookie"])
         self._recv_buff = ""
 
     def _change_to_error(self, error_messege):
@@ -154,11 +153,15 @@ class Client(base.Base):
         self._recv_buff = ""
 
     def _set_game_object(self):
-        cookie = self._request.get_all_header()["cookie"]
-        if ("pid" in cookie and
-                self.common.pid_client[int(cookie["pid"])] is not None):
-            self._game = self.common.pid_client[cookie["pid"]]
-            self.logger.debug("Set game as %s" % self._game)
+        cookie = Cookie.BaseCookie(self._request.get_all_header()["cookie"])
+        print type(self.common.pid_client)
+        print self.common.pid_client
+        print cookie
+        if "pid" in cookie:
+            pid = int(cookie["pid"].value)
+            if pid in self.common.pid_client:
+                self._game = self.common.pid_client[pid]
+                self.logger.debug("Set game as %s" % self._game)
         else:
             self.logger.debug("Game object not found")
 
@@ -167,18 +170,22 @@ class Client(base.Base):
         parsed_uri = urlparse.urlparse(self._request.uri)
         querry = urlparse.parse_qs(parsed_uri.query)
         if "cookie" in headers:  # Setting game object
-            self._set_game_object(headers)
+            self._set_game_object()
         if parsed_uri.path in (
             services.choose_name.NAME,
             services.register_quiz.NAME
         ):
             if "cookie" in headers:  # Remove existing user
-                self._server.pid_client.pop(headers["cookie"])
-                if self._game.NAME == "MASTER":
-                    for player in self._server.pid_client.values():
-                        player.game_master = None
-                if self._game.NAME == "PLAYER":
-                    self._game.game_master.remove_player(headers["cookie"])
+                self.common.pid_client.pop(headers["cookie"], None)
+                try:
+                    if self._game.NAME == "MASTER":
+                        for player in self.common.pid_client.values():
+                            player.game_master = None
+                    if self._game.NAME == "PLAYER":
+                        self._game.game_master.remove_player(
+                            headers["cookie"])
+                except AttributeError:
+                    pass
             self.logger.debug("Removed existing user")
 
             if parsed_uri.path == services.choose_name.NAME:  # new one
@@ -194,7 +201,7 @@ class Client(base.Base):
         # Set name for player
         if (parsed_uri.path == services.waiting_room_start.NAME
                 and self._game is not None and self._game.NAME == "PLAYER"):
-            self._game.name = querry.name
+            self._game.name = querry["name"]
             self._game.game_master.add_player(self._game.pid, self._game)
 
     def recv(self):
@@ -214,9 +221,7 @@ class Client(base.Base):
                 self._test_http_and_creat_objects()
 
             # If we do have request line, get headers
-
-            if self._state in (SENDING_DATA, SENDING_STATUS):
-                self._get_headers()
+            self.logger.debug("state %s" % self._state)
             self.logger.debug("Now recv_buff is %s" % self._recv_buff)
 
         except OSError as e:
