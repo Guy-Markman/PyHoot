@@ -76,14 +76,14 @@ class Creat_new_game(Service):
 
     def content(self):
         return BASE_HTTP % ("New Game!",
-                            """<form action = "/register_quiz" method = "get" >
+                            """<form action="/register_quiz" method = "get">
                                <font size="4">Name of quiz:</font><br>
-                               <input type = "text" name = "quiz_name"
+                               <input type="text" name="quiz_name"
                                 size="21" autocomplete="off">
                                <br><br>
-                               <input type = "submit" value = "Start game!"
+                               <input type="submit" value="Start game!"
                                 style="height:50px; width:150px">
-                                </form >"""
+                                </form>"""
                             )
 
 
@@ -113,11 +113,11 @@ class register_quiz(Service):
     def wrong():
         return BASE_HTTP % (
             "No such quiz",
-            """<form action = "/register_quiz" method = "get" >
+            """<form action="/register_quiz" method="get">
                <font size="4">No such quiz!<br>Name of quiz:</font><br>
                <input type = "text" name = "quiz_name" size="21"
-               autocomplete="off"> <br><br >
-               <input type = "submit" value = "Start game!"
+               autocomplete="off"> <br><br>
+               <input type="submit" value="Start game!"
                style="height:50px; width:150px">
                </form >"""
         )
@@ -132,7 +132,7 @@ class join_quiz(Service):
     def content(self):
         return BASE_HTTP % (
             """Join game!""",
-            """<form action = "/choose_name" method = "get">
+            """<form action="/choose_name" method="get">
                <font size ="7">Game Pin</font><br>
                <input type="number" name="pid" style="width: 200px;"
                 min="100000000" max="999999999" autocomplete="off">
@@ -172,7 +172,7 @@ class choose_name(Service):
     def wrong():
         return BASE_HTTP % (
             """Join game!""",
-            """<form action = "/choose_name" method = "get">
+            """<form action="/choose_name" method="get">
                <font size ="7">No such Game Pin, enter right one</font><br>
                <input type="number" name="pid" style="width: 200px;"
                 min="100000000" max="999999999" autocomplete="off">
@@ -211,8 +211,8 @@ class waiting_room_start(Service):
     def wrong():
         return BASE_HTTP % (
             "Choose name",
-            """<form action = "/waiting_room_start" method = "get">
-               <font size = "6"> Name taken, Choose name</font></br>
+            """<form action="/waiting_room_start" method="get">
+               <font size="6"> Name taken, Choose name</font></br>
                <input type="text" name="name" style="width: 200px;">
                <br><br><input type="submit" value="Start Playing!"
                 style="height:50px;width:150px">
@@ -226,26 +226,26 @@ class answer(Service):
     def content(self):
         return BASE_HTTP % (
             "Play!",
-            """ < form action="/wait_answer" style="float:left;" method="GET" >
-                < input type="hidden" name="answer" value="A" >
+            """ <form action="/wait_answer" style="float:left;" method="GET">
+                <input type="hidden" name="answer" value="A">
                 <input type="submit" value="A" style="height: 150px;
-                 width: 150px; font - size: 50px; "/ >
-            < /form >
-            <form action="/wait_answer" method="GET" >
-                < input type="hidden" name="answer" value="B" >
+                 width: 150px; font-size: 50px;"/>
+            </form>
+            <form action="/wait_answer" method="GET">
+                <input type="hidden" name="answer" value="B">
                 <input type="submit" value="B" style="height: 150px;
-                 width: 150px; font - size: 50px; "/ >
-            < /form >
-            <form action="/wait_answer" style="float:left;" method="GET" >
-                < input type="hidden" name="answer" value="C" >
+                 width: 150px; font-size: 50px;"/>
+            </form>
+            <form action="/wait_answer" style="float:left;" method="GET">
+                <input type="hidden" name="answer" value="C">
                 <input type="submit" value="C" style="height: 150px;
-                 width: 150px; font - size: 50px; "/ >
-            < /form >
-            <form action="/wait_answer" method="GET" >
-                < input type="hidden" name="answer" value="D" >
+                 width: 150px; font-size: 50px;"/>
+            </form>
+            <form action="/wait_answer" method="GET">
+                <input type="hidden" name="answer" value="D">
                 <input type="submit" value="D" style="height: 150px;
-                 width: 150px; font - size: 50px; "/ >
-            < /form > """
+                 width: 150px; font-size: 50px;"/>
+            </form>"""
         )
 
 
@@ -261,5 +261,5 @@ class wait_answer(Service):
     def content(self):
         return BASE_HTTP % (
             "Please wait",
-            """ < font size="6" > Please wait < /font >"""
+            """<font size="6">Please wait</font>"""
         )

@@ -32,7 +32,7 @@ class GameMaster(Game):
         self._players_list[new_pid] = game_player
 
     def remove_player(self, pid):
-        self._players_list.pop[pid]
+        self._players_list.pop(pid, None)
 
     def get_player_dict(self):
         return self._players_list
@@ -41,8 +41,8 @@ class GameMaster(Game):
 class GamePlayer(Game):
     NAME = "PLAYER"
 
-    def __init__(self, master, name=None):
-        super(GamePlayer, self).__init__()
+    def __init__(self, master, common, name=None):
+        super(GamePlayer, self).__init__(common)
         self._name = name
         self._game_master = master  # Game object GameMaster
 

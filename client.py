@@ -100,6 +100,10 @@ class Client(base.Base):
             if self._game is not None:
                 dic_argument.update({"quiz_pid": self._game.pid})
                 if self._game.NAME == "PLAYER":
+                    print "GAME"
+                    print self._game
+                    print self._game.game_master
+                    print self._game.game_master.pid
                     dic_argument.update(
                         {"server_pid": self._game.game_master.pid})
             # Remove un-usable keys
@@ -191,10 +195,12 @@ class Client(base.Base):
 
             if parsed_uri.path == services.choose_name.NAME:  # new one
                 self._game = game.GamePlayer(
-                    self.common.pid_client.get(int(querry["pid"][0]))
+                    self.common.pid_client.get(int(querry["pid"][0])),
+                    self.common
                 )
             else:
-                self._game = game.GameMaster(querry["quiz_name"][0])
+                self._game = game.GameMaster(
+                    querry["quiz_name"][0], self.common)
             self.common.pid_client[self._game.pid] = self._game
             self._extra_headers[
                 "Set-Cookie"] = "pid=%d" % self._game.pid
