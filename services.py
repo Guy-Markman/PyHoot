@@ -263,3 +263,29 @@ class wait_answer(Service):
             "Please wait",
             """<font size="6">Please wait</font>"""
         )
+
+
+class test_xmlhttprequest(Service):
+    NAME = "/test_xmlhttprequest"
+
+    def content(self):
+        return BASE_HTTP % (
+            "test",
+            """<p id="test">
+               <button type="button" onclick="bip()">BIP</button>
+               </p>
+               <script>
+               function bip() {
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.onreadystatechange = function() {
+                        if (this.readyState == 4 && this.status == 200){
+                            document.getElementById("test").innerHTML =
+                            this.responseText;
+                        }
+                    };
+                    xhttp.open("GET", "bop.txt", true);
+                    xhttp.send();
+               }
+               </script>
+               """
+        )
