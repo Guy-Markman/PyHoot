@@ -1,10 +1,10 @@
 import os
 import string
-from xml.dom import minidom
 from xml.etree import ElementTree
 
+from . import util
+
 N_ANSWERS = 4
-ENCODING = 'utf-8'
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
                 answer, "answer_text").text = raw_input("Enter the answer ")
             ElementTree.SubElement(answer, "right_wrong").text = raw_input(
                 "Is the answer right or wrong? (answer in true or false)")
-    build = prettify(quiz)
+    build = util.prettify(quiz)
     print build
     try:
         fd = os.open("../Quizes/%s.xml" % name, os.O_CREAT | os.O_WRONLY)
@@ -37,14 +37,6 @@ def main():
             build = build[os.write(fd, build):]
     finally:
         os.close(fd)
-
-
-def prettify(elem):
-    """Return a pretty-printed XML string for the Element.
-    """
-    rough_string = ElementTree.tostring(elem, ENCODING)
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ", encoding="utf-8")
 
 
 if __name__ == "__main__":

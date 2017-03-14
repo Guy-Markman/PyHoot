@@ -2,6 +2,8 @@
 import httplib
 import mimetypes
 import socket
+from xml.dom import minidom
+from xml.etree import ElementTree
 
 from . import constants
 
@@ -75,3 +77,18 @@ def creat_error(code, extra):
     )
 
     return message
+
+
+def prettify(elem):
+    """Return a pretty-printed XML string for the Element.
+    """
+    return minidom.parseString(ElementTree.tostring(elem, constants.ENCODING)
+                               ).toprettyxml(indent="  ",
+                                             encoding=constants.ENCODING)
+
+
+def names_to_xml(names_list):
+    players = ElementTree.Element("players")
+    for name in names_list:
+        ElementTree.SubElement(players, "name").text = name
+    return prettify(players)
