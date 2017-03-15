@@ -14,7 +14,9 @@ BASE_HTTP = """<HTML>
     </head>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <BODY>
+    <center>
         %s
+    </center>
     </BODY>
 </HTML>"""
 
@@ -50,6 +52,15 @@ class Service(object):
     def get_status(self):
         """Return self._finished_reading"""
         return self._finished_reading
+
+
+class TXTService(Service):
+
+    def headers(self, extra):
+        """Headers of the service, base if for any HTTP page"""
+        return util.create_headers_response(200,
+                                            len(self._content_page),
+                                            extra_headers=extra, type=".txt")
 
 
 class Clock(Service):
@@ -106,8 +117,29 @@ class register_quiz(Service):
 
     def right(self):
         return BASE_HTTP % ("Join!",
-                            """<font size = 7>Now you can join the Game!<br>
-        Pid %d</font>""" % self._quiz_pid)
+                            """
+                    <font size = 7>Now you can join the Game!<br>
+                    Pid %d</font><br><br>
+                    Connected players
+                    <p id="names">
+                    </p>
+                    <script>
+                    window.setInterval(function(){
+                      getnames();
+                    }, 500);
+                    function getnames() {
+                         var xhttp = new XMLHttpRequest();
+                         xhttp.onreadystatechange = function() {
+                             if (this.readyState == 4 && this.status == 200){
+                                 document.getElementById("names").innerHTML =
+                                 this.responseText;
+                             }
+                         };
+                         xhttp.open("GET", "getnames", true);
+                         xhttp.send();
+                    }
+                    </script>
+                    """ % self._quiz_pid)
 
     @staticmethod
     def wrong():
@@ -289,3 +321,29 @@ class test_xmlhttprequest(Service):
                </script>
                """
         )
+
+
+class getnames(Service):
+    NAME = "/getnames"
+
+    def __init__(self, game, common):
+        self._game = game
+        print game
+        self._common = common
+        self.finished_reading = False  # Did we read everything from read?
+        self.read_pointer = 0  # How much did we read from read
+        self._content_page = self.content()
+
+    def headers(self, extra):
+        """Headers of the service, base if for any HTTP page"""
+        return util.create_headers_response(200,
+                                            len(self._content_page),
+                                            extra_headers=extra, type=".txt")
+
+    def content(self):
+        names = []
+        for player in self._game.get_player_dict().values():
+            name = player.name
+            if name is not None:
+                names.append(name)
+        return "\t".join(names)

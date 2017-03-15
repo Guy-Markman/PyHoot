@@ -98,12 +98,9 @@ class Client(base.Base):
                 urlparse.urlparse(uri).query)
             dic_argument.update({"common": self.common})
             if self._game is not None:
-                dic_argument.update({"quiz_pid": self._game.pid})
+                dic_argument.update({"quiz_pid": self._game.pid, "game":
+                                     self._game})
                 if self._game.NAME == "PLAYER":
-                    print "GAME"
-                    print self._game
-                    print self._game.game_master
-                    print self._game.game_master.pid
                     dic_argument.update(
                         {"server_pid": self._game.game_master.pid})
             # Remove un-usable keys
