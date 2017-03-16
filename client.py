@@ -98,7 +98,7 @@ class Client(base.Base):
                 urlparse.urlparse(uri).query)
             dic_argument.update({"common": self.common})
             if self._game is not None:
-                dic_argument.update({"quiz_pid": self._game.pid, "game":
+                dic_argument.update({"pid": self._game.pid, "game":
                                      self._game})
                 if self._game.NAME == "PLAYER":
                     dic_argument.update(
@@ -205,7 +205,7 @@ class Client(base.Base):
         # Set name for player
         if (parsed_uri.path == services.waiting_room_start.NAME
                 and self._game is not None and self._game.NAME == "PLAYER"):
-            self._game.name = querry["name"]
+            self._game.name = querry["name"][0]
             self._game.game_master.add_player(self._game.pid, self._game)
 
     def recv(self):

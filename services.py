@@ -14,9 +14,7 @@ BASE_HTTP = """<HTML>
     </head>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <BODY>
-    <center>
         %s
-    </center>
     </BODY>
 </HTML>"""
 
@@ -54,15 +52,6 @@ class Service(object):
         return self._finished_reading
 
 
-class TXTService(Service):
-
-    def headers(self, extra):
-        """Headers of the service, base if for any HTTP page"""
-        return util.create_headers_response(200,
-                                            len(self._content_page),
-                                            extra_headers=extra, type=".txt")
-
-
 class Clock(Service):
     """HTTP page of local time and UTC time"""
     NAME = '/clock'
@@ -87,25 +76,27 @@ class Creat_new_game(Service):
 
     def content(self):
         return BASE_HTTP % ("New Game!",
-                            """<form action="/register_quiz" method = "get">
+                            """<center>
+                               <form action="/register_quiz" method = "get">
                                <font size="4">Name of quiz:</font><br>
                                <input type="text" name="quiz_name"
                                 size="21" autocomplete="off">
                                <br><br>
                                <input type="submit" value="Start game!"
                                 style="height:50px; width:150px">
-                                </form>"""
+                                </form>
+                                </center>"""
                             )
 
 
 class register_quiz(Service):
     NAME = "/register_quiz"
 
-    def __init__(self, quiz_name, quiz_pid):
+    def __init__(self, quiz_name, pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
         self._quiz_name = quiz_name[0]
-        self._quiz_pid = quiz_pid
+        self._pid = pid
         if os.path.isfile(os.path.normpath("PyHoot\Quizes\%s.xml" %
                                            os.path.normpath(self._quiz_name))):
             self.content = self.right
@@ -118,6 +109,7 @@ class register_quiz(Service):
     def right(self):
         return BASE_HTTP % ("Join!",
                             """
+                    <center>
                     <font size = 7>Now you can join the Game!<br>
                     Pid %d</font><br><br>
                     Connected players
@@ -139,19 +131,22 @@ class register_quiz(Service):
                          xhttp.send();
                     }
                     </script>
-                    """ % self._quiz_pid)
+                    </center>
+                    """ % self._pid)
 
     @staticmethod
     def wrong():
         return BASE_HTTP % (
             "No such quiz",
-            """<form action="/register_quiz" method="get">
+            """<center>
+               <form action="/register_quiz" method="get">
                <font size="4">No such quiz!<br>Name of quiz:</font><br>
                <input type = "text" name = "quiz_name" size="21"
                autocomplete="off"> <br><br>
                <input type="submit" value="Start game!"
                style="height:50px; width:150px">
-               </form >"""
+               </form >
+               </center>"""
         )
 
     def get_quiz(self):
@@ -164,12 +159,14 @@ class join_quiz(Service):
     def content(self):
         return BASE_HTTP % (
             """Join game!""",
-            """<form action="/choose_name" method="get">
+            """<center>
+               <form action="/choose_name" method="get">
                <font size ="7">Game Pin</font><br>
                <input type="number" name="pid" style="width: 200px;"
                 min="100000000" max="999999999" autocomplete="off">
                <br><br><input type="submit" value="Join!" style="height:50px;
                 width:150px">
+               </center>
            """
         )
 
@@ -180,7 +177,7 @@ class choose_name(Service):
     def __init__(self, common, pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
-        if common.pid_client.get(int(pid[0])) is not None:
+        if common.pid_client.get(int(pid)) is not None:
             self.content = self.right
             self.right_page = True
         else:
@@ -192,11 +189,13 @@ class choose_name(Service):
     def right():
         return BASE_HTTP % (
             "Choose name",
-            """<form action = "/waiting_room_start" method = "get">
+            """<center>
+               <form action = "/waiting_room_start" method = "get">
                <font size = "6"> Choose name</font></br>
                <input type="text" name="name" style="width: 200px;">
                <br><br><input type="submit" value="Start Playing!"
                 style="height:50px;width:150px">
+                </center>
            """
         )
 
@@ -204,12 +203,14 @@ class choose_name(Service):
     def wrong():
         return BASE_HTTP % (
             """Join game!""",
-            """<form action="/choose_name" method="get">
+            """<center>
+               <form action="/choose_name" method="get">
                <font size ="7">No such Game Pin, enter right one</font><br>
                <input type="number" name="pid" style="width: 200px;"
                 min="100000000" max="999999999" autocomplete="off">
                <br><br><input type="submit" value="Join!" style="height:50px;
                 width:150px">
+                </center>
            """
         )
 
@@ -235,19 +236,37 @@ class waiting_room_start(Service):
     @staticmethod
     def right():
         return BASE_HTTP % (
-            "Please wait",
-            """<font size="6">Please wait</font>"""
+            "Please wait", #WIP!!!!
+            """<center>
+               <font size="6">Please wait</font>
+               <br><br>
+               <input id="disconnect" type="button" value="disconnect" onclick="disconnect_function();"/>
+               </center>
+               <script>
+               function disconnect_function(){
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.onreadystatechange = function() {
+                        if (this.readyState == 4 && this.status == 200){ 
+                            window.location = '/';
+                        }
+                    };
+                    xhttp.open("GET", "diconnect_user", true);
+                    xhttp.send();
+               }
+               """
         )
 
     @staticmethod
     def wrong():
         return BASE_HTTP % (
             "Choose name",
-            """<form action="/waiting_room_start" method="get">
+            """<center>
+               <form action="/waiting_room_start" method="get">
                <font size="6"> Name taken, Choose name</font></br>
                <input type="text" name="name" style="width: 200px;">
                <br><br><input type="submit" value="Start Playing!"
                 style="height:50px;width:150px">
+                </center>
            """
         )
 
@@ -293,7 +312,7 @@ class wait_answer(Service):
     def content(self):
         return BASE_HTTP % (
             "Please wait",
-            """<font size="6">Please wait</font>"""
+            """<center><font size="6">Please wait</font></center>"""
         )
 
 
@@ -315,7 +334,7 @@ class test_xmlhttprequest(Service):
                             this.responseText;
                         }
                     };
-                    xhttp.open("GET", "bop.txt", true);
+                    xhttp.open("GET", "diconnect_user", true);
                     xhttp.send();
                }
                </script>
@@ -328,7 +347,6 @@ class getnames(Service):
 
     def __init__(self, game, common):
         self._game = game
-        print game
         self._common = common
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
@@ -344,6 +362,31 @@ class getnames(Service):
         names = []
         for player in self._game.get_player_dict().values():
             name = player.name
+            print name
             if name is not None:
                 names.append(name)
-        return "\t".join(names)
+        return "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".join(names)
+
+
+class diconnect_user(Service):
+    NAME = "/diconnect_user"
+    
+    def __init__(self, pid, common, game):
+        self.finished_reading = False  # Did we read everything from read?
+        self.read_pointer = 0  # How much did we read from read
+        self._content_page = self.content()
+        
+        self._pid = pid
+        
+        self.common.pid_client.pop(pid, None)
+        try:
+            if game.NAME == "MASTER":
+                for pid_player in game.get_player_dict().keys():
+                    player = common.get(pid_player)
+                    if player is not None:
+                        player.game_master = None
+            if game.NAME == "PLAYER":
+                game.game_master.remove_player(
+                    headers["cookie"])
+        except AttributeError:
+            pass
