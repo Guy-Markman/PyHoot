@@ -100,7 +100,8 @@ class Client(base.Base):
             if self._game is not None:
                 dic_argument.update({"pid": self._game.pid, "game":
                                      self._game})
-                if self._game.NAME == "PLAYER":
+                if (self._game.NAME == "PLAYER" and
+                        self._game.game_master is not None):
                     dic_argument.update(
                         {"server_pid": self._game.game_master.pid})
             # Remove un-usable keys

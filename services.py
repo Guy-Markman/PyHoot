@@ -30,7 +30,7 @@ class Service(object):
 
     def content(self):
         """The body of the service"""
-        pass
+        return ""
 
     def close(self):
         pass
@@ -118,7 +118,7 @@ class register_quiz(Service):
                     <script>
                     window.setInterval(function(){
                       getnames();
-                    }, 500);
+                    }, 1000);
                     function getnames() {
                          var xhttp = new XMLHttpRequest();
                          xhttp.onreadystatechange = function() {
@@ -236,23 +236,25 @@ class waiting_room_start(Service):
     @staticmethod
     def right():
         return BASE_HTTP % (
-            "Please wait", #WIP!!!!
+            "Please wait",  # WIP!!!!
             """<center>
                <font size="6">Please wait</font>
                <br><br>
-               <input id="disconnect" type="button" value="disconnect" onclick="disconnect_function();"/>
+               <input type="button" value="disconnect" onclick=
+               "disconnect_function();"/>
                </center>
                <script>
                function disconnect_function(){
                     var xhttp = new XMLHttpRequest();
                     xhttp.onreadystatechange = function() {
-                        if (this.readyState == 4 && this.status == 200){ 
+                        if (this.readyState == 4 && this.status == 200){
                             window.location = '/';
                         }
                     };
                     xhttp.open("GET", "diconnect_user", true);
                     xhttp.send();
                }
+               </script>
                """
         )
 
@@ -370,15 +372,15 @@ class getnames(Service):
 
 class diconnect_user(Service):
     NAME = "/diconnect_user"
-    
+
     def __init__(self, pid, common, game):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
         self._content_page = self.content()
-        
+
         self._pid = pid
-        
-        self.common.pid_client.pop(pid, None)
+
+        common.pid_client.pop(pid, None)
         try:
             if game.NAME == "MASTER":
                 for pid_player in game.get_player_dict().keys():
@@ -386,7 +388,6 @@ class diconnect_user(Service):
                     if player is not None:
                         player.game_master = None
             if game.NAME == "PLAYER":
-                game.game_master.remove_player(
-                    headers["cookie"])
+                game.game_master.remove_player(pid)
         except AttributeError:
             pass
