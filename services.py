@@ -224,7 +224,7 @@ class waiting_room_start(Service):
     @staticmethod
     def right():
         return constants.BASE_HTTP % (
-            "Please wait",  # WIP!!!!
+            "Please wait",
             """<center>
                <font size="6">Please wait</font>
                <br><br>
@@ -324,7 +324,7 @@ class test_xmlhttprequest(Service):
                             this.responseText;
                         }
                     };
-                    xhttp.open("GET", "diconnect_user", true);
+                    xhttp.open("GET", "bop.txt", true);
                     xhttp.send();
                }
                </script>
