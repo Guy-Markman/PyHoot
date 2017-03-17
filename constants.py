@@ -1,5 +1,15 @@
 """Constants for the program"""
 BASE = '.'
+# Base for  any HTTP page, you give it the title and the body of the page
+BASE_HTTP = """<HTML>
+    <head>
+    <title>%s</title>
+    </head>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <BODY>
+        %s
+    </BODY>
+</HTML>"""
 BUFF_SIZE = 1024
 CLOSE, SERVER, CLIENT = range(3)
 CRLF = "\r\n"

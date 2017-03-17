@@ -5,6 +5,7 @@
     <number_of_questions>1</number_of_questions>
   </settings>
   <questions>
+    <picture>2.png</picutre>
     <question number="1">
       <question_text>1+1</question_text>
       <answer number="A">

@@ -19,6 +19,8 @@ def main():
         q = ElementTree.SubElement(questions, "question", number=str(x + 1))
         ElementTree.SubElement(q, "question_text").text = raw_input(
             "What is the question? ")
+        ElementTree.SubElement(q, "picture").text = raw_input(
+            "Picture name. Must include extension. Leave Blunk for nothing.")
         for z in range(N_ANSWERS):
             answer = ElementTree.SubElement(
                 q, "answer", number=string.ascii_uppercase[z])

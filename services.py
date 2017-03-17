@@ -4,19 +4,7 @@
 import os.path
 import time
 
-from . import util
-
-
-# Base for  any HTTP page, you give it the title and the body of the page
-BASE_HTTP = """<HTML>
-    <head>
-    <title>%s</title>
-    </head>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <BODY>
-        %s
-    </BODY>
-</HTML>"""
+from . import constants, util
 
 
 class Service(object):
@@ -57,7 +45,7 @@ class Clock(Service):
     NAME = '/clock'
 
     def content(self):
-        return BASE_HTTP % (
+        return constants.BASE_HTTP % (
             """clock""",
             """local timezone %s<br>
             UTC timezone %s""" % (
@@ -75,8 +63,8 @@ class Creat_new_game(Service):
     """Let the manager of the game choose the quiz he wants"""
 
     def content(self):
-        return BASE_HTTP % ("New Game!",
-                            """<center>
+        return constants.BASE_HTTP % ("New Game!",
+                                      """<center>
                                <form action="/register_quiz" method = "get">
                                <font size="4">Name of quiz:</font><br>
                                <input type="text" name="quiz_name"
@@ -86,7 +74,7 @@ class Creat_new_game(Service):
                                 style="height:50px; width:150px">
                                 </form>
                                 </center>"""
-                            )
+                                      )
 
 
 class register_quiz(Service):
@@ -107,8 +95,8 @@ class register_quiz(Service):
         self._content_page = self.content()
 
     def right(self):
-        return BASE_HTTP % ("Join!",
-                            """
+        return constants.BASE_HTTP % ("Join!",
+                                      """
                     <center>
                     <font size = 7>Now you can join the Game!<br>
                     Pid %d</font><br><br>
@@ -136,7 +124,7 @@ class register_quiz(Service):
 
     @staticmethod
     def wrong():
-        return BASE_HTTP % (
+        return constants.BASE_HTTP % (
             "No such quiz",
             """<center>
                <form action="/register_quiz" method="get">
@@ -157,7 +145,7 @@ class join_quiz(Service):
     NAME = "/"  # This is the homepage
 
     def content(self):
-        return BASE_HTTP % (
+        return constants.BASE_HTTP % (
             """Join game!""",
             """<center>
                <form action="/choose_name" method="get">
@@ -187,7 +175,7 @@ class choose_name(Service):
 
     @staticmethod
     def right():
-        return BASE_HTTP % (
+        return constants.BASE_HTTP % (
             "Choose name",
             """<center>
                <form action = "/waiting_room_start" method = "get">
@@ -201,7 +189,7 @@ class choose_name(Service):
 
     @staticmethod
     def wrong():
-        return BASE_HTTP % (
+        return constants.BASE_HTTP % (
             """Join game!""",
             """<center>
                <form action="/choose_name" method="get">
@@ -235,7 +223,7 @@ class waiting_room_start(Service):
 
     @staticmethod
     def right():
-        return BASE_HTTP % (
+        return constants.BASE_HTTP % (
             "Please wait",  # WIP!!!!
             """<center>
                <font size="6">Please wait</font>
@@ -260,7 +248,7 @@ class waiting_room_start(Service):
 
     @staticmethod
     def wrong():
-        return BASE_HTTP % (
+        return constants.BASE_HTTP % (
             "Choose name",
             """<center>
                <form action="/waiting_room_start" method="get">
@@ -277,7 +265,7 @@ class answer(Service):
     NAME = "/answer"
 
     def content(self):
-        return BASE_HTTP % (
+        return constants.BASE_HTTP % (
             "Play!",
             """ <form action="/wait_answer" style="float:left;" method="GET">
                 <input type="hidden" name="answer" value="A">
@@ -312,7 +300,7 @@ class wait_answer(Service):
         self._content_page = self.content()
 
     def content(self):
-        return BASE_HTTP % (
+        return constants.BASE_HTTP % (
             "Please wait",
             """<center><font size="6">Please wait</font></center>"""
         )
@@ -322,7 +310,7 @@ class test_xmlhttprequest(Service):
     NAME = "/test_xmlhttprequest"
 
     def content(self):
-        return BASE_HTTP % (
+        return constants.BASE_HTTP % (
             "test",
             """<p id="test">
                <button type="button" onclick="bip()">BIP</button>
