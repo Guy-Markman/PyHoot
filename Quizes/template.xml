@@ -6,8 +6,8 @@
     </settings>
     <questions>
         <question number="1">
-            <picture>The name of the picture including extension, example: test.jpg. Leave blunk for Nothing</picutre>
             <question_text>the question itself, exmaple: 1+1</question_text>
+            <picture>The name of the picture including extension, example: test.jpg. Leave blunk for Nothing</picutre>
             <answer number= "A">
                 <answer_text>the text of the answer, example: 1</answer_text>
                 <right_wrong>Is the answer currect or not, exmaple:False</right_wrong>

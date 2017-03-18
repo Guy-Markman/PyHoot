@@ -1,7 +1,8 @@
 """Constants for the program"""
 BASE = '.'
 # Base for  any HTTP page, you give it the title and the body of the page
-BASE_HTTP = """<HTML>
+BASE_HTTP = """<!DOCTYPE html>
+<HTML>
     <head>
     <title>%s</title>
     </head>

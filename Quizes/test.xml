@@ -5,9 +5,9 @@
     <number_of_questions>1</number_of_questions>
   </settings>
   <questions>
-    <picture>2.png</picture>
     <question number="1">
       <question_text>1+1</question_text>
+      <picture>2.png</picture>
       <answer number="A">
         <answer_text>1</answer_text>
         <right_wrong>false</right_wrong>
