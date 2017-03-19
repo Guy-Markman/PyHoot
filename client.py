@@ -239,6 +239,9 @@ class Client(base.Base):
                 self._change_to_error(
                     util.creat_error(
                         500, e))
+        except custom_exceptions.CorruptXML as e:
+            self._logger.error("Exception", exc_info=True)
+            self._change_to_error(util.creat_error(400, e))
         except Exception as e:
             self.logger.error('Exception ', exc_info=True)
             self._change_to_error(util.creat_error(500, e))

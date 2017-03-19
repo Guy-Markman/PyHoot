@@ -66,7 +66,7 @@ class Creat_new_game(Service):
         return constants.BASE_HTTP % ("New Game!",
                                       """<center>
                                <form action="/register_quiz" method = "get">
-                               <font size="4">Name of quiz:</font><br>
+                               <font size="5">Name of quiz:</font><br>
                                <input type="text" name="quiz_name"
                                 size="21" autocomplete="off">
                                <br><br>
@@ -103,6 +103,9 @@ class register_quiz(Service):
                     Connected players
                     <p id="names">
                     </p>
+                    <br><br>
+                    <input type="button" value="Start playing"
+                    onclick="window.location = '/opening'">
                     <script>
                     window.setInterval(function(){
                       getnames();
@@ -151,11 +154,11 @@ class join_quiz(Service):
                <form action="/choose_name" method="get">
                <font size ="7">Game Pin</font><br>
                <input type="number" name="pid" style="width: 200px;"
-                min="100000000" max="999999999" autocomplete="off">
+                min="%s" max="%s" autocomplete="off">
                <br><br><input type="submit" value="Join!" style="height:50px;
                 width:150px">
                </center>
-           """
+           """ % (constants.MIN_PID, constants.MAX_PID)
         )
 
 
@@ -180,7 +183,8 @@ class choose_name(Service):
             """<center>
                <form action = "/waiting_room_start" method = "get">
                <font size = "6"> Choose name</font></br>
-               <input type="text" name="name" style="width: 200px;">
+               <input type="text" name="name"  pattern=".{3,}"
+                required title="3 characters minimum" style="width: 200px;">
                <br><br><input type="submit" value="Start Playing!"
                 style="height:50px;width:150px">
                 </center>
@@ -228,7 +232,7 @@ class waiting_room_start(Service):
             """<center>
                <font size="6">Please wait</font>
                <br><br>
-               <input type="button" value="disconnect" onclick=
+               <input type="button" value="Disconnect" onclick=
                "disconnect_function();"/>
                </center>
                <script>
@@ -236,7 +240,7 @@ class waiting_room_start(Service):
                     var xhttp = new XMLHttpRequest();
                     xhttp.onreadystatechange = function() {
                         if (this.readyState == 4 && this.status == 200){
-                            window.location = '/';
+                            window.location.href = '/';
                         }
                     };
                     xhttp.open("GET", "diconnect_user", true);
@@ -379,3 +383,33 @@ class diconnect_user(Service):
                 game.game_master.remove_player(pid)
         except AttributeError:
             pass
+
+
+class opening(Service):
+    NAME = "/opening"
+
+    def __init__(self, game):
+        self.finished_reading = False  # Did we read everything from read?
+        self.read_pointer = 0  # How much did we read from read
+        self._content_page = game.get_parser().get_html_start()
+
+
+class question(Service):
+    NAME = "/question"
+
+    def __init__(self, game):
+        self.finished_reading = False  # Did we read everything from read?
+        self.read_pointer = 0  # How much did we read from read
+        parser = game.get_parser()
+        if parser.get_left_questions() > 0:
+            parser.moved_to_next_page()
+            self._content_page = parser.get_html_question()
+        else:
+            self._content_page = """<html>
+            <body onload="window.location.href="/finish">
+            </body>
+</html>
+            """
+
+
+class finish
