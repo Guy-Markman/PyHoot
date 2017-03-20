@@ -1,7 +1,7 @@
 """Constants for the program"""
 BASE = '.'
 # Base for  any HTTP page, you give it the title and the body of the page
-BASE_HTTP = """<HTML>
+BASE_HTML = """<HTML>
     <head>
     <title>%s</title>
     </head>
@@ -12,6 +12,7 @@ BASE_HTTP = """<HTML>
 </HTML>"""
 BUFF_SIZE = 1024
 MIN_PID = 100000
+QUESTION_TIME = 3000
 MAX_PID = 999999
 CLOSE, SERVER, CLIENT = range(3)
 CRLF = "\r\n"

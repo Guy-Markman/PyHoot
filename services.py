@@ -45,7 +45,7 @@ class Clock(Service):
     NAME = '/clock'
 
     def content(self):
-        return constants.BASE_HTTP % (
+        return constants.BASE_HTML % (
             """clock""",
             """local timezone %s<br>
             UTC timezone %s""" % (
@@ -63,7 +63,7 @@ class Creat_new_game(Service):
     """Let the manager of the game choose the quiz he wants"""
 
     def content(self):
-        return constants.BASE_HTTP % ("New Game!",
+        return constants.BASE_HTML % ("New Game!",
                                       """<center>
                                <form action="/register_quiz" method = "get">
                                <font size="5">Name of quiz:</font><br>
@@ -95,7 +95,7 @@ class register_quiz(Service):
         self._content_page = self.content()
 
     def right(self):
-        return constants.BASE_HTTP % ("Join!",
+        return constants.BASE_HTML % ("Join!",
                                       """
                     <center>
                     <font size = 7>Now you can join the Game!<br>
@@ -127,7 +127,7 @@ class register_quiz(Service):
 
     @staticmethod
     def wrong():
-        return constants.BASE_HTTP % (
+        return constants.BASE_HTML % (
             "No such quiz",
             """<center>
                <form action="/register_quiz" method="get">
@@ -148,7 +148,7 @@ class join_quiz(Service):
     NAME = "/"  # This is the homepage
 
     def content(self):
-        return constants.BASE_HTTP % (
+        return constants.BASE_HTML % (
             """Join game!""",
             """<center>
                <form action="/choose_name" method="get">
@@ -178,7 +178,7 @@ class choose_name(Service):
 
     @staticmethod
     def right():
-        return constants.BASE_HTTP % (
+        return constants.BASE_HTML % (
             "Choose name",
             """<center>
                <form action = "/waiting_room_start" method = "get">
@@ -193,7 +193,7 @@ class choose_name(Service):
 
     @staticmethod
     def wrong():
-        return constants.BASE_HTTP % (
+        return constants.BASE_HTML % (
             """Join game!""",
             """<center>
                <form action="/choose_name" method="get">
@@ -213,7 +213,6 @@ class waiting_room_start(Service):
     def __init__(self, name, common, server_pid):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
-        print type(server_pid)
         if name[0] not in common.pid_client[server_pid].get_player_dict():
             self.content = self.right
             self.right_page = True
@@ -227,7 +226,7 @@ class waiting_room_start(Service):
 
     @staticmethod
     def right():
-        return constants.BASE_HTTP % (
+        return constants.BASE_HTML % (
             "Please wait",
             """<center>
                <font size="6">Please wait</font>
@@ -252,7 +251,7 @@ class waiting_room_start(Service):
 
     @staticmethod
     def wrong():
-        return constants.BASE_HTTP % (
+        return constants.BASE_HTML % (
             "Choose name",
             """<center>
                <form action="/waiting_room_start" method="get">
@@ -269,7 +268,7 @@ class answer(Service):
     NAME = "/answer"
 
     def content(self):
-        return constants.BASE_HTTP % (
+        return constants.BASE_HTML % (
             "Play!",
             """ <form action="/wait_answer" style="float:left;" method="GET">
                 <input type="hidden" name="answer" value="A">
@@ -297,14 +296,14 @@ class answer(Service):
 class wait_answer(Service):
     NAME = "/wait_answer"
 
-    def __init__(self, answer):
+    def __init__(self, game, answer):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
-        self.answer = answer
+        game.add_answer(answer)
         self._content_page = self.content()
 
     def content(self):
-        return constants.BASE_HTTP % (
+        return constants.BASE_HTML % (
             "Please wait",
             """<center><font size="6">Please wait</font></center>"""
         )
@@ -314,7 +313,7 @@ class test_xmlhttprequest(Service):
     NAME = "/test_xmlhttprequest"
 
     def content(self):
-        return constants.BASE_HTTP % (
+        return constants.BASE_HTML % (
             "test",
             """<p id="test">
                <button type="button" onclick="bip()">BIP</button>
@@ -354,10 +353,9 @@ class getnames(Service):
 
     def content(self):
         names = []
-        for player in self._game.get_player_dict().values():
+        for player in self._game.get_player_dict().values:
             name = player.name
-            print name
-            if name is not None:
+            if  name is not None:
                 names.append(name)
         return "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".join(names)
 
@@ -412,4 +410,21 @@ class question(Service):
             """
 
 
-class finish
+class leaderboard(Service):
+    NAME = "/leaderboard"
+    
+    def __init__(self, game):
+        self.finished_reading = False  # Did we read everything from read?
+        self.read_pointer = 0  # How much did we read from read
+        self._content_page = game.get_html_leaderboard())
+
+class finish(Services):
+    NAME = "/finish"
+    
+    def __init__(self, game):
+        self.finished_reading = False  # Did we read everything from read?
+        self.read_pointer = 0  # How much did we read from read
+        self._game = game
+    
+    def content(self)
+        return "WIP"
