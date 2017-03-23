@@ -144,22 +144,13 @@ class register_quiz(Service):
         return self._quiz_name
 
 
-class join_quiz(Service):
+class homepage(Service):
     NAME = "/"  # This is the homepage
 
-    def content(self):
-        return constants.BASE_HTML % (
-            """Join game!""",
-            """<center>
-               <form action="/choose_name" method="get">
-               <font size ="7">Game Pin</font><br>
-               <input type="number" name="pid" style="width: 200px;"
-                min="%s" max="%s" autocomplete="off">
-               <br><br><input type="submit" value="Join!" style="height:50px;
-                width:150px">
-               </center>
-           """ % (constants.MIN_PID, constants.MAX_PID)
-        )
+    def headers(self, extra):
+        """Headers of the service, base if for any HTTP page"""
+        return util.create_headers_response(302, location = "/home.html")
+    
 
 
 class choose_name(Service):
@@ -309,32 +300,6 @@ class wait_answer(Service):
         )
 
 
-class test_xmlhttprequest(Service):
-    NAME = "/test_xmlhttprequest"
-
-    def content(self):
-        return constants.BASE_HTML % (
-            "test",
-            """<p id="test">
-               <button type="button" onclick="bip()">BIP</button>
-               </p>
-               <script>
-               function bip() {
-                    var xhttp = new XMLHttpRequest();
-                    xhttp.onreadystatechange = function() {
-                        if (this.readyState == 4 && this.status == 200){
-                            document.getElementById("test").innerHTML =
-                            this.responseText;
-                        }
-                    };
-                    xhttp.open("GET", "bop.txt", true);
-                    xhttp.send();
-               }
-               </script>
-               """
-        )
-
-
 class getnames(Service):
     NAME = "/getnames"
 
@@ -410,15 +375,16 @@ class question(Service):
             """
 
 
+
 class leaderboard(Service):
     NAME = "/leaderboard"
     
     def __init__(self, game):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
-        self._content_page = game.get_html_leaderboard())
+        self._content_page = game.get_html_leaderboard()
 
-class finish(Services):
+class finish(Service):
     NAME = "/finish"
     
     def __init__(self, game):
@@ -426,5 +392,5 @@ class finish(Services):
         self.read_pointer = 0  # How much did we read from read
         self._game = game
     
-    def content(self)
+    def content(self):
         return "WIP"

@@ -1,0 +1,43 @@
+<HTML>
+	<HEAD>
+		<SCRIPT>
+			function changeDiv(){
+				document.getElementById('p1').style.display = "none";
+				document.getElementById('p2').style.display = "block";
+			}
+			function check(type){ //Check if name / test exist
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+                        if (this.readyState == 4 && this.status == 200){
+							if type == "test"{
+								if this.responseText == "1"{
+									changeDiv()
+								}
+								else{
+									document.getElementById("p1_title").value = 
+									"No such quiz!<br>Name of quiz:"
+								}
+							}
+								
+								
+                        }
+                    };
+				xhttp.open("GET", "check_"+type+"?name="+
+				document.getElementById("pid").value, true);
+				xhttp.send();
+			}
+		</SCRIPT>
+	</HEAD>
+	<BODY>
+		<center>
+			<form action="/game" method="get">
+				<p id = "p1">
+					<font name="p1_title" size="7">Game PIN</font><br>
+					<input type="number" name="pid" style="width: 200px;" 
+					min="100000" max="999999" autocomplete="off" autofocus>
+					<br><br>
+					<button type="button" onclick="check(test);">
+				</p>
+		</center>	
+	</BODY>
+</HTML>

@@ -17,9 +17,10 @@ def creat_nonblocking_socket():
 
 def create_headers_response(
     code,
-    length,
+    length = None,
     extra_headers=None,
-    type=None
+    type = None,
+    location = None
 ):
     """create the headers part of the request
         Args:
@@ -31,27 +32,28 @@ def create_headers_response(
             type - The type of the file (is we send a file).
                    example: ".py"
     """
-    message = ("%s %s %s%s"
-               "Content-Length: %s%s" % (
+    message = ("%s %s %s%s" % (
                    constants.HTTP_VERSION,
                    code,
                    httplib.responses[code],
                    constants.CRLF,
-                   length,
-                   constants.CRLF
                )
                )
+    if length is not None:
+        message += "Content-Length: %s%s" % (length, constants.CRLF)
     if type is not None:
         mimetypes.init()
         if type in mimetypes.types_map and type != ".py":
             content_type = mimetypes.types_map[type]
         else:
             content_type = 'application/octet-stream'
-        message += "Content-Type: %s%s" % (content_type, constants.CRLF)
+        message += "Content-Type: %s%s" % (content_type, constants.CRLF)        
     if extra_headers is not None:
         for extra in extra_headers:
             message += "%s: %s%s" % (extra,
                                      extra_headers[extra], constants.CRLF)
+    if location is not None:
+        message += "Location: %s%s" % (location, constants.CRLF)
     message += constants.CRLF
     return message
 
