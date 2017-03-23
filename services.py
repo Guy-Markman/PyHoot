@@ -81,8 +81,7 @@ class register_quiz(Service):
     NAME = "/register_quiz"
 
     def __init__(self, quiz_name, pid):
-        self.finished_reading = False  # Did we read everything from read?
-        self.read_pointer = 0  # How much did we read from read
+        super(register_quiz, self).__init__()
         self._quiz_name = quiz_name[0]
         self._pid = pid
         if os.path.isfile(os.path.normpath("PyHoot\Quizes\%s.xml" %
@@ -149,16 +148,14 @@ class homepage(Service):
 
     def headers(self, extra):
         """Headers of the service, base if for any HTTP page"""
-        return util.create_headers_response(302, location = "/home.html")
-    
+        return util.create_headers_response(302, location="/home.html")
 
 
 class choose_name(Service):
     NAME = "/choose_name"
 
     def __init__(self, common, pid):
-        self.finished_reading = False  # Did we read everything from read?
-        self.read_pointer = 0  # How much did we read from read
+        super(choose_name, self).__init__()
         if common.pid_client.get(int(pid)) is not None:
             self.content = self.right
             self.right_page = True
@@ -202,8 +199,7 @@ class waiting_room_start(Service):
     NAME = "/waiting_room_start"  # TODO: Write this
 
     def __init__(self, name, common, server_pid):
-        self.finished_reading = False  # Did we read everything from read?
-        self.read_pointer = 0  # How much did we read from read
+        super(waiting_room_start, self).__init__()
         if name[0] not in common.pid_client[server_pid].get_player_dict():
             self.content = self.right
             self.right_page = True
@@ -288,10 +284,8 @@ class wait_answer(Service):
     NAME = "/wait_answer"
 
     def __init__(self, game, answer):
-        self.finished_reading = False  # Did we read everything from read?
-        self.read_pointer = 0  # How much did we read from read
+        super(wait_answer, self).__init__()
         game.add_answer(answer)
-        self._content_page = self.content()
 
     def content(self):
         return constants.BASE_HTML % (
@@ -304,11 +298,9 @@ class getnames(Service):
     NAME = "/getnames"
 
     def __init__(self, game, common):
+        super(getnames, self).__init__()
         self._game = game
         self._common = common
-        self.finished_reading = False  # Did we read everything from read?
-        self.read_pointer = 0  # How much did we read from read
-        self._content_page = self.content()
 
     def headers(self, extra):
         """Headers of the service, base if for any HTTP page"""
@@ -320,7 +312,7 @@ class getnames(Service):
         names = []
         for player in self._game.get_player_dict().values:
             name = player.name
-            if  name is not None:
+            if name is not None:
                 names.append(name)
         return "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".join(names)
 
@@ -329,9 +321,7 @@ class diconnect_user(Service):
     NAME = "/diconnect_user"
 
     def __init__(self, pid, common, game):
-        self.finished_reading = False  # Did we read everything from read?
-        self.read_pointer = 0  # How much did we read from read
-        self._content_page = self.content()
+        super(diconnect_user, self).__init__()
 
         self._pid = pid
 
@@ -352,8 +342,7 @@ class opening(Service):
     NAME = "/opening"
 
     def __init__(self, game):
-        self.finished_reading = False  # Did we read everything from read?
-        self.read_pointer = 0  # How much did we read from read
+        super(opening, self).__init__()
         self._content_page = game.get_parser().get_html_start()
 
 
@@ -361,8 +350,7 @@ class question(Service):
     NAME = "/question"
 
     def __init__(self, game):
-        self.finished_reading = False  # Did we read everything from read?
-        self.read_pointer = 0  # How much did we read from read
+        super(question, self).__init__()
         parser = game.get_parser()
         if parser.get_left_questions() > 0:
             parser.moved_to_next_page()
@@ -375,22 +363,22 @@ class question(Service):
             """
 
 
+class check_test(Service):
+    NAME = "/check_test"
 
-class leaderboard(Service):
-    NAME = "/leaderboard"
-    
-    def __init__(self, game):
-        self.finished_reading = False  # Did we read everything from read?
-        self.read_pointer = 0  # How much did we read from read
-        self._content_page = game.get_html_leaderboard()
+    def __init__(self, data, common):
+        self.data = data[0]
+        self.common = common
+        super(check_test, self).__init__()
 
-class finish(Service):
-    NAME = "/finish"
-    
-    def __init__(self, game):
-        self.finished_reading = False  # Did we read everything from read?
-        self.read_pointer = 0  # How much did we read from read
-        self._game = game
-    
     def content(self):
-        return "WIP"
+        return str((
+            self.data in self.common.pid_client and
+            self.common.pid_client[self.data].name == "MASTER"
+        ))
+
+    def headers(self, extra):
+        """Headers of the service, base if for any HTTP page"""
+        return util.create_headers_response(200,
+                                            len(self._content_page),
+                                            extra_headers=extra, type=".txt")

@@ -1,5 +1,6 @@
 <HTML>
 	<HEAD>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 		<SCRIPT>
 			function changeDiv(){
 				document.getElementById('p1').style.display = "none";
@@ -9,20 +10,18 @@
 				var xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function() {
                         if (this.readyState == 4 && this.status == 200){
-							if type == "test"{
-								if this.responseText == "1"{
+							if (type == "test"){
+								if (this.responseText == "True"){
 									changeDiv()
 								}
 								else{
-									document.getElementById("p1_title").value = 
-									"No such quiz!<br>Name of quiz:"
+									document.getElementById("p1_title").innerHTML =
+									"No such Game Pin, enter right one"
 								}
 							}
-								
-								
                         }
                     };
-				xhttp.open("GET", "check_"+type+"?name="+
+				xhttp.open("GET", "check_"+type+"?data="+
 				document.getElementById("pid").value, true);
 				xhttp.send();
 			}
@@ -32,12 +31,16 @@
 		<center>
 			<form action="/game" method="get">
 				<p id = "p1">
-					<font name="p1_title" size="7">Game PIN</font><br>
-					<input type="number" name="pid" style="width: 200px;" 
+					<font size="7"id="p1_title">Game PIN
+					</font><br>
+					<input type="number" id="pid" style="width: 200px;"
 					min="100000" max="999999" autocomplete="off" autofocus>
 					<br><br>
-					<button type="button" onclick="check(test);">
+					<button type="button" style="height:50px;width:150px;"
+					onclick="check('test');">Join!</button>
 				</p>
-		</center>	
+				<p id="p2">
+					
+		</center>
 	</BODY>
 </HTML>
