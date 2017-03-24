@@ -40,6 +40,18 @@ class Service(object):
         return self._finished_reading
 
 
+class TXTService(Service):
+
+    def __init__(self):
+        super(TXTService, self).__init__()
+
+    def headers(self, extra):
+        """Headers of the service, base if for any HTTP page"""
+        return util.create_headers_response(200,
+                                            len(self._content_page),
+                                            extra_headers=extra, type=".html")
+
+
 class Clock(Service):
     """HTTP page of local time and UTC time"""
     NAME = '/clock'
@@ -106,9 +118,9 @@ class register_quiz(Service):
                     <input type="button" value="Start playing"
                     onclick="window.location = '/opening'">
                     <script>
-                    window.setInterval(function(){
+                    /*window.setInterval(function(){
                       getnames();
-                    }, 1000);
+                    }, -1);*/
                     function getnames() {
                          var xhttp = new XMLHttpRequest();
                          xhttp.onreadystatechange = function() {
@@ -147,8 +159,8 @@ class homepage(Service):
     NAME = "/"  # This is the homepage
 
     def headers(self, extra):
-        """Headers of the service, base if for any HTTP page"""
-        return util.create_headers_response(302, location="/home.html")
+        extra.update({"Location": "/home.html"})
+        return util.create_headers_response(302, extra_headers=extra)
 
 
 class choose_name(Service):
@@ -294,23 +306,17 @@ class wait_answer(Service):
         )
 
 
-class getnames(Service):
+class getnames(TXTService):
     NAME = "/getnames"
 
     def __init__(self, game, common):
-        super(getnames, self).__init__()
         self._game = game
         self._common = common
-
-    def headers(self, extra):
-        """Headers of the service, base if for any HTTP page"""
-        return util.create_headers_response(200,
-                                            len(self._content_page),
-                                            extra_headers=extra, type=".txt")
+        super(getnames, self).__init()
 
     def content(self):
         names = []
-        for player in self._game.get_player_dict().values:
+        for player in self._game.get_player_dict().values():
             name = player.name
             if name is not None:
                 names.append(name)
@@ -363,22 +369,38 @@ class question(Service):
             """
 
 
-class check_test(Service):
+class check_test(TXTService):
     NAME = "/check_test"
 
-    def __init__(self, data, common):
-        self.data = data[0]
+    def __init__(self, pid, common):
+        self.data = int(pid[0])
         self.common = common
         super(check_test, self).__init__()
 
     def content(self):
         return str((
             self.data in self.common.pid_client and
-            self.common.pid_client[self.data].name == "MASTER"
+            self.common.pid_client[self.data].NAME == "MASTER"
         ))
 
-    def headers(self, extra):
-        """Headers of the service, base if for any HTTP page"""
-        return util.create_headers_response(200,
-                                            len(self._content_page),
-                                            extra_headers=extra, type=".txt")
+
+class check_name(TXTService):
+    NAME = "/check_name"
+
+    def __init__(self, pid, name, common):
+        self.data = pid[0]
+        self.name = name[0]
+        self.common = common
+        super(check_name, self).__init__()
+
+    def content(self):
+        ans = "False"
+        if self.data in self.common.pid_client:
+            master = self.common.pid_client[self.data]
+            if master.Name == "MASTER":
+                name_list = []
+                for player in master.get_player_dict.values():
+                    name_list.append(player.name)
+                if self.name not in name_list:
+                    ans = "True"
+        return ans

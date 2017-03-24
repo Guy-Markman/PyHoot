@@ -5,6 +5,7 @@
 			function changeDiv(){
 				document.getElementById('p1').style.display = "none";
 				document.getElementById('p2').style.display = "block";
+				document.getElementById('name').focus();
 			}
 			function check(type){ //Check if name / test exist
 				var xhttp = new XMLHttpRequest();
@@ -19,28 +20,48 @@
 									"No such Game Pin, enter right one"
 								}
 							}
+							else if (type == "name"){
+								if (this.responseText == "True"){
+									document.getElementById("join").submit();
+								}
+								else{
+									document.getElementById("p2_title").innerHTML=
+									"Name taken, choose another name"
+								}
+							}
                         }
                     };
-				xhttp.open("GET", "check_"+type+"?data="+
-				document.getElementById("pid").value, true);
+				var data = document.getElementById("pid").value;
+				if (type == "name"){
+					data += "&name="+document.getElementById("name").value
+				}
+				xhttp.open("GET", "check_"+type+"?pid="+data, true);
 				xhttp.send();
 			}
 		</SCRIPT>
 	</HEAD>
 	<BODY>
 		<center>
-			<form action="/game" method="get">
+			<form id="join" action="/join" method="get">
 				<p id = "p1">
-					<font size="7"id="p1_title">Game PIN
-					</font><br>
-					<input type="number" id="pid" style="width: 200px;"
-					min="100000" max="999999" autocomplete="off" autofocus>
+					<font size="7" id="p1_title">Game PIN</font><br>
+					<input type="number" id="pid" name="pid" style="width: 200px
+					;" min="100000" max="999999" autocomplete="off" autofocus>
+					</input>
 					<br><br>
 					<button type="button" style="height:50px;width:150px;"
 					onclick="check('test');">Join!</button>
 				</p>
-				<p id="p2">
-					
+				<p id="p2" style="display:none">
+					<font id="p2_title" size = "6"> Choose name</font></br>
+	                <input type="text" name="name" id="name"  pattern=".{3,}"
+	                 required title="3 characters minimum" style="width: 200px;"
+					 ></input><br><br>
+					 <button type="button" style="height:50px;width:150px"
+					 onclick="check('name');">
+				     Start Playing!</button>
+				</p>
+			</form>
 		</center>
 	</BODY>
 </HTML>

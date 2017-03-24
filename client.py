@@ -12,7 +12,8 @@ SERVICES_HEADERS = {}
 
 INITIALIZED, SENDING_STATUS, SENDING_DATA, FINISHED, ERROR = range(5)
 SERVICES_LIST = {service.NAME: service for service in
-                 services.Service.__subclasses__()}
+                 (services.Service.__subclasses__() +
+                  services.TXTService.__subclasses__())}
 
 # Argument call can use f(*[dic[arg] for arg in f.__code__.co_varnames if
 # arg in dic])
