@@ -91,3 +91,13 @@ def names_to_xml(names_list):
     for name in names_list:
         ElementTree.SubElement(players, "name").text = name
     return prettify(players)
+
+
+def remove_from_sysyem(common, pid):
+    g = common.pid_client.pop(pid, None)
+    if g is not None:
+        if g.NAME == "MASTER":
+            for player in common.pid_client.values():
+                player.game_master = None
+        if g.NAME == "PLAYER":
+            game.game_master.remove_player(pid)

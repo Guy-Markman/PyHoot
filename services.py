@@ -4,17 +4,17 @@
 import os.path
 import time
 
-from . import constants, util
+from . import base, constants, game, util
 
 
-class Service(object):
+class Service(base.Base):
     """Base class to all services"""
     NAME = 'base'  # The uri path needed to use this services
 
     def __init__(self):
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
-        self._content_page = self.content()
+        self._content_page = None
 
     def content(self):
         """The body of the service"""
@@ -25,12 +25,16 @@ class Service(object):
 
     def headers(self, extra):
         """Headers of the service, base if for any HTTP page"""
+        if self._content_page is None:
+            self._content_page = self.content()
         return util.create_headers_response(200,
                                             len(self._content_page),
                                             extra_headers=extra, type=".html")
 
     def read_buff(self, buff_size):
         """return the content page and update self._finished_reading"""
+        if self._content_page is None:
+            self._content_page = self.content()
         self.read_pointer += buff_size
         return self._content_page[self.read_pointer - buff_size:
                                   self.read_pointer]
@@ -47,6 +51,8 @@ class TXTService(Service):
 
     def headers(self, extra):
         """Headers of the service, base if for any HTTP page"""
+        if self._content_page is None:
+            self._content_page = self.content()
         return util.create_headers_response(200,
                                             len(self._content_page),
                                             extra_headers=extra, type=".html")
@@ -92,7 +98,7 @@ class Creat_new_game(Service):
 class register_quiz(Service):
     NAME = "/register_quiz"
 
-    def __init__(self, pid, name):
+    def __init__(self, pid, quiz_name):
         super(register_quiz, self).__init__()
         self._quiz_name = quiz_name[0]
         self._pid = pid
@@ -161,106 +167,6 @@ class homepage(Service):
     def headers(self, extra):
         extra.update({"Location": "/home.html"})
         return util.create_headers_response(302, extra_headers=extra)
-
-
-class choose_name(Service):
-    NAME = "/choose_name"
-
-    def __init__(self, common, pid):
-        super(choose_name, self).__init__()
-        if common.pid_client.get(int(pid)) is not None:
-            self.content = self.right
-            self.right_page = True
-        else:
-            self.content = self.wrong
-            self.right_page = False
-        self._content_page = self.content()
-
-    @staticmethod
-    def right():
-        return constants.BASE_HTML % (
-            "Choose name",
-            """<center>
-               <form action = "/waiting_room_start" method = "get">
-               <font size = "6"> Choose name</font></br>
-               <input type="text" name="name"  pattern=".{3,}"
-                required title="3 characters minimum" style="width: 200px;">
-               <br><br><input type="submit" value="Start Playing!"
-                style="height:50px;width:150px">
-                </center>
-           """
-        )
-
-    @staticmethod
-    def wrong():
-        return constants.BASE_HTML % (
-            """Join game!""",
-            """<center>
-               <form action="/choose_name" method="get">
-               <font size ="7">No such Game Pin, enter right one</font><br>
-               <input type="number" name="pid" style="width: 200px;"
-                min="100000000" max="999999999" autocomplete="off">
-               <br><br><input type="submit" value="Join!" style="height:50px;
-                width:150px">
-                </center>
-           """
-        )
-
-
-class waiting_room_start(Service):
-    NAME = "/waiting_room_start"  # TODO: Write this
-
-    def __init__(self, name, common, server_pid):
-        super(waiting_room_start, self).__init__()
-        if name[0] not in common.pid_client[server_pid].get_player_dict():
-            self.content = self.right
-            self.right_page = True
-        else:
-            self.content = self.wrong
-            self.right_page = False
-        self._content_page = self.content()
-
-    def get_pid(self):
-        return self._pid
-
-    @staticmethod
-    def right():
-        return constants.BASE_HTML % (
-            "Please wait",
-            """<center>
-               <font size="6">Please wait</font>
-               <br><br>
-               <input type="button" value="Disconnect" onclick=
-               "disconnect_function();"/>
-               </center>
-               <script>
-               function disconnect_function(){
-                    var xhttp = new XMLHttpRequest();
-                    xhttp.onreadystatechange = function() {
-                        if (this.readyState == 4 && this.status == 200){
-                            window.location.href = '/';
-                        }
-                    };
-                    xhttp.open("GET", "diconnect_user", true);
-                    xhttp.send();
-               }
-               </script>
-               """
-        )
-
-    @staticmethod
-    def wrong():
-        return constants.BASE_HTML % (
-            "Choose name",
-            """<center>
-               <form action="/waiting_room_start" method="get">
-               <font size="6"> Name taken, Choose name</font></br>
-               <input type="text" name="name" style="width: 200px;">
-               <br><br><input type="submit" value="Start Playing!"
-                style="height:50px;width:150px">
-                </center>
-           """
-        )
 
 
 class answer(Service):
@@ -373,9 +279,9 @@ class check_test(TXTService):
     NAME = "/check_test"
 
     def __init__(self, pid, common):
+        super(check_test, self).__init__()
         self.data = int(pid[0])
         self.common = common
-        super(check_test, self).__init__()
 
     def content(self):
         return str((
@@ -392,34 +298,40 @@ class check_name(TXTService):
         self.data = int(pid[0])
         self.name = name[0]
         self.common = common
-        
 
     def content(self):
         ans = "False"
-        print self.data in self.common.pid_client
-        print self.data
-        print self.common.pid_client
         if self.data in self.common.pid_client:
             print self.common.pid_client[self.data].NAME
             master = self.common.pid_client[self.data]
             if master.NAME == "MASTER":
                 name_list = []
-                print master.get_player_dict(
                 for player in master.get_player_dict().values():
                     name_list.append(player.name)
-                print name_list
                 if self.name not in name_list:
                     ans = "True"
         return ans
 
+
 class join(Service):
-    NAME = "/"  # This is the homepage
-    
-    
-    def __init__(self, pid, name, common): #TODO: Contintue
+    NAME = "/join"  # This is the homepage
+
+    def __init__(self, pid, name, common):  # TODO: Contintue
         super(join, self).__init__()
-        
-        
+        pid = pid[0]
+        name = name[0]
+        util.remove_from_sysyem(common, pid)
+        g = self.register_player(pid, name, common)
+        g.game_master.add_player(pid, g)
+        self.player_name = g.name
+
     def headers(self, extra):
-        extra.update({"Location": "/game.html"})
+        extra.update({"Location": "/game.html",
+                      "Set-Cookie": "pid=%s" % self.player_name})
         return util.create_headers_response(302, extra_headers=extra)
+
+    def register_player(self, pid, name, common):
+        g = game.GamePlayer(common.pid_client[pid], common, name)
+        common.pid_client[g.pid] = g
+        g.game_master.add_player(pid, g)
+        return g

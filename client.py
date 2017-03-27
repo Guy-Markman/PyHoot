@@ -175,10 +175,8 @@ class Client(base.Base):
         querry = urlparse.parse_qs(parsed_uri.query)
         if "cookie" in headers:  # Setting game object
             self._set_game_object()
-        if parsed_uri.path in (
-            services.choose_name.NAME,
-            services.register_quiz.NAME
-        ):
+        # FIXME: Get rid of the need  for this
+        if parsed_uri.path == services.register_quiz.NAME:
             if "cookie" in headers:  # Remove existing user
                 self.common.pid_client.pop(headers["cookie"], None)
                 try:
@@ -192,7 +190,7 @@ class Client(base.Base):
                     pass
             self.logger.debug("Removed existing user")
 
-            if parsed_uri.path == services.choose_name.NAME:  # new one
+            if parsed_uri.path == services.join.NAME:  # new one
                 self._game = game.GamePlayer(
                     self.common.pid_client.get(int(querry["pid"][0])),
                     self.common
