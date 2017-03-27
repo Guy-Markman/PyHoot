@@ -92,7 +92,7 @@ class Creat_new_game(Service):
 class register_quiz(Service):
     NAME = "/register_quiz"
 
-    def __init__(self, quiz_name, pid):
+    def __init__(self, pid, name):
         super(register_quiz, self).__init__()
         self._quiz_name = quiz_name[0]
         self._pid = pid
@@ -388,19 +388,38 @@ class check_name(TXTService):
     NAME = "/check_name"
 
     def __init__(self, pid, name, common):
-        self.data = pid[0]
+        super(check_name, self).__init__()
+        self.data = int(pid[0])
         self.name = name[0]
         self.common = common
-        super(check_name, self).__init__()
+        
 
     def content(self):
         ans = "False"
+        print self.data in self.common.pid_client
+        print self.data
+        print self.common.pid_client
         if self.data in self.common.pid_client:
+            print self.common.pid_client[self.data].NAME
             master = self.common.pid_client[self.data]
-            if master.Name == "MASTER":
+            if master.NAME == "MASTER":
                 name_list = []
-                for player in master.get_player_dict.values():
+                print master.get_player_dict(
+                for player in master.get_player_dict().values():
                     name_list.append(player.name)
+                print name_list
                 if self.name not in name_list:
                     ans = "True"
         return ans
+
+class join(Service):
+    NAME = "/"  # This is the homepage
+    
+    
+    def __init__(self, pid, name, common): #TODO: Contintue
+        super(join, self).__init__()
+        
+        
+    def headers(self, extra):
+        extra.update({"Location": "/game.html"})
+        return util.create_headers_response(302, extra_headers=extra)
