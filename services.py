@@ -124,9 +124,9 @@ class register_quiz(Service):
                     <input type="button" value="Start playing"
                     onclick="window.location = '/opening'">
                     <script>
-                    /*window.setInterval(function(){
+                    window.setInterval(function(){
                       getnames();
-                    }, -1);*/
+                    }, 1000);
                     function getnames() {
                          var xhttp = new XMLHttpRequest();
                          xhttp.onreadystatechange = function() {
@@ -216,9 +216,9 @@ class getnames(TXTService):
     NAME = "/getnames"
 
     def __init__(self, game, common):
+        super(getnames, self).__init__()
         self._game = game
         self._common = common
-        super(getnames, self).__init()
 
     def content(self):
         names = []
@@ -235,17 +235,17 @@ class diconnect_user(Service):
     def __init__(self, pid, common, game):
         super(diconnect_user, self).__init__()
 
-        self._pid = pid
-
         common.pid_client.pop(pid, None)
         try:
-            if game.NAME == "MASTER":
+            if game.TYPE == "MASTER":
                 for pid_player in game.get_player_dict().keys():
                     player = common.get(pid_player)
                     if player is not None:
                         player.game_master = None
-            if game.NAME == "PLAYER":
-                game.game_master.remove_player(pid)
+                self.logger.debug("Disconneted master")
+            if game.TYPE == "PLAYER":
+                game.game_master.remove_player(int(pid))
+                self.logger.debug("Disconnect player")
         except AttributeError:
             pass
 
@@ -286,7 +286,7 @@ class check_test(TXTService):
     def content(self):
         return str((
             self.data in self.common.pid_client and
-            self.common.pid_client[self.data].NAME == "MASTER"
+            self.common.pid_client[self.data].TYPE == "MASTER"
         ))
 
 
@@ -302,9 +302,8 @@ class check_name(TXTService):
     def content(self):
         ans = "False"
         if self.data in self.common.pid_client:
-            print self.common.pid_client[self.data].NAME
             master = self.common.pid_client[self.data]
-            if master.NAME == "MASTER":
+            if master.TYPE == "MASTER":
                 name_list = []
                 for player in master.get_player_dict().values():
                     name_list.append(player.name)
@@ -314,7 +313,7 @@ class check_name(TXTService):
 
 
 class join(Service):
-    NAME = "/join"  # This is the homepage
+    NAME = "/join"
 
     def __init__(self, pid, name, common):  # TODO: Contintue
         super(join, self).__init__()
@@ -322,16 +321,15 @@ class join(Service):
         name = name[0]
         util.remove_from_sysyem(common, pid)
         g = self.register_player(pid, name, common)
-        g.game_master.add_player(pid, g)
-        self.player_name = g.name
+        self.player_pid = g.pid
 
     def headers(self, extra):
         extra.update({"Location": "/game.html",
-                      "Set-Cookie": "pid=%s" % self.player_name})
+                      "Set-Cookie": "pid=%s" % self.player_pid})
         return util.create_headers_response(302, extra_headers=extra)
 
     def register_player(self, pid, name, common):
-        g = game.GamePlayer(common.pid_client[pid], common, name)
+        g = game.GamePlayer(common.pid_client[int(pid)], common, name)
         common.pid_client[g.pid] = g
-        g.game_master.add_player(pid, g)
+        g.game_master.add_player(g.pid, g)
         return g

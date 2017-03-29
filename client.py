@@ -101,7 +101,7 @@ class Client(base.Base):
             if self._game is not None:
                 dic_argument.update({"pid": self._game.pid, "game":
                                      self._game})
-                if (self._game.NAME == "PLAYER" and
+                if (self._game.TYPE == "PLAYER" and
                         self._game.game_master is not None):
                     dic_argument.update(
                         {"server_pid": self._game.game_master.pid})
@@ -180,10 +180,10 @@ class Client(base.Base):
             if "cookie" in headers:  # Remove existing user
                 self.common.pid_client.pop(headers["cookie"], None)
                 try:
-                    if self._game.NAME == "MASTER":
+                    if self._game.TYPE == "MASTER":
                         for player in self.common.pid_client.values():
                             player.game_master = None
-                    if self._game.NAME == "PLAYER":
+                    if self._game.TYPE == "PLAYER":
                         self._game.game_master.remove_player(
                             headers["cookie"])
                 except AttributeError:
@@ -201,12 +201,6 @@ class Client(base.Base):
             self.common.pid_client[self._game.pid] = self._game
             self._extra_headers[
                 "Set-Cookie"] = "pid=%d" % self._game.pid
-
-        # Set name for player
-        if (parsed_uri.path == services.waiting_room_start.NAME
-                and self._game is not None and self._game.NAME == "PLAYER"):
-            self._game.name = querry["name"][0]
-            self._game.game_master.add_player(self._game.pid, self._game)
 
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and
@@ -284,7 +278,10 @@ class Client(base.Base):
                 self.logger.debug("client sent")
         except socket.error as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
+                if e.errno == errno.WSABASEERR:
+                    raise custom_exceptions.Disconnect()
                 raise
+
         self.logger.debug("Sent all that I could, send_buff %s" %
                           self._send_buff)
 
@@ -310,6 +307,8 @@ class Client(base.Base):
                 self._recv_buff += t
         except socket.error as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
+                if e.errno == errno.WSABASEERR:
+                    raise custom_exceptions.Disconnect()
                 raise
 
     def can_recv(self):

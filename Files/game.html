@@ -2,10 +2,25 @@
 	<HEAD>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<SCRIPT>
+		function disconnect_function(){
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200){
+					window.location.href = '/';
+				}
+			};
+			xhttp.open("GET", "diconnect_user", true);
+			xhttp.send();
+		}
 	</SCRIPT>
-	</HEAD>
 	<BODY>
-		Work In process"
+		<center>
+			<p id="start">
+				<font size="6">Please wait</font>
+				<br><br>
+				<input type="button" value="Disconnect" onclick=
+				"disconnect_function();"/>
+			</p>
+       </center>
 	</BODY>
 </HTML>
-	

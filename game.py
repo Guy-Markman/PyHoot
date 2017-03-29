@@ -24,7 +24,7 @@ class Game(object):
 
 
 class GameMaster(Game):
-    NAME = "MASTER"
+    TYPE = "MASTER"
 
     def __init__(self, quiz_name, commmon):
         super(GameMaster, self).__init__(commmon)
@@ -42,7 +42,7 @@ class GameMaster(Game):
     def get_player_dict(self):
         dict = {}
         for key in self._players_list:
-            dict[key] = self._players_list["player"]
+            dict[key] = self._players_list[key]["player"]
         return dict
 
     def get_parser(self):
@@ -73,7 +73,7 @@ class GameMaster(Game):
 
 
 class GamePlayer(Game):
-    NAME = "PLAYER"
+    TYPE = "PLAYER"
 
     def __init__(self, master, common, name=None):
         super(GamePlayer, self).__init__(common)
