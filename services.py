@@ -76,89 +76,26 @@ class Clock(Service):
         )
 
 
-class Creat_new_game(Service):
-    NAME = '/new'
-    """Let the manager of the game choose the quiz he wants"""
-
-    def content(self):
-        return constants.BASE_HTML % ("New Game!",
-                                      """<center>
-                               <form action="/register_quiz" method = "get">
-                               <font size="5">Name of quiz:</font><br>
-                               <input type="text" name="quiz_name"
-                                size="21" autocomplete="off">
-                               <br><br>
-                               <input type="submit" value="Start game!"
-                                style="height:50px; width:150px">
-                                </form>
-                                </center>"""
-                                      )
-
-
 class register_quiz(Service):
     NAME = "/register_quiz"
 
-    def __init__(self, pid, quiz_name):
+    def __init__(self, quiz_name, common, pid=None):
         super(register_quiz, self).__init__()
         self._quiz_name = quiz_name[0]
-        self._pid = pid
-        if os.path.isfile(os.path.normpath("PyHoot\Quizes\%s.xml" %
-                                           os.path.normpath(self._quiz_name))):
-            self.content = self.right
-            self.right_page = True
-        else:
-            self.content = self.wrong
-            self.right_page = False
-        self._content_page = self.content()
+        if pid is not None:
+            util.remove_from_sysyem(common, pid)
+        g = self.register_master(quiz_name[0], common)
+        self.master_pid = g.pid
 
-    def right(self):
-        return constants.BASE_HTML % ("Join!",
-                                      """
-                    <center>
-                    <font size = 7>Now you can join the Game!<br>
-                    Pid %d</font><br><br>
-                    Connected players
-                    <p id="names">
-                    </p>
-                    <br><br>
-                    <input type="button" value="Start playing"
-                    onclick="window.location = '/opening'">
-                    <script>
-                    window.setInterval(function(){
-                      getnames();
-                    }, 1000);
-                    function getnames() {
-                         var xhttp = new XMLHttpRequest();
-                         xhttp.onreadystatechange = function() {
-                             if (this.readyState == 4 && this.status == 200){
-                                 document.getElementById("names").innerHTML =
-                                 this.responseText;
-                             }
-                         };
-                         xhttp.open("GET", "getnames", true);
-                         xhttp.send();
-                    }
-                    </script>
-                    </center>
-                    """ % self._pid)
+    def headers(self, extra):
+        extra.update({"Location": "/quiz.html",
+                      "Set-Cookie": "pid=%s" % self.master_pid})
+        return util.create_headers_response(302, extra_headers=extra)
 
-    @staticmethod
-    def wrong():
-        return constants.BASE_HTML % (
-            "No such quiz",
-            """<center>
-               <form action="/register_quiz" method="get">
-               <font size="4">No such quiz!<br>Name of quiz:</font><br>
-               <input type = "text" name = "quiz_name" size="21"
-               autocomplete="off"> <br><br>
-               <input type="submit" value="Start game!"
-               style="height:50px; width:150px">
-               </form >
-               </center>"""
-        )
-
-    def get_quiz(self):
-        return self._quiz_name
+    def register_master(self, quiz_name, common):
+        m = game.GameMaster(quiz_name, common)
+        common.pid_client[m.pid] = m
+        return m
 
 
 class homepage(Service):
@@ -315,12 +252,11 @@ class check_name(TXTService):
 class join(Service):
     NAME = "/join"
 
-    def __init__(self, pid, name, common):  # TODO: Contintue
+    def __init__(self, pid, name, common):
         super(join, self).__init__()
         pid = pid[0]
-        name = name[0]
         util.remove_from_sysyem(common, pid)
-        g = self.register_player(pid, name, common)
+        g = self.register_player(pid, name[0], common)
         self.player_pid = g.pid
 
     def headers(self, extra):
@@ -333,3 +269,29 @@ class join(Service):
         common.pid_client[g.pid] = g
         g.game_master.add_player(g.pid, g)
         return g
+
+
+class check_test_exist(TXTService):
+    NAME = "/check_test_exist"
+
+    def __init__(self, quiz_name):
+        super(check_test_exist, self).__init__()
+        self._quiz_name = quiz_name[0]
+
+    def content(self):
+        print self._quiz_name
+        return str(
+            os.path.isfile(
+                os.path.normpath("PyHoot\Quizes\%s.xml" %
+                                 os.path.normpath(self._quiz_name)
+                                 )
+            )
+        )
+
+
+class new(Service):
+    NAME = "/new"  # This is the homepage
+
+    def headers(self, extra):
+        extra.update({"Location": "/new.html"})
+        return util.create_headers_response(302, extra_headers=extra)

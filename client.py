@@ -190,18 +190,6 @@ class Client(base.Base):
                     pass
             self.logger.debug("Removed existing user")
 
-            if parsed_uri.path == services.join.NAME:  # new one
-                self._game = game.GamePlayer(
-                    self.common.pid_client.get(int(querry["pid"][0])),
-                    self.common
-                )
-            else:
-                self._game = game.GameMaster(
-                    querry["quiz_name"][0], self.common)
-            self.common.pid_client[self._game.pid] = self._game
-            self._extra_headers[
-                "Set-Cookie"] = "pid=%d" % self._game.pid
-
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and
            FileObject, or put it in the buff"""

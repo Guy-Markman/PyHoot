@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title>PyHoot!</title>
+        <script>
+        window.setInterval(function(){
+          getnames();
+        }, 1000);
+        function getnames() {
+             var xhttp = new XMLHttpRequest();
+             xhttp.onreadystatechange = function() {
+                 if (this.readyState == 4 && this.status == 200){
+                     document.getElementById("names").innerHTML =
+                     this.responseText;
+                 }
+             };
+             xhttp.open("GET", "getnames", true);
+             xhttp.send();
+        }
+        </script>
+    </head>
+    <body>
+        <center>
+            <font size = "7">Now you can join the Game!<br>
+            Pid %d</font><br><br> <!--TODO: change %d to the pid-->
+            Connected players
+            <p id="names">
+            </p>
+            <br><br>
+            <input type="button" value="Start playing"
+            onclick="window.location = '/opening'">
+        </center>
+    </body>
+</html>
