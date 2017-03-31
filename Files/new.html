@@ -9,14 +9,14 @@
                 xhttp.onreadystatechange = function(){
                     if (this.readyState ==4 && this.status == 200){
                         if (this.responseText=="True"){
-                            document.getElementById("register_quiz").submit()
+                            document.getElementById("register_quiz").submit();
                         }
                         else{
                             document.getElementById("title_register").innerHTML=
-                            "No such quiz!<br>Name of quiz:"
+                            "No such quiz!<br>Name of quiz:";
                         }
                     }
-                }
+                };
                 xhttp.open("GET", "check_test_exist?quiz_name="+
                 document.getElementById("quiz_name").value, true);
                 xhttp.send();

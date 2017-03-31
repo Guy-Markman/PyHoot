@@ -4,26 +4,36 @@
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <title>PyHoot!</title>
         <script>
+        document.onload(getpid());
         window.setInterval(function(){
           getnames();
         }, 1000);
+        function xhttpreq(url){
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200){
+                    return this.responseText;
+                }
+            };
+            xhttp.open("GET", url, true);
+            xhttp.send();
+        }
+        function setInnterHTTP(id, content){
+            document.getElementById(id).innerHTML = content;
+        }
         function getnames() {
-             var xhttp = new XMLHttpRequest();
-             xhttp.onreadystatechange = function() {
-                 if (this.readyState == 4 && this.status == 200){
-                     document.getElementById("names").innerHTML =
-                     this.responseText;
-                 }
-             };
-             xhttp.open("GET", "getnames", true);
-             xhttp.send();
+            setInnterHTTP("names", xhttpreq("getnames"));
+        }
+        function getpid(){
+            setInnterHTTP("pid", xhttpreq("getpid"));
         }
         </script>
     </head>
-    <body>
+    <body onload="">
         <center>
             <font size = "7">Now you can join the Game!<br>
-            Pid %d</font><br><br> <!--TODO: change %d to the pid-->
+            Pid <p id="pid"></p></font>
+            <br><br> <!--TODO: change %d to the pid-->
             Connected players
             <p id="names">
             </p>

@@ -4,7 +4,7 @@ import os.path
 import socket
 import urlparse
 
-from . import (base, constants, custom_exceptions, file_object, game, request,
+from . import (base, constants, custom_exceptions, file_object, request,
                services, util)
 
 SUPPORTED_METHODS = ('GET')
@@ -171,24 +171,8 @@ class Client(base.Base):
         """Setting the game. Creating new game object if needed and deleting
         unneeded"""
         headers = self._request.get_all_header()
-        parsed_uri = urlparse.urlparse(self._request.uri)
-        querry = urlparse.parse_qs(parsed_uri.query)
         if "cookie" in headers:  # Setting game object
             self._set_game_object()
-        # FIXME: Get rid of the need  for this
-        if parsed_uri.path == services.register_quiz.NAME:
-            if "cookie" in headers:  # Remove existing user
-                self.common.pid_client.pop(headers["cookie"], None)
-                try:
-                    if self._game.TYPE == "MASTER":
-                        for player in self.common.pid_client.values():
-                            player.game_master = None
-                    if self._game.TYPE == "PLAYER":
-                        self._game.game_master.remove_player(
-                            headers["cookie"])
-                except AttributeError:
-                    pass
-            self.logger.debug("Removed existing user")
 
     def recv(self):
         """Recv data from the client socket and process it to Reqeust and
