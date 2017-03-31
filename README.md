@@ -25,7 +25,7 @@ TODO:
 - [X] Create XML class
 - [X] Quiz editor (independent)
 - [X] Add support to services
-- [ ] Registrater players
+- [X] Registrater players
 - [ ] Show question on the screen and move to the next part (timer)
 - [ ] Get answers and analyze them
 - [ ] Update database of player with score
