@@ -97,6 +97,7 @@ def remove_from_sysyem(common, pid):
     g = common.pid_client.pop(pid, None)
     if g is not None:
         if g.TYPE == "MASTER":
+            common.join_number.pop(g.join_number)
             for player in common.pid_client.values():
                 player.game_master = None
         if g.TYPE == "PLAYER":

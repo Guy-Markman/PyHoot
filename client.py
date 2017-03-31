@@ -97,6 +97,7 @@ class Client(base.Base):
             # dictionary of the query of uri
             dic_argument = urlparse.parse_qs(
                 urlparse.urlparse(uri).query)
+            print dic_argument
             dic_argument.update({"common": self.common})
             if self._game is not None:
                 dic_argument.update({"pid": self._game.pid, "game":

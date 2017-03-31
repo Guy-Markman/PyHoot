@@ -15,11 +15,11 @@
                         if (this.readyState == 4 && this.status == 200){
 							if (type == "test"){
 								if (this.responseText == "True"){
-									changeDiv()
+									changeDiv();
 								}
 								else{
 									document.getElementById("p1_title").innerHTML =
-									"No such Game Pin, enter right one"
+									"No such Game Pin, enter right one";
 								}
 							}
 							else if (type == "name"){
@@ -28,16 +28,16 @@
 								}
 								else{
 									document.getElementById("p2_title").innerHTML=
-									"Name taken, choose another name"
+									"Name taken, choose another name";
 								}
 							}
                         }
                     };
-				var data = document.getElementById("pid").value;
+				var data = document.getElementById("join_number").value;
 				if (type == "name"){
-					data += "&name="+document.getElementById("name").value
+					data += "&name="+document.getElementById("name").value;
 				}
-				xhttp.open("GET", "check_"+type+"?pid="+data, true);
+				xhttp.open("GET", "check_"+type+"?join_number="+data, true);
 				xhttp.send();
 			}
 		</script>
@@ -47,8 +47,10 @@
 			<form id="join" action="/join" method="get">
 				<p id = "p1">
 					<font size="7" id="p1_title">Game PIN</font><br>
-					<input type="number" id="pid" name="pid" style="width: 200px
-					;" min="100000" max="999999" autocomplete="off" autofocus>
+					<input type="number" id="join_number" name="join_number"
+					 style="width: 200px;" min="100000" max="999999"
+					  autocomplete="off" autofocus onkeypress=
+					  "return event.charCode >= 48 && event.charCode <= 57">
 					<br><br>
 					<button type="button" style="height:50px;width:150px;"
 					onclick="check('test');">Join!</button>

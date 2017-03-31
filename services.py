@@ -83,7 +83,10 @@ class register_quiz(Service):
         super(register_quiz, self).__init__()
         self._quiz_name = quiz_name[0]
         if pid is not None:
-            util.remove_from_sysyem(common, pid)
+            util.remove_from_sysyem(
+                common,
+                pid,
+            )
         g = self.register_master(quiz_name[0], common)
         self.master_pid = g.pid
 
@@ -95,6 +98,7 @@ class register_quiz(Service):
     def register_master(self, quiz_name, common):
         m = game.GameMaster(quiz_name, common)
         common.pid_client[m.pid] = m
+        common.join_number[m.join_number] = m
         return m
 
 
@@ -174,15 +178,8 @@ class diconnect_user(Service):
 
         common.pid_client.pop(pid, None)
         try:
-            if game.TYPE == "MASTER":
-                for pid_player in game.get_player_dict().keys():
-                    player = common.get(pid_player)
-                    if player is not None:
-                        player.game_master = None
-                self.logger.debug("Disconneted master")
-            if game.TYPE == "PLAYER":
-                game.game_master.remove_player(int(pid))
-                self.logger.debug("Disconnect player")
+            util.remove_from_sysyem(common, pid)
+            # FIXME: The name is not dissapring from connected users list
         except AttributeError:
             pass
 
@@ -215,31 +212,31 @@ class question(Service):
 class check_test(TXTService):
     NAME = "/check_test"
 
-    def __init__(self, pid, common):
+    def __init__(self, join_number, common):
         super(check_test, self).__init__()
-        self.data = int(pid[0])
+        self.data = int(join_number[0])
         self.common = common
 
     def content(self):
         return str((
-            self.data in self.common.pid_client and
-            self.common.pid_client[self.data].TYPE == "MASTER"
+            self.data in self.common.join_number and
+            self.common.join_number[self.data].TYPE == "MASTER"
         ))
 
 
 class check_name(TXTService):
     NAME = "/check_name"
 
-    def __init__(self, pid, name, common):
+    def __init__(self, join_number, name, common):
         super(check_name, self).__init__()
-        self.data = int(pid[0])
+        self.data = int(join_number[0])
         self.name = name[0]
         self.common = common
 
     def content(self):
         ans = "False"
-        if self.data in self.common.pid_client:
-            master = self.common.pid_client[self.data]
+        if self.data in self.common.join_number:
+            master = self.common.join_number[self.data]
             if master.TYPE == "MASTER":
                 name_list = []
                 for player in master.get_player_dict().values():
@@ -252,20 +249,21 @@ class check_name(TXTService):
 class join(Service):
     NAME = "/join"
 
-    def __init__(self, pid, name, common):
+    def __init__(self, join_number, name, common, pid=None):
         super(join, self).__init__()
-        pid = pid[0]
-        util.remove_from_sysyem(common, pid)
-        g = self.register_player(pid, name[0], common)
-        self.player_pid = g.pid
+        join_number = int(join_number[0])
+        if pid is not None:
+            util.remove_from_sysyem(common, pid)
+        self.player_pid = self.register_player(join_number, name[0], common
+                                               ).pid
 
     def headers(self, extra):
         extra.update({"Location": "/game.html",
                       "Set-Cookie": "pid=%s" % self.player_pid})
         return util.create_headers_response(302, extra_headers=extra)
 
-    def register_player(self, pid, name, common):
-        g = game.GamePlayer(common.pid_client[int(pid)], common, name)
+    def register_player(self, join_number, name, common):
+        g = game.GamePlayer(common.join_number[join_number], common, name)
         common.pid_client[g.pid] = g
         g.game_master.add_player(g.pid, g)
         return g
@@ -297,13 +295,12 @@ class new(Service):
         return util.create_headers_response(302, extra_headers=extra)
 
 
-class getpid(TXTService):
-    NAME = "/getpid"
+class get_join_number(TXTService):
+    NAME = "/get_join_number"
 
-    def __init__(self, pid):
-        super(getpid, self).__init__()
-        self._pid = pid
-        print "GETPID"
+    def __init__(self, pid, common):
+        super(get_join_number, self).__init__()
+        self._join_number = str(common.pid_client[pid].join_number)
 
     def content(self):
-        return str(self._pid)
+        return self._join_number

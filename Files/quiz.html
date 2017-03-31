@@ -5,6 +5,7 @@
         <title>PyHoot!</title>
         <script>
             window.setInterval(function(){getnames();}, 1000);
+
             function setInnerHTML(url, id){
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
@@ -16,16 +17,17 @@
                 xhttp.open("GET", url, true);
                 xhttp.send();
             }
+
             function getnames() {
                 setInnerHTML("getnames", "names");
             }
         </script>
     </head>
-    <body onload="setInnerHTML('getpid', 'pid');">
+    <body onload="setInnerHTML('get_join_number', 'join_number');">
         <center>
             <p id = "part1">
-                <font size = "7">Now you can join the Game!<br>
-                <p id="pid"></p></font>
+                <font size = "7">Now you can join the Game!<br></font>
+                <font size = "7" id="join_number"></font>
                 <br><br>
                 Connected players
                 <p id="names">

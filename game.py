@@ -26,11 +26,17 @@ class Game(object):
 class GameMaster(Game):
     TYPE = "MASTER"
 
-    def __init__(self, quiz_name, commmon):
-        super(GameMaster, self).__init__(commmon)
+    def __init__(self, quiz_name, common):
+        super(GameMaster, self).__init__(common)
         self._quiz = quiz_name
         self._players_list = {}  # {pid: {"player": GamePlayer, "_score":score}
         self._parser = xmlparser.XMLParser(quiz_name)
+        while True:
+            join_number = random.randint(constants.MIN_PID, constants.MAX_PID)
+            if join_number not in common.join_number.keys():
+                break
+        print join_number
+        self._join_number = join_number
         self._time_start = 0
 
     def add_player(self, new_pid, game_player):
@@ -58,8 +64,9 @@ class GameMaster(Game):
         for pid in self._players_list:
             player = self._players_list["player"]
             if player.answer in right_answers:
-                self._players_list[pid]["_score"] += constants.QUESTION_TIME - \
-                    int(round((time_stop - player.timeanswer) * 100))
+                self._players_list[pid]["_score"] += (
+                    constants.QUESTION_TIME -
+                    int(round((time_stop - player.timeanswer) * 100)))
 
     def get_html_leaderboard(self):
         # self._update_score()
@@ -70,6 +77,11 @@ class GameMaster(Game):
         # ].name})
         # body = ""
         return "WIP"
+
+    @property
+    def join_number(self):
+        """The number of the object in the database"""
+        return self._join_number
 
 
 class GamePlayer(Game):
