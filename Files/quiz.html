@@ -4,42 +4,42 @@
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <title>PyHoot!</title>
         <script>
-        document.onload(getpid());
-        window.setInterval(function(){
-          getnames();
-        }, 1000);
-        function xhttpreq(url){
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200){
-                    return this.responseText;
-                }
-            };
-            xhttp.open("GET", url, true);
-            xhttp.send();
-        }
-        function setInnterHTTP(id, content){
-            document.getElementById(id).innerHTML = content;
-        }
-        function getnames() {
-            setInnterHTTP("names", xhttpreq("getnames"));
-        }
-        function getpid(){
-            setInnterHTTP("pid", xhttpreq("getpid"));
-        }
+            window.setInterval(function(){getnames();}, 1000);
+            function setInnerHTML(url, id){
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200){
+                        document.getElementById(id).innerHTML =
+                            this.responseText;
+                    }
+                };
+                xhttp.open("GET", url, true);
+                xhttp.send();
+            }
+            function getnames() {
+                setInnerHTML("getnames", "names");
+            }
         </script>
     </head>
-    <body onload="">
+    <body onload="setInnerHTML('getpid', 'pid');">
         <center>
-            <font size = "7">Now you can join the Game!<br>
-            Pid <p id="pid"></p></font>
-            <br><br> <!--TODO: change %d to the pid-->
-            Connected players
-            <p id="names">
+            <p id = "part1">
+                <font size = "7">Now you can join the Game!<br>
+                <p id="pid"></p></font>
+                <br><br>
+                Connected players
+                <p id="names">
+                </p>
+                <br><br>
+                <input type="button" value="Start playing"
+                onclick="window.location = '/opening'">
             </p>
-            <br><br>
-            <input type="button" value="Start playing"
-            onclick="window.location = '/opening'">
+            <p id="part2" style="display:none">
+                <!--TODO: Add the content of the name and number-->
+                <font size = "7"><p id = "quiz_name"></p></font>
+                <br><br>
+                <font size = "4"><p id = "number_questions"></p></font>
+            </p>
         </center>
     </body>
 </html>

@@ -96,8 +96,8 @@ def names_to_xml(names_list):
 def remove_from_sysyem(common, pid):
     g = common.pid_client.pop(pid, None)
     if g is not None:
-        if g.NAME == "MASTER":
+        if g.TYPE == "MASTER":
             for player in common.pid_client.values():
                 player.game_master = None
-        if g.NAME == "PLAYER":
+        if g.TYPE == "PLAYER":
             g.game_master.remove_player(pid)

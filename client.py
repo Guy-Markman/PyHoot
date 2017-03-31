@@ -248,7 +248,7 @@ class Client(base.Base):
                 self._send_buff = self._send_buff[
                     self._socket.send(self._send_buff):]
                 self.logger.debug("client sent")
-        except socket.error as e:
+        except Exception as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
                 if e.errno == errno.WSABASEERR:
                     raise custom_exceptions.Disconnect()

@@ -295,3 +295,15 @@ class new(Service):
     def headers(self, extra):
         extra.update({"Location": "/new.html"})
         return util.create_headers_response(302, extra_headers=extra)
+
+
+class getpid(TXTService):
+    NAME = "/getpid"
+
+    def __init__(self, pid):
+        super(getpid, self).__init__()
+        self._pid = pid
+        print "GETPID"
+
+    def content(self):
+        return str(self._pid)
