@@ -1,15 +1,18 @@
 <!doctype html>
 <html>
+
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>PyHoot!</title>
         <script>
-            window.setInterval(function(){getnames();}, 1000);
+            var get_names = window.setInterval(function() {
+                getnames();
+            }, 1000);
 
-            function setInnerHTML(url, id){
+            function setInnerHTML(url, id) {
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200){
+                    if (this.readyState == 4 && this.status == 200) {
                         document.getElementById(id).innerHTML =
                             this.responseText;
                     }
@@ -18,30 +21,85 @@
                 xhttp.send();
             }
 
+
             function getnames() {
-                setInnerHTML("getnames", "names");
+                setInnerHTML("getnames", "names", true);
+            }
+
+            //continue only if at least one user is online
+            function check_moveable() {
+                if (document.getElementById("names").innerHTML.length > 0) {
+                    changeDiv1();
+                }
+            }
+
+            function changeDiv1() {
+                clearInterval(get_names);
+                getinfo();
+                document.getElementById('part1').style.display = "none";
+                document.getElementById("br1").style.display = "none";
+                document.getElementById("names").style.display = "none";
+                document.getElementById("br2").style.display = "none";
+                document.getElementById("Start_playing").style.display = "none";
+                document.getElementById('part2').style.display = "inline";
+                setTimeout(function() {
+                    changeDiv2();
+                }, 5000);
+            }
+
+            function changeDiv2() {
+                document.getElementById('part2').style.display = "none";
+                document.getElementById('part3').style.display = "inline";
+                // TODO: before showing part3 it will load the question and answers
+            }
+
+            function getinfo() {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        parser = new DOMParser();
+                        xmlDoc = parser.parseFromString(this.responseText,
+                            "text/xml");
+                        document.getElementById("quiz_name").innerHTML =
+                            xmlDoc.getElementsByTagName("name")[0].childNodes[0].nodeValue;
+                        document.getElementById("number_questions").innerHTML =
+                            xmlDoc.getElementsByTagName("number_of_questions")[0].childNodes[0].nodeValue + " questions";
+                    }
+                };
+                xhttp.open("GET", "get_information", true);
+                xhttp.send();
             }
         </script>
     </head>
+
     <body onload="setInnerHTML('get_join_number', 'join_number');">
         <center>
-            <p id = "part1">
-                <font size = "7">Now you can join the Game!<br></font>
-                <font size = "7" id="join_number"></font>
-                <br><br>
-                Connected players
-                <p id="names">
+            <p id="part1">
+                <font size="7">Now you can join the Game!<br /></font>
+                <font size="7" id="join_number"></font>
+                <p id="br1">
+                    <br /><br />Connected players
                 </p>
-                <br><br>
-                <input type="button" value="Start playing"
-                onclick="window.location = '/opening'">
+                <font size="4" id="names">
+                </font>
+                <p id="br2">
+                    <br /><br />
+                </p>
+                <input type="button" id="Start_playing" value="Start playing" onclick="check_moveable()">
             </p>
             <p id="part2" style="display:none">
-                <!--TODO: Add the content of the name and number-->
-                <font size = "7"><p id = "quiz_name"></p></font>
-                <br><br>
-                <font size = "4"><p id = "number_questions"></p></font>
+                <font size="7" id="quiz_name">
+                </font>
+                <br /><br />
+                <font size="4" id="number_questions">
+                </font>
             </p>
+            <p id="part3" style="display:none">
+                <!--TODO: part3 would contain the question and the answers, also after 30 seconds it will move to leaderboard-->
+                WIP
+            </p>
+            <!--TODO: Add leaderboard-->
         </center>
     </body>
+
 </html>

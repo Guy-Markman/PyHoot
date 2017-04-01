@@ -1,70 +1,79 @@
 <!doctype html>
 <html>
+
 	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
 		<script>
-			function changeDiv(){
-				document.getElementById('p1').style.display = "none";
-				document.getElementById('p2').style.display = "block";
+			function changeDiv() {
+				document.getElementById('p1').style.display =
+					"none";
+				document.getElementById('p2').style.display =
+					"inline";
 				document.getElementById('name').focus();
 			}
-			function check(type){ //Check if name / test exist
+
+			function check_length_name() {
+				if (document.getElementById("name").value.length >= 3) {
+					check("name");
+				} else {
+					document.getElementById("p2_title").innerHTML =
+						"Name too short, at least 3 characters";
+				}
+			}
+
+			function check(type) { //Check if name / test exist
 				var xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function() {
-                        if (this.readyState == 4 && this.status == 200){
-							if (type == "test"){
-								if (this.responseText == "True"){
-									changeDiv();
-								}
-								else{
-									document.getElementById("p1_title").innerHTML =
+					if (this.readyState == 4 && this.status == 200) {
+						if (type == "test") {
+							if (this.responseText == "True") {
+								changeDiv();
+							} else {
+								document.getElementById("p1_title").innerHTML =
 									"No such Game Pin, enter right one";
-								}
 							}
-							else if (type == "name"){
-								if (this.responseText == "True"){
-									document.getElementById("join").submit();
-								}
-								else{
-									document.getElementById("p2_title").innerHTML=
+						} else if (type == "name") {
+							if (this.responseText == "True") {
+								document.getElementById("join").submit();
+							} else {
+								document.getElementById("p2_title").innerHTML =
 									"Name taken, choose another name";
-								}
 							}
-                        }
-                    };
+						}
+					}
+				};
 				var data = document.getElementById("join_number").value;
-				if (type == "name"){
-					data += "&name="+document.getElementById("name").value;
+				if (type == "name") {
+					data += "&name=" + document.getElementById("name")
+						.value;
 				}
-				xhttp.open("GET", "check_"+type+"?join_number="+data, true);
+				xhttp.open("GET", "check_" + type +
+					"?join_number=" +
+					data, true);
 				xhttp.send();
 			}
 		</script>
 	</head>
+
 	<body>
 		<center>
 			<form id="join" action="/join" method="get">
-				<p id = "p1">
-					<font size="7" id="p1_title">Game PIN</font><br>
-					<input type="number" id="join_number" name="join_number"
-					 style="width: 200px;" min="100000" max="999999"
-					  autocomplete="off" autofocus onkeypress=
-					  "return event.charCode >= 48 && event.charCode <= 57">
-					<br><br>
-					<button type="button" style="height:50px;width:150px;"
-					onclick="check('test');">Join!</button>
+				<p id="p1">
+					<font size="7" id="p1_title">Game PIN</font><br />
+					<input type="number" id="join_number" name="join_number" style="width: 200px;" min="100000" max="999999" autocomplete="off" autofocus onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+					<br /><br />
+					<button type="button" style="height:50px;width:150px;" onclick="check('test');">
+						Join!</button>
 				</p>
 				<p id="p2" style="display:none">
-					<font id="p2_title" size = "6">Choose name</font><br>
-	                <input type="text" name="name" id="name"  pattern=".{3,}"
-	                 required title="3 characters minimum" style="width: 200px;"
-					 ><br><br>
-					 <button type="button" style="height:50px;width:150px"
-					 onclick="check('name');">
+					<font id="p2_title" size="6">Choose name</font><br />
+					<input type="text" name="name" id="name" pattern=".{3,}" required title="3 characters minimum" style="width: 200px;"><br /><br />
+					<button type="button" style="height:50px;width:150px" onclick="check_length_name()">
 				     Start Playing!</button>
 				</p>
 			</form>
 		</center>
 	</body>
+
 </html>

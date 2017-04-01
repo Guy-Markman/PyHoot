@@ -1,42 +1,42 @@
 <!doctype html>
 <html>
+
     <head>
         <title>PyHoot!</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <script>
-            function check_test_exist(){
+            function check_test_exist() {
                 var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function(){
-                    if (this.readyState ==4 && this.status == 200){
-                        if (this.responseText=="True"){
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        if (this.responseText == "True") {
                             document.getElementById("register_quiz").submit();
-                        }
-                        else{
-                            document.getElementById("title_register").innerHTML=
-                            "No such quiz!<br>Name of quiz:";
+                        } else {
+                            document.getElementById("title_register").innerHTML =
+                                "No such quiz!<br />Name of quiz:";
                         }
                     }
                 };
-                xhttp.open("GET", "check_test_exist?quiz_name="+
-                document.getElementById("quiz_name").value, true);
+                xhttp.open("GET", "check_test_exist?quiz_name=" +
+                    document.getElementById("quiz_name").value, true);
                 xhttp.send();
             }
         </script>
     </head>
+
     <body>
         <center>
-            <form action="/register_quiz" id="register_quiz" method = "get">
+            <form action="/register_quiz" id="register_quiz" method="get">
                 <font size="5">
                     <p id="title_register">Name of quiz:</p>
                 </font>
-                <input type="text" id= "quiz_name" name="quiz_name" size="21"
-                autocomplete="off" autofocus>
-                <br><br>
-                <button type="button" style="height:50px; width:150px"
-                onclick="check_test_exist();">
+                <input type="text" id="quiz_name" name="quiz_name" size="21" autocomplete="off" autofocus>
+                <br /><br />
+                <button type="button" style="height:50px; width:150px" onclick="check_test_exist();">
                     Start game!
                 </button>
             </form>
         </center>
     </body>
+
 </html>

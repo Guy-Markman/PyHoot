@@ -113,30 +113,9 @@ class homepage(Service):
 class answer(Service):
     NAME = "/answer"
 
-    def content(self):
-        return constants.BASE_HTML % (
-            "Play!",
-            """ <form action="/wait_answer" style="float:left;" method="GET">
-                <input type="hidden" name="answer" value="A">
-                <input type="submit" value="A" style="height: 150px;
-                 width: 150px; font-size: 50px;"/>
-            </form>
-            <form action="/wait_answer" method="GET">
-                <input type="hidden" name="answer" value="B">
-                <input type="submit" value="B" style="height: 150px;
-                 width: 150px; font-size: 50px;"/>
-            </form>
-            <form action="/wait_answer" style="float:left;" method="GET">
-                <input type="hidden" name="answer" value="C">
-                <input type="submit" value="C" style="height: 150px;
-                 width: 150px; font-size: 50px;"/>
-            </form>
-            <form action="/wait_answer" method="GET">
-                <input type="hidden" name="answer" value="D">
-                <input type="submit" value="D" style="height: 150px;
-                 width: 150px; font-size: 50px;"/>
-            </form>"""
-        )
+    def __init__(self, letter, game):
+        super(answer, self).__init__()
+        game.answer = letter[0]
 
 
 class wait_answer(Service):
@@ -175,8 +154,6 @@ class diconnect_user(Service):
 
     def __init__(self, pid, common, game):
         super(diconnect_user, self).__init__()
-
-        common.pid_client.pop(pid, None)
         try:
             util.remove_from_sysyem(common, pid)
             # FIXME: The name is not dissapring from connected users list
@@ -251,11 +228,13 @@ class join(Service):
 
     def __init__(self, join_number, name, common, pid=None):
         super(join, self).__init__()
-        join_number = int(join_number[0])
         if pid is not None:
             util.remove_from_sysyem(common, pid)
-        self.player_pid = self.register_player(join_number, name[0], common
-                                               ).pid
+        self.player_pid = self.register_player(
+            int(join_number[0]),
+            name[0],
+            common
+        ).pid
 
     def headers(self, extra):
         extra.update({"Location": "/game.html",
@@ -277,7 +256,6 @@ class check_test_exist(TXTService):
         self._quiz_name = quiz_name[0]
 
     def content(self):
-        print self._quiz_name
         return str(
             os.path.isfile(
                 os.path.normpath("PyHoot\Quizes\%s.xml" %
@@ -304,3 +282,17 @@ class get_join_number(TXTService):
 
     def content(self):
         return self._join_number
+
+
+class get_information(TXTService):
+    NAME = "/get_information"
+
+    def __init__(self, game):
+        super(get_information, self).__init__()
+        self._game = game
+
+    def content(self):
+        return self._game.get_parser().get_information()
+
+# TODO: Write, check switch, swtich all players, get question, get
+# leaderboard master, get leaderboard player

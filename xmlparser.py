@@ -1,6 +1,6 @@
 from xml.etree import ElementTree  # NOT THE MOVIE!
 
-from . import constants, custom_exceptions
+from . import constants, custom_exceptions, util
 
 
 class XMLParser(object):
@@ -23,6 +23,9 @@ class XMLParser(object):
 
     def get_left_questions(self):
         return self._number_of_questions - self.question_number
+
+    def get_information(self):
+        return util.prettify(self._settings)
 
     def get_html_start(self):
         name_of_quiz = self._settings.find("name").text

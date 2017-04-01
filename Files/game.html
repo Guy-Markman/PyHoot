@@ -1,29 +1,69 @@
 <!doctype html>
 <html>
+
 	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
 		<script>
-			function disconnect_function(){
+			function disconnect_function() {
 				var xhttp = new XMLHttpRequest();
 				xhttp.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200){
+					if (this.readyState == 4 && this.status == 200) {
 						window.location.href = '/';
 					}
 				};
 				xhttp.open("GET", "diconnect_user", true);
 				xhttp.send();
 			}
+
+			function switch_wait_question() {
+				var wait_style_display = document.getElementById("wait").style.display;
+				var question_style_display = document.getElementById("question").style.display;
+				wait_style_display = [question_style_display, question_style_display = wait_style_display][0];
+			}
+
+			function sent_answer(letter) {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						switch_wait_question();
+					}
+				};
+				xhttp.open("GET", "answer", true);
+				xhttp.send();
+			}
 		</script>
 	</head>
+
 	<body>
 		<center>
-			<p id="start">
+			<p id="wait" style="display:inline">
+				<!--Will check when it should switch to question everysecond-->
 				<font size="6">Please wait</font>
-				<br><br>
-				<input type="button" value="Disconnect" onclick=
-				"disconnect_function();"/>
+				<br /><br />
+				<input type="button" value="Disconnect" onclick="disconnect_function();" />
 			</p>
-       </center>
-   </body>
+			<p id="question" style="display:none">
+				<!--TODO: After 30 seconds it will move to leaderboard-->
+				<button type="button" style="float:left; height: 150px;
+				 width: 150px; font-size: 50px;" onclick="sent_answer('A');">
+					A
+				</button>
+				<button type="button" style="float:left; height: 150px;
+				 width: 150px; font-size: 50px;" onclick="sent_answer('B');">
+					B
+				</button>
+				<br style="margin: 150px;" />
+				<button type="button" style="float:left; height: 150px;
+				 width: 150px; font-size: 50px;" onclick="sent_answer('C');">
+					C
+				</button>
+				<button type="button" style="float:left; height: 150px;
+				 width: 150px; font-size: 50px;" onclick="sent_answer('D');">
+					D
+				</button>
+			</p>
+		</center>
+	</body>
+
 </html>

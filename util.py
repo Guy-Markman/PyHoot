@@ -86,13 +86,6 @@ def prettify(elem):
                                              encoding=constants.ENCODING)
 
 
-def names_to_xml(names_list):
-    players = ElementTree.Element("players")
-    for name in names_list:
-        ElementTree.SubElement(players, "name").text = name
-    return prettify(players)
-
-
 def remove_from_sysyem(common, pid):
     g = common.pid_client.pop(pid, None)
     if g is not None:
