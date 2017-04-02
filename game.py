@@ -16,11 +16,28 @@ class Game(object):
             if pid not in common.pid_client.keys():
                 break
         self._pid = pid
+        self._change_timer = None
+        self._move_to_next_page = False
 
     @property
     def pid(self):
         """The number of the object in the database"""
         return self._pid
+
+    def get_move_to_next_page(self):
+        return self._move_to_next_page
+
+    def order_move_to_next_page(self):
+        self._move_to_next_page = True
+
+    def moved_to_next_page(self):
+        self._move_to_next_page = False
+
+    def set_time_change(self, new_time):
+        self._change_timer = time.time() + new_time
+
+    def check_timer_change(self):
+        return self._change_timer - time.time() < 0
 
 
 class GameMaster(Game):
@@ -37,7 +54,6 @@ class GameMaster(Game):
                 break
         print join_number
         self._join_number = join_number
-        self._time_start = 0
 
     def add_player(self, new_pid, game_player):
         self._players_list[new_pid] = {"player": game_player, "_score": 0}
@@ -53,10 +69,6 @@ class GameMaster(Game):
 
     def get_parser(self):
         return self._parser
-
-    def start_question(self):
-        self._parser.moved_to_next_question()
-        self._time_start = time.time()
 
     def _update_score(self):
         right_answers = self._parser.get_question_answers()
@@ -91,7 +103,6 @@ class GamePlayer(Game):
         super(GamePlayer, self).__init__(common)
         self._name = name
         self._game_master = master  # Game object GameMaster
-        self._move_to_next_page = False
         self._answer = None
         self._time = 0
 
@@ -110,12 +121,6 @@ class GamePlayer(Game):
     @game_master.setter
     def game_master(self, new):
         self._game_master = new
-
-    def order_move_to_next_page(self):
-        self._move_to_next_page = True
-
-    def moved_to_next_page(self):
-        self._move_to_next_page = False
 
     @property
     def answer(self):

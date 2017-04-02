@@ -118,20 +118,6 @@ class answer(Service):
         game.answer = letter[0]
 
 
-class wait_answer(Service):
-    NAME = "/wait_answer"
-
-    def __init__(self, game, answer):
-        super(wait_answer, self).__init__()
-        game.add_answer(answer)
-
-    def content(self):
-        return constants.BASE_HTML % (
-            "Please wait",
-            """<center><font size="6">Please wait</font></center>"""
-        )
-
-
 class getnames(TXTService):
     NAME = "/getnames"
 
@@ -156,17 +142,8 @@ class diconnect_user(Service):
         super(diconnect_user, self).__init__()
         try:
             util.remove_from_sysyem(common, pid)
-            # FIXME: The name is not dissapring from connected users list
         except AttributeError:
             pass
-
-
-class opening(Service):
-    NAME = "/opening"
-
-    def __init__(self, game):
-        super(opening, self).__init__()
-        self._content_page = game.get_parser().get_html_start()
 
 
 class question(Service):
@@ -296,3 +273,47 @@ class get_information(TXTService):
 
 # TODO: Write, check switch, swtich all players, get question, get
 # leaderboard master, get leaderboard player
+
+
+class set_timer_change(TXTService):
+    NAME = "/set_timer_change"
+
+    def __init__(self, game, new_time):
+        super(set_timer_change, self).__init__()
+        game.set_time_change(int(new_time[0]))
+
+    def content(self):
+        return "done"
+
+
+class check_timer_change(TXTService):
+    NAME = "/check_timer_change"
+
+    def __init__(self, game):
+        self._game = game
+
+    def content(self):
+        return str(self._game.check_timer_change())
+
+
+class order_move_all_players(TXTService):
+    NAME = "/order_change_all_players"
+
+    def __init__(self, game):
+        super(order_move_all_players, self).__init__()
+        for player in game.get_player_dict().values():
+            player.order_move_to_next_page()
+
+    def content(self):
+        return "done"
+
+
+class check_move_next_page(TXTService):
+    NAME = "/check_move_next_page"
+
+    def __init__(self, game):
+        super(check_move_next_page, self).__init__()
+        self._game = game
+
+    def content(self):
+        return str(self._game.get_move_to_next_page())
