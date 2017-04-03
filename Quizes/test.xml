@@ -1,29 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<quiz>
-    <settings>
-        <name>test</name>
-        <number_of_questions>1</number_of_questions>
-    </settings>
-    <questions>
-        <question number="1">
-            <question_text>1+1</question_text>
-            <picture>2.png</picture>
-            <answer number="A">
-                <answer_text>1</answer_text>
-                <right_wrong>false</right_wrong>
-            </answer>
-            <answer number="B">
-                <answer_text>2</answer_text>
-                <right_wrong>true</right_wrong>
-            </answer>
-            <answer number="C">
-                <answer_text>3</answer_text>
-                <right_wrong>false</right_wrong>
-            </answer>
-            <answer number="D">
-                <answer_text>4</answer_text>
-                <right_wrong>false</right_wrong>
-            </answer>
-        </question>
-    </questions>
-</quiz>
+<Root>
+	<Quiz name="test" number_of_questions="2">
+		<Question duration="30">
+           <Text><![CDATA[
+             <font size="7">1+1</font><br />
+             <img src="questineer-pics/test/2.jpg"/>
+           ]]></Text>
+           <Answer>
+               <Text><![CDATA[
+                 <font size = "4">1</font>
+               ]]></Text>
+           </Answer>
+		   <Answer correct="1">
+               <Text><![CDATA[
+                 <font size = "4">2</font>
+               ]]></Text>
+           </Answer>
+		   <Answer>
+               <Text><![CDATA[
+                 <font size = "4">3</font>
+               ]]></Text>
+           </Answer>
+		   <Answer>
+               <Text><![CDATA[
+                 <font size = "4">4</font>
+               ]]></Text>
+           </Answer>
+	   </Question>
+   </Quiz>
+</Root>

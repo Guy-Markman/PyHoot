@@ -41,7 +41,7 @@ class Service(base.Base):
 
     def get_status(self):
         """Return self._finished_reading"""
-        return self._finished_reading
+        return self.finished_reading
 
 
 class TXTService(Service):
@@ -144,23 +144,6 @@ class diconnect_user(Service):
             util.remove_from_sysyem(common, pid)
         except AttributeError:
             pass
-
-
-class question(Service):
-    NAME = "/question"
-
-    def __init__(self, game):
-        super(question, self).__init__()
-        parser = game.get_parser()
-        if parser.get_left_questions() > 0:
-            parser.moved_to_next_page()
-            self._content_page = parser.get_html_question()
-        else:
-            self._content_page = """<html>
-            <body onload="window.location.href="/finish">
-            </body>
-</html>
-            """
 
 
 class check_test(TXTService):
@@ -297,7 +280,7 @@ class check_timer_change(TXTService):
 
 
 class order_move_all_players(TXTService):
-    NAME = "/order_change_all_players"
+    NAME = "/order_move_all_players"
 
     def __init__(self, game):
         super(order_move_all_players, self).__init__()
@@ -316,4 +299,6 @@ class check_move_next_page(TXTService):
         self._game = game
 
     def content(self):
+        print self._game
+        print self._game._move_to_next_page
         return str(self._game.get_move_to_next_page())

@@ -19,6 +19,7 @@
                 };
                 xhttp.open("GET", url, true);
                 xhttp.send();
+				return false;
             }
 
 
@@ -35,18 +36,17 @@
 
             function changeDiv1() {
                 clearInterval(get_names);
+				order_move_all_players();
+				set_timer("5000");
+				get_names = window.setInterval(function(){
+					check_timer_change();
+				}, 1000);				
                 getinfo();
                 document.getElementById('part1').style.display = "none";
-                document.getElementById("br1").style.display = "none";
-                document.getElementById("names").style.display = "none";
-                document.getElementById("br2").style.display = "none";
-                document.getElementById("Start_playing").style.display = "none";
                 document.getElementById('part2').style.display = "inline";
-                setTimeout(function() {
-                    changeDiv2();
-                }, 5000);
+				
             }
-
+			
             function changeDiv2() {
                 document.getElementById('part2').style.display = "none";
                 document.getElementById('part3').style.display = "inline";
@@ -69,12 +69,58 @@
                 xhttp.open("GET", "get_information", true);
                 xhttp.send();
             }
+			
+			function order_move_all_players(){
+				var xhttp = new XMLHttpRequest();
+				xhttp.open("GET", "order_move_all_players", true);
+				xhttp.send();
+			}
+			
+			function set_timer(new_time){
+				var xhttp = new XMLHttpRequest();
+				xhttp.open("GET", "set_timer_change?new_time="+new_time);
+				xhttp.send();
+			}
+			
+			function check_timer_change(){
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        if (this.responseText == "True"){
+							get_question();
+							changeDiv2();
+						}
+                    }
+				};
+				xhttp.open("GET", "check_timer_change", true);
+				xhttp.send();
+			}
+			
+			function get_question(){
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+						parser = new DOMParser();
+						xmlDoc = parser.parseFromString(this.responseText,
+                            "text/xml");
+						document.getElementById("question_title").innerHTML =
+							xmlDoc.getElementsByTagName("question_text")[0].childNodes[0].nodeValue;
+						var questionsID = ["A_answer", "B_answer", "B_answer", "B_answer"]
+						for (i = 0; i < 4; i++){
+							document.getElementById(questionsID[i]).innerHTML =
+								xmlDoc.getElementsByTagName("answer")[i].childNodes[0].getElementById
+						}
+                    }
+				};
+				xhttp.open("GET", "get_question", false);
+				xhttp.send();
+			}
         </script>
     </head>
 
     <body onload="setInnerHTML('get_join_number', 'join_number');">
         <center>
-            <p id="part1">
+            <div id="part1">
                 <font size="7">Now you can join the Game!<br /></font>
                 <font size="7" id="join_number"></font>
                 <p id="br1">
@@ -86,19 +132,35 @@
                     <br /><br />
                 </p>
                 <input type="button" id="Start_playing" value="Start playing" onclick="check_moveable()">
-            </p>
-            <p id="part2" style="display:none">
+            </div>
+            <div id="part2" style="display:none">
                 <font size="7" id="quiz_name">
                 </font>
                 <br /><br />
                 <font size="4" id="number_questions">
                 </font>
-            </p>
+            </div>
             <p id="part3" style="display:none">
-                <!--TODO: part3 would contain the question and the answers, also after 30 seconds it will move to leaderboard-->
-                WIP
+				<font id="question_title" size = "7"></font>
+				<table style="width:100%">
+					<tr>
+						<td>
+							<font id = "A_answer"></font>
+						</td>
+						<td>
+							<font id = "B_answer"></font>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<font id = "C_answer"></font>
+						</td>
+						<td>
+							<font id = "D_answer"></font>
+						</td>
+					</tr>
+				</table>
             </p>
-            <!--TODO: Add leaderboard-->
         </center>
     </body>
 

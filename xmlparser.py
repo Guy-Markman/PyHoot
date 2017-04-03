@@ -1,7 +1,8 @@
-from xml.etree import ElementTree  # NOT THE MOVIE!
+from xml.etree import ElementTree
 
 from . import constants, custom_exceptions, util
 
+#  TODO: change all the x-path
 
 class XMLParser(object):
 
@@ -42,32 +43,11 @@ class XMLParser(object):
             #                </script>
         )
 
-    def get_html_question(self):
+    def get_xml_question(self):
         question = self._dic_questions[self.question_number]
-        picture = question.find("picture").text
-        dic_answers = {}
         for ans in question.findall("answer"):
-            dic_answers.update({ans.attrib["number"]: ans.find("answer_text"
-                                                               ).text})
-        body = """<center>
-            <h1>%s</h1>""" % question.find("question_text").text
-        if picture != "":
-            body += """
-            <br><br><img src="%s" style="width:304px;height:228px;>
-            """ % picture
-        body += """<table style="width:50%">"""
-        # Had to break it to two parts because of %
-        body += """<tr>
-            <td>A: %s</td>
-            <td>B: %s</td>
-        </tr>
-        <tr>
-            <td>C: %s</td>
-            <td>D: %s</td>
-        </tr>
-        </table>
-        """ % (dic_answers["A"], dic_answers["B"], dic_answers["C"],
-               dic_answers["D"])
+            ans.remove(ans.find("right_wrong"))
+        return util.prettify(question)
 
     def get_question_answers(self):
         right_answer = []
@@ -79,37 +59,34 @@ class XMLParser(object):
     def test_file(self, filename):
         """Making sure everything is OK with the file before we start usings it
         """
+        #  TODO: finish this
         try:
             root = ElementTree.parse("%s.xml" % filename).getroot()
             if root is None:
-                raise Exception("No root")
-            settings = root.find("settings")
-            if settings is None:
-                raise Exception("No settings")
-            name = settings.find("name")
-            if name is None:
-                raise Exception("No name")
-            number_of_questions = settings.find("number_of_questions")
+                raise Exception("No Root")
+            settings = root.find("./Quiz").attrib
+            if "name" in settings and "number_of_questions" in settings:
+                raise Exception("Missings settings")
+            number_of_questions = settings.attrib["number_of_questions"]
             if (
-                number_of_questions is None or
                 not number_of_questions.text.isdigit() or
                 int(number_of_questions.text) < 1
             ):
                 raise Exception("No number of questions")
-            questions = root.find("questions")
-            if questions is None:
-                raise Exception("No questions")
-            question_list = questions.findall("question")
+            question_list = root.findall("./Quiz/Question")
+            
+            
+            
+            
             dic_questions = []
             for q in question_list:
-                if not q.attrib.isditig() or int(q.attrib) < 1:
-                    raise Exception("One of the questions don't have a number")
-                question_text = q.find("question_text")
-                if question_text is None or question_text.text == "":
-                    raise Exception("One of the questions don't have text")
-                if q.find("picture") is None:
-                    raise Exception(
-                        "One of the questions don't have picture SubElement")
+                if (
+                    "duration" in q.attrib and
+                    q.attrib["duration"] is digit
+                    and int(q.attrib["duration"]) > 0
+                ):
+                    raise Exception("Missing duration")
+                if q.find("Text") is 
                 answers = q.findall("answer")
                 if len(answers) != 4:
                     raise Exception(
