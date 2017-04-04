@@ -1,30 +1,17 @@
 <!--TODO: change the template by test.xml-->
 <?xml version="1.0" encoding ="UTF-8"?>
-<quiz>
-    <settings>
-        <name>Name of the Quiz, example: example</Name>
-        <number_of_questions>Number of questions in the quiz, example: 1</number_of_questions>
-    </settings>
-    <questions>
-        <question number="1">
-            <question_text>the question itself, exmaple: 1+1</question_text>
-            <picture>The name of the picture including extension, example: test.jpg. Leave blunk for Nothing</picutre>
-            <answer number= "A">
-                <answer_text>the text of the answer, example: 1</answer_text>
-                <right_wrong>Is the answer currect or not, exmaple:False</right_wrong>
-            </answer>
-            <answer number = "B">
-                <answer_text>2</answer_text>
-                <right_wrong>True</right_wrong>
-            </answer>
-            <answer number = "C">
-                <answer_text>3</answer_text>
-                <right_wrong>False</right_wrong>
-            </answer>
-            <answer number = "D">
-                <answer_text>4</answer_text>
-                <right_wrong>False</right_wrong>
-            </answer>
-        </question>
-    </questions>
-</quiz>
+<Root>
+    <Quiz name="The name of the quiz" number_of_questions="The number of questions in the quiz">
+        <Question duration="The for each question">
+            <Text><![CDATA[
+                    The question itself
+            ]]></Text>
+            <!---There must be 4 answers for each question-->
+            <Answer correct="1 for right, without the attribute for wrong">
+                <Text><![CDATA[
+                        The answer
+                ]]></Text>
+            </Answer>
+        </Question>
+    </Quiz>
+</Root>

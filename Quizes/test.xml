@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root>
-	<Quiz name="test" number_of_questions="2">
+	<Quiz name="test" number_of_questions="1">
 		<Question duration="30">
            <Text><![CDATA[
              <font size="7">1+1</font><br />

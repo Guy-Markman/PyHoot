@@ -273,6 +273,7 @@ class check_timer_change(TXTService):
     NAME = "/check_timer_change"
 
     def __init__(self, game):
+        super(check_timer_change)
         self._game = game
 
     def content(self):

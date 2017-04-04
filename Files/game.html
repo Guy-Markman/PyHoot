@@ -5,9 +5,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
 		<script>
-            var check_move = window.setInterval(function() {
-                check_move_to_next();
-            }, 1000);
+			var check_move = window.setInterval(function() {
+				check_move_to_next();
+			}, 1000);
 
 			function disconnect_user() {
 				var xhttp = new XMLHttpRequest();
@@ -40,17 +40,17 @@
 				xhttp.open("GET", "answer", true);
 				xhttp.send();
 			}
-			
-			function check_move_to_next(){
-				var xhttp =new XMLHttpRequest();
-				xhttp.onreadystatechange= function(){
-					if (this.readyState == 4 && this.status == 200){
-						if (this.responseText == "True"){
+
+			function check_move_to_next() {
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						if (this.responseText == "True") {
 							console.log("switch");
 							switch_wait_question();
 						}
 					}
-				}
+				};
 				xhttp.open("GET", "check_move_next_page", true);
 				xhttp.send();
 			}
@@ -61,7 +61,7 @@
 	<body>
 		<center>
 			<p id="wait" style="display:inline">
-						<!--Will check when it should switch to question everysecond-->
+				<!--Will check when it should switch to question everysecond-->
 				<font size="6">Please wait</font>
 				<br /><br />
 				<input type="button" value="Disconnect" onclick="disconnect_user();" />
@@ -97,7 +97,8 @@
 						</td>
 					</tr>
 				</table>
-			</p>
+			</div>
 		</center>
 	</body>
+
 </html>

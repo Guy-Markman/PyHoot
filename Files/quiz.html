@@ -19,7 +19,7 @@
                 };
                 xhttp.open("GET", url, true);
                 xhttp.send();
-				return false;
+                return false;
             }
 
 
@@ -36,17 +36,17 @@
 
             function changeDiv1() {
                 clearInterval(get_names);
-				order_move_all_players();
-				set_timer("5000");
-				get_names = window.setInterval(function(){
-					check_timer_change();
-				}, 1000);				
+                order_move_all_players();
+                set_timer("5000");
+                get_names = window.setInterval(function() {
+                    check_timer_change();
+                }, 1000);
                 getinfo();
                 document.getElementById('part1').style.display = "none";
                 document.getElementById('part2').style.display = "inline";
-				
+
             }
-			
+
             function changeDiv2() {
                 document.getElementById('part2').style.display = "none";
                 document.getElementById('part3').style.display = "inline";
@@ -60,61 +60,63 @@
                         parser = new DOMParser();
                         xmlDoc = parser.parseFromString(this.responseText,
                             "text/xml");
+                        quiz = xmlDoc.getElementsByTagName("Quiz")[0];
                         document.getElementById("quiz_name").innerHTML =
-                            xmlDoc.getElementsByTagName("name")[0].childNodes[0].nodeValue;
+                            quiz.getAttribute("name");
                         document.getElementById("number_questions").innerHTML =
-                            xmlDoc.getElementsByTagName("number_of_questions")[0].childNodes[0].nodeValue + " questions";
+                            quiz.getAttribute("number_of_questions") + " questions";
                     }
                 };
                 xhttp.open("GET", "get_information", true);
                 xhttp.send();
             }
-			
-			function order_move_all_players(){
-				var xhttp = new XMLHttpRequest();
-				xhttp.open("GET", "order_move_all_players", true);
-				xhttp.send();
-			}
-			
-			function set_timer(new_time){
-				var xhttp = new XMLHttpRequest();
-				xhttp.open("GET", "set_timer_change?new_time="+new_time);
-				xhttp.send();
-			}
-			
-			function check_timer_change(){
-				var xhttp = new XMLHttpRequest();
-				xhttp.onreadystatechange = function() {
+
+            function order_move_all_players() {
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("GET", "order_move_all_players", true);
+                xhttp.send();
+            }
+
+            function set_timer(new_time) {
+                var xhttp = new XMLHttpRequest();
+                xhttp.open("GET", "set_timer_change?new_time=" + new_time);
+                xhttp.send();
+            }
+
+            function check_timer_change() {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
-                        if (this.responseText == "True"){
-							get_question();
-							changeDiv2();
-						}
+                        if (this.responseText == "True") {
+                            get_question();
+                            changeDiv2();
+                        }
                     }
-				};
-				xhttp.open("GET", "check_timer_change", true);
-				xhttp.send();
-			}
-			
-			function get_question(){
-				var xhttp = new XMLHttpRequest();
-				xhttp.onreadystatechange = function() {
+                };
+                xhttp.open("GET", "check_timer_change", true);
+                xhttp.send();
+            }
+
+            function get_question() {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
-						parser = new DOMParser();
-						xmlDoc = parser.parseFromString(this.responseText,
+                        parser = new DOMParser();
+                        xmlDoc = parser.parseFromString(this.responseText,
                             "text/xml");
-						document.getElementById("question_title").innerHTML =
-							xmlDoc.getElementsByTagName("question_text")[0].childNodes[0].nodeValue;
-						var questionsID = ["A_answer", "B_answer", "B_answer", "B_answer"]
-						for (i = 0; i < 4; i++){
-							document.getElementById(questionsID[i]).innerHTML =
-								xmlDoc.getElementsByTagName("answer")[i].childNodes[0].getElementById
-						}
+                        document.getElementById("question_title").innerHTML =
+                            xmlDoc.getElementsByTagName("question_text")[0].childNodes[0].nodeValue;
+                        var questionsID = ["A_answer", "B_answer", "B_answer", "B_answer"];
+                        for (i = 0; i < 4; i++) {
+                            document.getElementById(questionsID[i]).innerHTML =
+                                xmlDoc.getElementsByTagName("answer")[i].childNodes[0].getElementById;
+                        }
                     }
-				};
-				xhttp.open("GET", "get_question", false);
-				xhttp.send();
-			}
+                };
+                xhttp.open("GET", "get_question", false);
+                xhttp.send();
+            }
+
         </script>
     </head>
 
@@ -141,25 +143,25 @@
                 </font>
             </div>
             <p id="part3" style="display:none">
-				<font id="question_title" size = "7"></font>
-				<table style="width:100%">
-					<tr>
-						<td>
-							<font id = "A_answer"></font>
-						</td>
-						<td>
-							<font id = "B_answer"></font>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<font id = "C_answer"></font>
-						</td>
-						<td>
-							<font id = "D_answer"></font>
-						</td>
-					</tr>
-				</table>
+                <font id="question_title" size="7"></font>
+                <table style="width:100%">
+                    <tr>
+                        <td>
+                            <font id="A_answer"></font>
+                        </td>
+                        <td>
+                            <font id="B_answer"></font>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font id="C_answer"></font>
+                        </td>
+                        <td>
+                            <font id="D_answer"></font>
+                        </td>
+                    </tr>
+                </table>
             </p>
         </center>
     </body>

@@ -94,4 +94,5 @@ def remove_from_sysyem(common, pid):
             for player in common.pid_client.values():
                 player.game_master = None
         if g.TYPE == "PLAYER":
-            g.game_master.remove_player(pid)
+            if g.game_master is not None:
+                g.game_master.remove_player(pid)
