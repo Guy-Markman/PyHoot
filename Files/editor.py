@@ -1,32 +1,33 @@
 import os
+from xml.dom import minidom
 from xml.etree import ElementTree
-
-from . import util
 
 N_ANSWERS = 4
 
 
 def main():
     Root = ElementTree.Element("Root")
+    type(Root)
     ElementTree.SubElement(Root, "Quiz", {
         "name": raw_input("Name of the quiz. "),
         "number_of_questions": raw_input("How many question in the quiz? ")
     })
     for question in Root.find("./Quiz").attrib["number_of_questions"]:
         q = ElementTree.SubElement(
-            Root.find("./Quiz"), {
-                "duration": raw_input("How long is this question? ")
+            Root.find("./Quiz"), "Question", {
+                "duration": raw_input("How long is this question? In seconds ")
             })
         ElementTree.SubElement(q, "Text").text = "<![CDATA[%s]]>" % (
-            raw_input("What is the question?"))
+            raw_input("What is the question? "))
         for answer in range(N_ANSWERS):
             ans = ElementTree.SubElement(
-                q, "Answer").text = raw_input("Enter the answer ")
+                q, "Answer")
+            ans.text = raw_input("Enter the answer ")
             right_wrong = raw_input(
                 "Is the answer right or wrong? (answer in true or false) ")
             if right_wrong == "true":
                 ans.attrib["correct"] = "1"
-    build = util.prettify(Root)
+    build = prettify(Root)
     print build
     name = Root.find("./Quiz").attrib["name"]
     try:
@@ -41,6 +42,16 @@ def main():
             build = build[os.write(fd, build):]
         finally:
             os.close(fd)
+
+
+def prettify(elem):
+    """Return a pretty-printed XML string for the Element.
+    """
+    print "Start"
+    return minidom.parseString(
+        ElementTree.tostring(
+            elem, 'utf-8')
+    ).toprettyxml(encoding='utf-8')
 
 
 if __name__ == "__main__":

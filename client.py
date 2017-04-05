@@ -160,7 +160,7 @@ class Client(base.Base):
         """Setting the game object to self._game using the cookies"""
         cookie = Cookie.BaseCookie(self._request.get_all_header()["cookie"])
         if "pid" in cookie:
-            pid = int(cookie["pid"].value)
+            pid = cookie["pid"].value
             if pid in self.common.pid_client:
                 self._game = self.common.pid_client[pid]
                 self.logger.debug("Set game as %s" % self._game)

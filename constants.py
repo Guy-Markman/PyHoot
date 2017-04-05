@@ -11,19 +11,14 @@ BASE_HTML = """<HTML>
     </BODY>
 </HTML>"""
 BUFF_SIZE = 1024
-MIN_PID = 100000
-QUESTION_TIME = 3000
-MAX_PID = 999999
 CLOSE, SERVER, CLIENT = range(3)
 CRLF = "\r\n"
 DOUBLE_CRLF = 2 * CRLF
 ENCODING = 'utf-8'
 HTTP_VERSION = "HTTP/1.1"
+LENGTH_COOKIE = 16
 MAX_HEADER_LENGTH = 4096
-MIME_MAPPING = {
-    '.html': 'text/html',
-    '.png': 'image/png',
-    '.txt': 'text/plain',
-    '.py': 'application/octet-stream'
-}
+MAX_PID = 999999
+MIN_PID = 100000
 NONE, MASTER, PLAYER = range(3)
+QUESTION_TIME = 3000

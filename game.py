@@ -1,5 +1,7 @@
 """Game objects for the game, there is both player and master"""
 
+import base64
+import os
 import random
 import time
 
@@ -12,7 +14,7 @@ class Game(object):
     def __init__(self, common):
         super(Game, self).__init__()
         while True:
-            pid = random.randint(constants.MIN_PID, constants.MAX_PID)
+            pid = base64.b64encode(os.urandom(constants.LENGTH_COOKIE))
             if pid not in common.pid_client.keys():
                 break
         self._pid = pid

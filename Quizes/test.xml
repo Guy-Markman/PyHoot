@@ -2,30 +2,30 @@
 <Root>
 	<Quiz name="test" number_of_questions="1">
 		<Question duration="30">
-           <Text><![CDATA[
-             <font size="7">1+1</font><br />
-             <img src="questineer-pics/test/2.jpg"/>
-           ]]></Text>
-           <Answer>
-               <Text><![CDATA[
-                 <font size = "4">1</font>
-               ]]></Text>
-           </Answer>
-		   <Answer correct="1">
-               <Text><![CDATA[
-                 <font size = "4">2</font>
-               ]]></Text>
-           </Answer>
-		   <Answer>
-               <Text><![CDATA[
-                 <font size = "4">3</font>
-               ]]></Text>
-           </Answer>
-		   <Answer>
-               <Text><![CDATA[
-                 <font size = "4">4</font>
-               ]]></Text>
-           </Answer>
-	   </Question>
-   </Quiz>
+       		<Text><![CDATA[
+				<font size="7">1+1</font><br />
+				<img src="questineer-pics/test/2.jpg"/>
+			]]></Text>
+			<Answer>
+				<Text><![CDATA[
+				<font size = "4">1</font>
+				]]></Text>
+			</Answer>
+			<Answer correct="1">
+				<Text><![CDATA[
+				<font size = "4">2</font>
+				]]></Text>
+			</Answer>
+			<Answer>
+				<Text><![CDATA[
+				<font size = "4">3</font>
+				]]></Text>
+			</Answer>
+			<Answer>
+				<Text><![CDATA[
+				<font size = "4">4</font>
+				]]></Text>
+			</Answer>
+		</Question>
+	</Quiz>
 </Root>
