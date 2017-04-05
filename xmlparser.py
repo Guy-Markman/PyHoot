@@ -48,7 +48,7 @@ class XMLParser(object):
                     "./Quiz/Question").index(ans)])
         return right_answer
 
-    def moved_to_next_question(self):
+    def move_to_next_question(self):
         self.question_number += 1
 
 

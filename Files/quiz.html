@@ -5,7 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>PyHoot!</title>
         <script>
-            var get_names = window.setInterval(function() {
+            var state = "Registeration";
+            var timer = window.setInterval(function() {
                 getnames();
             }, 1000);
 
@@ -35,10 +36,11 @@
             }
 
             function changeDiv1() {
-                clearInterval(get_names);
+                state = "Opening";
+                clearInterval(timer);
                 order_move_all_players();
-                set_timer("5000");
-                get_names = window.setInterval(function() {
+                set_timer("5");
+                timer = window.setInterval(function() {
                     check_timer_change();
                 }, 1000);
                 getinfo();
@@ -50,7 +52,6 @@
             function changeDiv2() {
                 document.getElementById('part2').style.display = "none";
                 document.getElementById('part3').style.display = "inline";
-                // TODO: before showing part3 it will load the question and answers
             }
 
             function getinfo() {
@@ -88,12 +89,27 @@
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
                         if (this.responseText == "True") {
-                            get_question();
-                            changeDiv2();
+                            if (state == "Opening") {
+                                clearInterval(timer);
+                                move_to_next_question();
+                            }
                         }
                     }
                 };
                 xhttp.open("GET", "check_timer_change", true);
+                xhttp.send();
+            }
+
+            function move_to_next_question() {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        if (parseInt(this.responseText) > 0) {
+                            get_question();
+                        }
+                    }
+                };
+                xhttp.open("GET", "move_to_next_question", true);
                 xhttp.send();
             }
 
@@ -105,15 +121,18 @@
                         xmlDoc = parser.parseFromString(this.responseText,
                             "text/xml");
                         document.getElementById("question_title").innerHTML =
-                            xmlDoc.getElementsByTagName("question_text")[0].childNodes[0].nodeValue;
+                            xmlDoc.getElementsByTagName("Question")[0].childNodes[1].nodeValue;
                         var questionsID = ["A_answer", "B_answer", "B_answer", "B_answer"];
                         for (i = 0; i < 4; i++) {
                             document.getElementById(questionsID[i]).innerHTML =
-                                xmlDoc.getElementsByTagName("answer")[i].childNodes[0].getElementById;
+                                xmlDoc.getElementsByTagName("Answer")[i].childNodes[1].nodeValue;
                         }
+                        state = "Question";
+                        changeDiv2();
                     }
+
                 };
-                xhttp.open("GET", "get_question", false);
+                xmlDoc.xhttp.open("GET", "get_question", false);
                 xhttp.send();
             }
 
@@ -143,22 +162,22 @@
                 </font>
             </div>
             <p id="part3" style="display:none">
-                <font id="question_title" size="7"></font>
+                <div id="question_title"></div>
                 <table style="width:100%">
                     <tr>
                         <td>
-                            <font id="A_answer"></font>
+                            <div id="A_answer"></div>
                         </td>
                         <td>
-                            <font id="B_answer"></font>
+                            <div id="B_answer"></div>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <font id="C_answer"></font>
+                            <div id="C_answer"></div>
                         </td>
                         <td>
-                            <font id="D_answer"></font>
+                            <div id="D_answer"></div>
                         </td>
                     </tr>
                 </table>

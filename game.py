@@ -39,6 +39,8 @@ class Game(object):
         self._change_timer = time.time() + new_time
 
     def check_timer_change(self):
+        print self._change_timer - time.time()
+        print self._change_timer - time.time() < 0
         return self._change_timer - time.time() < 0
 
 
@@ -91,6 +93,15 @@ class GameMaster(Game):
         # ].name})
         # body = ""
         return "WIP"
+
+    def get_question(self):
+        return self._parser.get_xml_question()
+
+    def move_to_next_question(self):
+        self._parser.moved_to_next_question()
+
+    def get_left_questions(self):
+        return self._parser.get_left_questions()
 
     @property
     def join_number(self):

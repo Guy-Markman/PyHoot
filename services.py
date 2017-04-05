@@ -254,8 +254,7 @@ class get_information(TXTService):
     def content(self):
         return self._game.get_parser().get_information()
 
-# TODO: Write, check switch, swtich all players, get question, get
-# leaderboard master, get leaderboard player
+# TODO: Write, get leaderboard master, get leaderboard player
 
 
 class set_timer_change(TXTService):
@@ -303,3 +302,25 @@ class check_move_next_page(TXTService):
         print self._game
         print self._game._move_to_next_page
         return str(self._game.get_move_to_next_page())
+
+
+class move_to_next_question(TXTService):
+    NAME = "/move_to_next_question"
+
+    def __init__(self, game):
+        super(move_to_next_question, self).__init__()
+        self._game = game
+
+    def content(self):
+        return str(self._game.get_left_questions())
+
+
+class get_question(TXTService):
+    NAME = "/get_question"
+
+    def __init__(self, game):
+        super(get_question, self).__init__()
+        self._game = game
+
+    def content(self):
+        return self._game.get_question()
