@@ -39,8 +39,6 @@ class Game(object):
         self._change_timer = time.time() + new_time
 
     def check_timer_change(self):
-        print self._change_timer - time.time()
-        print self._change_timer - time.time() < 0
         return self._change_timer - time.time() < 0
 
 
@@ -56,7 +54,6 @@ class GameMaster(Game):
             join_number = random.randint(constants.MIN_PID, constants.MAX_PID)
             if join_number not in common.join_number.keys():
                 break
-        print join_number
         self._join_number = join_number
 
     def add_player(self, new_pid, game_player):
@@ -98,7 +95,7 @@ class GameMaster(Game):
         return self._parser.get_xml_question()
 
     def move_to_next_question(self):
-        self._parser.moved_to_next_question()
+        self._parser.move_to_next_question()
 
     def get_left_questions(self):
         return self._parser.get_left_questions()

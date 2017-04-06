@@ -4,26 +4,26 @@
 		<Question duration="30">
        		<Text><![CDATA[
 				<font size="7">1+1</font><br />
-				<img src="questineer-pics/test/2.jpg"/>
+				<img src="questineer-pics/test/2.png" style="width:304px;height:228px;"/>
 			]]></Text>
 			<Answer>
 				<Text><![CDATA[
-				<font size = "4">1</font>
+				<font size = "5">A: 1</font>
 				]]></Text>
 			</Answer>
 			<Answer correct="1">
 				<Text><![CDATA[
-				<font size = "4">2</font>
+				<font size = "5">B: 2</font>
 				]]></Text>
 			</Answer>
 			<Answer>
 				<Text><![CDATA[
-				<font size = "4">3</font>
+				<font size = "5">C: 3</font>
 				]]></Text>
 			</Answer>
 			<Answer>
 				<Text><![CDATA[
-				<font size = "4">4</font>
+				<font size = "5">D: 4</font>
 				]]></Text>
 			</Answer>
 		</Question>

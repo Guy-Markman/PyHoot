@@ -8,7 +8,6 @@ class XMLParser(object):
 
     def __init__(self, file_name):
         test_file("%s.xml" % file_name, "PyHoot\Quizes")
-        self.file_name = file_name
         self._root = ElementTree.parse(
             "PyHoot\Quizes\%s.xml" % file_name).getroot()
         self.question_number = 0  # 0 Represent the starting page
@@ -24,7 +23,8 @@ class XMLParser(object):
         )
 
     def get_information(self):
-        backup_root = self._root
+        backup_root = ElementTree.parse(
+            "PyHoot\Quizes\%s.xml" % self.file_name).getroot()
         for question in backup_root.findall("./Quiz/Question"):
             backup_root.find("./Quiz").remove(question)
         return ElementTree.tostring(backup_root, encoding=constants.ENCODING)
@@ -55,7 +55,6 @@ class XMLParser(object):
 def test_file(filename, base="."):
     """Making sure everything is OK with the file before we start usings it
     """
-    #  TODO: finish this
     root = ElementTree.parse(
         os.path.normpath(os.path.join(base, filename))
     )

@@ -104,7 +104,7 @@
                 var xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
-                        if (parseInt(this.responseText) > 0) {
+                        if (parseInt(this.responseText) >= 0) {
                             get_question();
                         }
                     }
@@ -112,6 +112,7 @@
                 xhttp.open("GET", "move_to_next_question", true);
                 xhttp.send();
             }
+
 
             function get_question() {
                 var xhttp = new XMLHttpRequest();
@@ -121,18 +122,19 @@
                         xmlDoc = parser.parseFromString(this.responseText,
                             "text/xml");
                         document.getElementById("question_title").innerHTML =
-                            xmlDoc.getElementsByTagName("Question")[0].childNodes[1].nodeValue;
-                        var questionsID = ["A_answer", "B_answer", "B_answer", "B_answer"];
+                            xmlDoc.getElementsByTagName("Question")[0].childNodes[1].firstChild.nodeValue;
+
+                        var questionsID = ["A_answer", "B_answer", "C_answer", "D_answer"];
                         for (i = 0; i < 4; i++) {
                             document.getElementById(questionsID[i]).innerHTML =
-                                xmlDoc.getElementsByTagName("Answer")[i].childNodes[1].nodeValue;
+                                xmlDoc.getElementsByTagName("Answer")[i].childNodes[1].firstChild.nodeValue;
                         }
                         state = "Question";
                         changeDiv2();
                     }
 
                 };
-                xmlDoc.xhttp.open("GET", "get_question", false);
+                xhttp.open("GET", "get_question", true);
                 xhttp.send();
             }
 
@@ -141,7 +143,7 @@
 
     <body onload="setInnerHTML('get_join_number', 'join_number');">
         <center>
-            <div id="part1">
+            <div id="part1" style="display:inline">
                 <font size="7">Now you can join the Game!<br /></font>
                 <font size="7" id="join_number"></font>
                 <p id="br1">
@@ -161,27 +163,32 @@
                 <font size="4" id="number_questions">
                 </font>
             </div>
-            <p id="part3" style="display:none">
-                <div id="question_title"></div>
-                <table style="width:100%">
+            <div id="part3" style="display:none">
+                <p id="question_title">
+                </p>
+                <table style="width:0%">
                     <tr>
                         <td>
-                            <div id="A_answer"></div>
+                            <p id="A_answer">
+                            </p>
                         </td>
                         <td>
-                            <div id="B_answer"></div>
+                            <p id="B_answer">
+                            </p>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <div id="C_answer"></div>
+                            <p id="C_answer">
+                            </p>
                         </td>
                         <td>
-                            <div id="D_answer"></div>
+                            <p id="D_answer">
+                            </p>
                         </td>
                     </tr>
                 </table>
-            </p>
+            </div>
         </center>
     </body>
 

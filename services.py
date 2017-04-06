@@ -299,8 +299,6 @@ class check_move_next_page(TXTService):
         self._game = game
 
     def content(self):
-        print self._game
-        print self._game._move_to_next_page
         return str(self._game.get_move_to_next_page())
 
 
@@ -310,6 +308,7 @@ class move_to_next_question(TXTService):
     def __init__(self, game):
         super(move_to_next_question, self).__init__()
         self._game = game
+        game.move_to_next_question()
 
     def content(self):
         return str(self._game.get_left_questions())
