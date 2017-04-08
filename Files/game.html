@@ -5,54 +5,61 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
 		<script>
-			var check_move = window.setInterval(function() {
+			var timer = window.setInterval(function() {
 				check_move_to_next();
 			}, 1000);
 
-			function disconnect_user() {
+			function xmlrequest(url, state_change) {
 				var xhttp = new XMLHttpRequest();
-				xhttp.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						window.location.href = '/';
-					}
-				};
-				xhttp.open("GET", "diconnect_user", true);
+				if (state_change !== null) {
+					xhttp.onreadystatechange = state_change;
+				}
+				xhttp.open("GET", url, true);
 				xhttp.send();
+				return false;
+			}
+
+			function disconnect_user() {
+				xmlrequest("diconnect_user",
+					function() {
+						if (this.readyState == 4 && this.status == 200) {
+							window.location.href = '/';
+						}
+					});
 			}
 
 			function switch_wait_question() {
 				var wait_style_display = document.getElementById("wait").style.display;
 				var question_style_display = document.getElementById("question").style.display;
-				clearInterval(check_move);
 				wait_style_display = [question_style_display, question_style_display = wait_style_display][0];
 				document.getElementById("wait").style.display = wait_style_display;
 				document.getElementById("question").style.display = question_style_display;
 			}
 
 			function sent_answer(letter) {
-				var xhttp = new XMLHttpRequest();
-				xhttp.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						clearInterval(timer);
-						switch_wait_question();
-					}
-				};
-				xhttp.open("GET", "answer?letter=" + letter, true);
-				xhttp.send();
-			}
-
-			function check_move_to_next() {
-				var xhttp = new XMLHttpRequest();
-				xhttp.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						if (this.responseText == "True") {
-							console.log("switch");
+				xmlrequest("answer?letter=" + letter,
+					function() {
+						if (this.readyState == 4 && this.status == 200) {
+							timer = window.setInterval(function() {
+								check_move_to_next();
+							}, 1000);
 							switch_wait_question();
 						}
 					}
-				};
-				xhttp.open("GET", "check_move_next_page", true);
-				xhttp.send();
+				);
+			}
+
+			function check_move_to_next() {
+				xmlrequest("check_move_next_page",
+					function() {
+						if (this.readyState == 4 && this.status == 200) {
+							if (this.responseText == "True") {
+								switch_wait_question();
+								clearInterval(timer);
+							}
+						}
+					}
+				);
 			}
 
 		</script>

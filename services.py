@@ -57,6 +57,9 @@ class TXTService(Service):
                                             len(self._content_page),
                                             extra_headers=extra, type=".html")
 
+    def content(self):
+        return "done"
+
 
 class Clock(Service):
     """HTTP page of local time and UTC time"""
@@ -254,8 +257,6 @@ class get_information(TXTService):
     def content(self):
         return self._game.get_parser().get_information()
 
-# TODO: Write, get leaderboard master, get leaderboard player
-
 
 class set_timer_change(TXTService):
     NAME = "/set_timer_change"
@@ -263,9 +264,6 @@ class set_timer_change(TXTService):
     def __init__(self, game, new_time):
         super(set_timer_change, self).__init__()
         game.set_time_change(int(new_time[0]))
-
-    def content(self):
-        return "done"
 
 
 class check_timer_change(TXTService):
@@ -287,9 +285,6 @@ class order_move_all_players(TXTService):
         for player in game.get_player_dict().values():
             player.order_move_to_next_page()
 
-    def content(self):
-        return "done"
-
 
 class check_move_next_page(TXTService):
     NAME = "/check_move_next_page"
@@ -299,7 +294,10 @@ class check_move_next_page(TXTService):
         self._game = game
 
     def content(self):
-        return str(self._game.get_move_to_next_page())
+        ans = self._game.get_move_to_next_page()
+        if ans:
+            self._game.moved_to_next_page()
+        return str(ans)
 
 
 class move_to_next_question(TXTService):
@@ -323,3 +321,28 @@ class get_question(TXTService):
 
     def content(self):
         return self._game.get_question()
+
+
+class get_xml_leaderboard(TXTService):
+    NAME = "/get_xml_leaderboard"
+
+    def __init__(self, game):
+        super(get_xml_leaderboard, self).__init__()
+        self._game = game
+
+    def content(self):
+        return self._game.get_xml_leaderboard()
+
+
+class check_move_question(TXTService):
+    NAME = "/check_move_question"
+
+    def __init__(self, game):
+        super(check_move_question, self).__init__()
+        self._game = game
+
+    def content(self):
+        return str(
+            self._game.check_timer_change() or
+            self._game.check_all_players_answered()
+        )

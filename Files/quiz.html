@@ -10,19 +10,27 @@
                 getnames();
             }, 1000);
 
-            function setInnerHTML(url, id) {
+
+            function xmlrequest(url, state_change) {
                 var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        document.getElementById(id).innerHTML =
-                            this.responseText;
-                    }
-                };
+                if (state_change !== null) {
+                    xhttp.onreadystatechange = state_change;
+                }
                 xhttp.open("GET", url, true);
                 xhttp.send();
                 return false;
             }
 
+            function setInnerHTML(url, id) {
+                xmlrequest(url,
+                    function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            document.getElementById(id).innerHTML =
+                                this.responseText;
+                        }
+                    }
+                );
+            }
 
             function getnames() {
                 setInnerHTML("getnames", "names", true);
@@ -31,111 +39,127 @@
             //continue only if at least one user is online
             function check_moveable() {
                 if (document.getElementById("names").innerHTML.length > 0) {
-                    changeDiv1();
+                    change_Registeration_Opening();
                 }
             }
 
-            function changeDiv1() {
+            function change_Registeration_Opening() {
                 state = "Opening";
                 clearInterval(timer);
-                order_move_all_players();
                 set_timer("5");
                 timer = window.setInterval(function() {
                     check_timer_change();
                 }, 1000);
                 getinfo();
-                document.getElementById('part1').style.display = "none";
-                document.getElementById('part2').style.display = "inline";
+                document.getElementById('Registration').style.display = "none";
+                document.getElementById('Opening').style.display = "inline";
 
             }
 
-            function changeDiv2() {
-                document.getElementById('part2').style.display = "none";
-                document.getElementById('part3').style.display = "inline";
-            }
-
-            function getinfo() {
-                var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        parser = new DOMParser();
-                        xmlDoc = parser.parseFromString(this.responseText,
-                            "text/xml");
-                        quiz = xmlDoc.getElementsByTagName("Quiz")[0];
-                        document.getElementById("quiz_name").innerHTML =
-                            quiz.getAttribute("name");
-                        document.getElementById("number_questions").innerHTML =
-                            quiz.getAttribute("number_of_questions") + " questions";
-                    }
-                };
-                xhttp.open("GET", "get_information", true);
-                xhttp.send();
-            }
-
-            function order_move_all_players() {
-                var xhttp = new XMLHttpRequest();
-                xhttp.open("GET", "order_move_all_players", true);
-                xhttp.send();
-            }
-
-            function set_timer(new_time) {
-                var xhttp = new XMLHttpRequest();
-                xhttp.open("GET", "set_timer_change?new_time=" + new_time);
-                xhttp.send();
-            }
-
-            function check_timer_change() {
-                var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        if (this.responseText == "True") {
-                            if (state == "Opening") {
-                                clearInterval(timer);
-                                move_to_next_question();
+            function check_move_question() {
+                xmlrequest("check_move_question",
+                    function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            if (this.responseText == "True") {
+                                change_Question_Leaderboard();
                             }
                         }
                     }
-                };
-                xhttp.open("GET", "check_timer_change", true);
-                xhttp.send();
+                );
+            }
+
+            function change_Opening_Question() {
+                order_move_all_players();
+                clearInterval(timer);
+                timer = window.setInterval(function() {
+                    check_move_question();
+                }, 1000);
+                document.getElementById('Opening').style.display = "none";
+                document.getElementById('Question').style.display = "inline";
+            }
+
+            function change_Question_Leaderboard() {
+                clearInterval(timer);
+                document.getElementById("Question").style.display = "none";
+                document.getElementById("Leaderboard").style.display = "inline";
+            }
+
+            function getinfo() {
+                xmlrequest("get_information",
+                    function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            parser = new DOMParser();
+                            xmlDoc = parser.parseFromString(this.responseText,
+                                "text/xml");
+                            quiz = xmlDoc.getElementsByTagName("Quiz")[0];
+                            document.getElementById("quiz_name").innerHTML =
+                                quiz.getAttribute("name");
+                            document.getElementById("number_questions").innerHTML =
+                                quiz.getAttribute("number_of_questions") + " questions";
+                        }
+                    }
+                );
+            }
+
+            function order_move_all_players() {
+                xmlrequest("order_move_all_players", null);
+            }
+
+            function set_timer(new_time) {
+                xmlrequest("set_timer_change?new_time=" + new_time, null);
+            }
+
+            function check_timer_change() {
+                xmlrequest("check_timer_change",
+                    function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            if (this.responseText == "True") {
+                                if (state == "Opening") {
+                                    clearInterval(timer);
+                                    move_to_next_question();
+                                }
+                            }
+                        }
+                    }
+                );
             }
 
             function move_to_next_question() {
-                var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        if (parseInt(this.responseText) >= 0) {
-                            get_question();
+                xmlrequest("move_to_next_question",
+                    function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            if (parseInt(this.responseText) >= 0) {
+                                get_question();
+                            }
                         }
                     }
-                };
-                xhttp.open("GET", "move_to_next_question", true);
-                xhttp.send();
+                );
             }
 
 
             function get_question() {
-                var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        parser = new DOMParser();
-                        xmlDoc = parser.parseFromString(this.responseText,
-                            "text/xml");
-                        document.getElementById("question_title").innerHTML =
-                            xmlDoc.getElementsByTagName("Question")[0].childNodes[1].firstChild.nodeValue;
+                xmlrequest("get_question",
+                    function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            parser = new DOMParser();
+                            xmlDoc = parser.parseFromString(this.responseText,
+                                "text/xml");
+                            question = xmlDoc.getElementsByTagName("Question")[0];
+                            set_timer(question.getAttribute("duration"));
+                            document.getElementById("question_title").innerHTML =
+                                question.childNodes[1].firstChild.nodeValue;
 
-                        var questionsID = ["A_answer", "B_answer", "C_answer", "D_answer"];
-                        for (i = 0; i < 4; i++) {
-                            document.getElementById(questionsID[i]).innerHTML =
-                                xmlDoc.getElementsByTagName("Answer")[i].childNodes[1].firstChild.nodeValue;
+                            var questionsID = ["A_answer", "B_answer", "C_answer", "D_answer"];
+                            for (i = 0; i < 4; i++) {
+                                document.getElementById(questionsID[i]).innerHTML =
+                                    xmlDoc.getElementsByTagName("Answer")[i].childNodes[1].firstChild.nodeValue;
+                            }
+                            state = "Question";
+                            change_Opening_Question();
                         }
-                        state = "Question";
-                        changeDiv2();
-                    }
 
-                };
-                xhttp.open("GET", "get_question", true);
-                xhttp.send();
+                    }
+                );
             }
 
         </script>
@@ -143,7 +167,7 @@
 
     <body onload="setInnerHTML('get_join_number', 'join_number');">
         <center>
-            <div id="part1" style="display:inline">
+            <div id="Registration" style="display:inline">
                 <font size="7">Now you can join the Game!<br /></font>
                 <font size="7" id="join_number"></font>
                 <p id="br1">
@@ -156,17 +180,17 @@
                 </p>
                 <input type="button" id="Start_playing" value="Start playing" onclick="check_moveable()">
             </div>
-            <div id="part2" style="display:none">
+            <div id="Opening" style="display:none">
                 <font size="7" id="quiz_name">
                 </font>
                 <br /><br />
                 <font size="4" id="number_questions">
                 </font>
             </div>
-            <div id="part3" style="display:none">
+            <div id="Question" style="display:none">
                 <p id="question_title">
                 </p>
-                <table style="width:0%">
+                <table align="center" style="width:20%">
                     <tr>
                         <td>
                             <p id="A_answer">
@@ -188,6 +212,9 @@
                         </td>
                     </tr>
                 </table>
+            </div>
+            <div id="Leaderboard" style="display:none">
+                WIP
             </div>
         </center>
     </body>

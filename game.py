@@ -4,6 +4,7 @@ import base64
 import os
 import random
 import time
+from xml.etree import ElementTree
 
 from . import constants, xmlparser
 
@@ -78,18 +79,30 @@ class GameMaster(Game):
             player = self._players_list["player"]
             if player.answer in right_answers:
                 self._players_list[pid]["_score"] += (
-                    constants.QUESTION_TIME -
+                    self._parser.get_duration_question() -
                     int(round((time_stop - player.timeanswer) * 100)))
 
-    def get_html_leaderboard(self):
-        # self._update_score()
-        # dic_score_name = {}
-        # for pid in self._players_list:
-        # player_score = self._players_list[pid]
-        # dic_score_name.update({player_score["_score"]: player_score["player"
-        # ].name})
-        # body = ""
-        return "WIP"
+    def get_xml_leaderboard(self):
+        self._update_score()
+        dic_score_name = {}
+        for pid in self._players_list:
+            dic_score_name.update(
+                {
+                    self._players_list[pid]["_score"]:
+                    self._players_list[pid]["player"].name
+                }
+            )
+        root = ElementTree.Element("Root")
+        score_sorted = sorted(dic_score_name, reverse=True)
+        for i in range(min(5, len(dic_score_name))):
+            score = score_sorted[i]
+            ElementTree.SubElement(
+                root, "Player", {
+                    "name": dic_score_name[score],
+                    "score": score
+                }
+            )
+        return root
 
     def get_question(self):
         return self._parser.get_xml_question()
@@ -99,6 +112,15 @@ class GameMaster(Game):
 
     def get_left_questions(self):
         return self._parser.get_left_questions()
+
+    def check_all_players_answered(self):
+        ans = True
+        for p in self._players_list.values():
+            p = p["player"]
+            if p._answer not in ["A", "B", "C", "D"]:
+                ans = False
+                break
+        return ans
 
     @property
     def join_number(self):

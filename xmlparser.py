@@ -38,15 +38,16 @@ class XMLParser(object):
 
     def get_question_answers(self):
         right_answer = []
-        for ans in self._root.findall("./Quiz/Question")[
-                self.question_number].findall(".s/Answer"):
-            if (
-                "correct" in ans.attrib and
-                ans.attrib["correct"] == "1"
-            ):
-                right_answer.append(["A", "B", "C", "D"][self._root.findall(
-                    "./Quiz/Question").index(ans)])
+        answers = self._root.findall(
+            "./Quiz/Question")[self.question_number].findall("./Answer")
+        for ans in answers:
+            if "correct" in ans.attrib and ans.attrib["correct"] == "1":
+                right_answer.append(["A", "B", "C", "D"][answers.index(ans)])
         return right_answer
+
+    def get_duration_question(self):
+        return int(self._root.findall("./Quiz/Question")[
+            self.question_number - 1].attrib["duration"])
 
     def move_to_next_question(self):
         self.question_number += 1

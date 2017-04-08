@@ -6,15 +6,14 @@ N_ANSWERS = 4
 
 
 def main():
-    Root = ElementTree.Element("Root")
-    type(Root)
-    ElementTree.SubElement(Root, "Quiz", {
+    root = ElementTree.Element("Root")
+    ElementTree.SubElement(root, "Quiz", {
         "name": raw_input("Name of the quiz. "),
         "number_of_questions": raw_input("How many question in the quiz? ")
     })
-    for question in Root.find("./Quiz").attrib["number_of_questions"]:
+    for question in root.find("./Quiz").attrib["number_of_questions"]:
         q = ElementTree.SubElement(
-            Root.find("./Quiz"), "Question", {
+            root.find("./Quiz"), "Question", {
                 "duration": raw_input("How long is this question? In seconds ")
             })
         ElementTree.SubElement(q, "Text").text = "<![CDATA[%s]]>" % (
@@ -27,9 +26,9 @@ def main():
                 "Is the answer right or wrong? (answer in true or false) ")
             if right_wrong == "true":
                 ans.attrib["correct"] = "1"
-    build = prettify(Root)
+    build = prettify(root)
     print build
-    name = Root.find("./Quiz").attrib["name"]
+    name = root.find("./Quiz").attrib["name"]
     try:
         fd = os.open("../Quizes/%s.xml" % name, os.O_CREAT | os.O_WRONLY)
         try:
