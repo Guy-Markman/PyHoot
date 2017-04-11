@@ -80,8 +80,35 @@
 
             function change_Question_Leaderboard() {
                 clearInterval(timer);
-                document.getElementById("Question").style.display = "none";
-                document.getElementById("Leaderboard").style.display = "inline";
+                xmlrequest("get_xml_leaderboard",
+                    function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            parser = new DOMParser();
+                            xmlDoc = parser.parseFromString(this.responseText, "text/xml");
+                            leaderboard = document.getElementById("leaderboard");
+                            leaderboard.innerHTML = "<font size = '7'>Top players</font><br/>" +
+                                "<table>" +
+                                "   <tr>" +
+                                "       <th>Player</th>" +
+                                "       <th>Score</th>" +
+                                "   </tr>";
+                            for (var player in xmlDoc.getElementsByTagName("Player")) {
+                                leaderboard.innerHTML += "<tr>" +
+                                    "   <td>" +
+                                    player.getAttribute("name") +
+                                    "   </td>" +
+                                    "   <td>" +
+                                    player.getAttribute("score") +
+                                    "   </td>" +
+                                    "</tr>";
+                            }
+                            order_move_all_players();
+                            document.getElementById("Question").style.display = "none";
+                            document.getElementById("Leaderboard").style.display = "inline";
+
+                        }
+                    }
+                );
             }
 
             function getinfo() {
@@ -130,6 +157,8 @@
                         if (this.readyState == 4 && this.status == 200) {
                             if (parseInt(this.responseText) >= 0) {
                                 get_question();
+                            } else {
+                                state = "finish";
                             }
                         }
                     }
@@ -214,7 +243,6 @@
                 </table>
             </div>
             <div id="Leaderboard" style="display:none">
-                WIP
             </div>
         </center>
     </body>

@@ -346,3 +346,14 @@ class check_move_question(TXTService):
             self._game.check_timer_change() or
             self._game.check_all_players_answered()
         )
+
+
+class get_score(TXTService):
+    NAME = "/get_personal_leaderboard"
+
+    def __init__(self, game):
+        super(get_score, self).__init__()
+        self._game = game
+
+    def content(self):
+        return str(self._game.get_score)

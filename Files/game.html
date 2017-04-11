@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
 		<script>
+			var state = "wait";
 			var timer = window.setInterval(function() {
 				check_move_to_next();
 			}, 1000);
@@ -28,12 +29,30 @@
 					});
 			}
 
-			function switch_wait_question() {
-				var wait_style_display = document.getElementById("wait").style.display;
-				var question_style_display = document.getElementById("question").style.display;
-				wait_style_display = [question_style_display, question_style_display = wait_style_display][0];
-				document.getElementById("wait").style.display = wait_style_display;
-				document.getElementById("question").style.display = question_style_display;
+			function switch_screens() {
+				switch (state) {
+					case "question":
+						from = "leaderboard";
+						to = "question";
+						break;
+					case "leaderboard":
+						from = "question";
+						to = "leaderboard";
+						break;
+					case "wait":
+						from = "question";
+						to = "wait";
+						break;
+					case "finish":
+						from = "leaderboard";
+						to = "finish";
+						break;
+				}
+				var from_style_display = document.getElementById(from).style.display;
+				var to_style_display = document.getElementById(to).style.display;
+				from_style_display = [to_style_display, to_style_display = from_style_display][0];
+				document.getElementById(from).style.display = from_style_display;
+				document.getElementById(to).style.display = to_style_display;
 			}
 
 			function sent_answer(letter) {
@@ -43,19 +62,27 @@
 							timer = window.setInterval(function() {
 								check_move_to_next();
 							}, 1000);
-							switch_wait_question();
+							state = "wait";
+							switch_screens();
 						}
 					}
 				);
 			}
+
 
 			function check_move_to_next() {
 				xmlrequest("check_move_next_page",
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
 							if (this.responseText == "True") {
-								switch_wait_question();
-								clearInterval(timer);
+								if (state == "wait") {
+									state = "question";
+									switch_screens();
+								}
+								if (state == "question") {
+									state = "leaderboard";
+									switch_screens();
+								}
 							}
 						}
 					}
@@ -104,6 +131,9 @@
 						</td>
 					</tr>
 				</table>
+			</div>
+			<div id="leaderboard" style="display:none">
+				wip
 			</div>
 		</center>
 	</body>

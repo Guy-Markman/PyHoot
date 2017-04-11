@@ -72,6 +72,9 @@ class GameMaster(Game):
     def get_parser(self):
         return self._parser
 
+    def get_score(self, pid):
+        return self._players_list[pid]["_score"]
+
     def _update_score(self):
         right_answers = self._parser.get_question_answers()
         time_stop = time.time()
@@ -137,6 +140,9 @@ class GamePlayer(Game):
         self._game_master = master  # Game object GameMaster
         self._answer = None
         self._time = 0
+
+    def get_score(self):
+        return self._game_master.get_score(self._pid)
 
     @property
     def name(self):
