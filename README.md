@@ -26,9 +26,9 @@ TODO:
 - [X] Quiz editor (independent)
 - [X] Add support to services
 - [X] Registrater players
-- [ ] Show question on the screen and move to the next part (timer)
-- [ ] Get answers and analyze them
-- [ ] Update database of player with score
+- [X] Show question on the screen and move to the next part (timer)
+- [X] Get answers and analyze them
+- [X] Update database of player with score
 - [ ] Show answer and leaderboard
 - [ ] End of game
 - [ ] Hide\ Find string in picture

@@ -77,13 +77,11 @@ class GameMaster(Game):
 
     def _update_score(self):
         right_answers = self._parser.get_question_answers()
-        time_stop = time.time()
         for pid in self._players_list:
-            player = self._players_list["player"]
+            player = self._players_list[pid]["player"]
             if player.answer in right_answers:
-                self._players_list[pid]["_score"] += (
-                    self._parser.get_duration_question() -
-                    int(round((time_stop - player.timeanswer) * 100)))
+                self._players_list[pid]["_score"] += 1
+                # TODO: score by time
 
     def get_xml_leaderboard(self):
         self._update_score()
@@ -97,15 +95,28 @@ class GameMaster(Game):
             )
         root = ElementTree.Element("Root")
         score_sorted = sorted(dic_score_name, reverse=True)
+        print len(dic_score_name)
         for i in range(min(5, len(dic_score_name))):
             score = score_sorted[i]
             ElementTree.SubElement(
                 root, "Player", {
                     "name": dic_score_name[score],
-                    "score": score
+                    "score": str(score)
                 }
             )
-        return root
+        return ElementTree.tostring(root, encoding=constants.ENCODING)
+
+    def get_place(self, pid):
+        dic_score_pid = {}
+        for pid in self._players_list:
+            dic_score_pid.update(
+                {
+                    self._players_list[pid]["_score"]:
+                    pid
+                }
+            )
+        dic_score_pid = sorted(dic_score_pid, reverse=True)
+        return dic_score_pid.values().index(pid) + 1
 
     def get_question(self):
         return self._parser.get_xml_question()
@@ -144,6 +155,9 @@ class GamePlayer(Game):
     def get_score(self):
         return self._game_master.get_score(self._pid)
 
+    def get_place(self):
+        return self._game_master.get_place(self._pid)
+
     @property
     def name(self):
         return self._name
@@ -166,7 +180,10 @@ class GamePlayer(Game):
 
     @answer.setter
     def answer(self, answer):
-        self._answer = answer
+        if answer in ["A", "B", "C", "D"]:
+            self._answer = answer
+        else:
+            raise Exception("Answer not allowd")
 
     @property
     def timeanswer(self):

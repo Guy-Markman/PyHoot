@@ -18,7 +18,6 @@
                 }
                 xhttp.open("GET", url, true);
                 xhttp.send();
-                return false;
             }
 
             function setInnerHTML(url, id) {
@@ -45,7 +44,6 @@
 
             function change_Registeration_Opening() {
                 state = "Opening";
-                clearInterval(timer);
                 set_timer("5");
                 timer = window.setInterval(function() {
                     check_timer_change();
@@ -61,6 +59,7 @@
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
                             if (this.responseText == "True") {
+                                clearInterval(timer);
                                 change_Question_Leaderboard();
                             }
                         }
@@ -69,30 +68,31 @@
             }
 
             function change_Opening_Question() {
+                console.log("change_Opening_Question");
                 order_move_all_players();
-                clearInterval(timer);
-                timer = window.setInterval(function() {
-                    check_move_question();
-                }, 1000);
+                console.log("after order_move_all_players");
                 document.getElementById('Opening').style.display = "none";
                 document.getElementById('Question').style.display = "inline";
             }
 
             function change_Question_Leaderboard() {
-                clearInterval(timer);
+                console.log("change_Question_Leaderboard");
                 xmlrequest("get_xml_leaderboard",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
+                            clearInterval(timer);
                             parser = new DOMParser();
                             xmlDoc = parser.parseFromString(this.responseText, "text/xml");
-                            leaderboard = document.getElementById("leaderboard");
+                            leaderboard = document.getElementById("Leaderboard");
                             leaderboard.innerHTML = "<font size = '7'>Top players</font><br/>" +
                                 "<table>" +
                                 "   <tr>" +
                                 "       <th>Player</th>" +
                                 "       <th>Score</th>" +
                                 "   </tr>";
-                            for (var player in xmlDoc.getElementsByTagName("Player")) {
+                            var list_players = xmlDoc.getElementsByTagName("Player");
+                            for (i=0;  i < list_players.length; i++) {
+                                player = list_players[i];
                                 leaderboard.innerHTML += "<tr>" +
                                     "   <td>" +
                                     player.getAttribute("name") +
@@ -141,8 +141,8 @@
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
                             if (this.responseText == "True") {
+                                clearInterval(timer);
                                 if (state == "Opening") {
-                                    clearInterval(timer);
                                     move_to_next_question();
                                 }
                             }
@@ -175,9 +175,12 @@
                                 "text/xml");
                             question = xmlDoc.getElementsByTagName("Question")[0];
                             set_timer(question.getAttribute("duration"));
+                            clearInterval(timer);
+                            var timer = window.setInterval(function() {
+                                check_move_question();
+                            }, 1000);
                             document.getElementById("question_title").innerHTML =
                                 question.childNodes[1].firstChild.nodeValue;
-
                             var questionsID = ["A_answer", "B_answer", "C_answer", "D_answer"];
                             for (i = 0; i < 4; i++) {
                                 document.getElementById(questionsID[i]).innerHTML =
@@ -242,6 +245,7 @@
                     </tr>
                 </table>
             </div>
+            <!--FIXME: Not stopping to reload the Leaderboard-->
             <div id="Leaderboard" style="display:none">
             </div>
         </center>

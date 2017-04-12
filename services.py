@@ -286,6 +286,16 @@ class order_move_all_players(TXTService):
             player.order_move_to_next_page()
 
 
+class order_move_all_not_answered(TXTService):
+    NAME = "/order_move_all_not_answered"
+
+    def __init__(self, game):
+        super(order_move_all_not_answered, self).__init__()
+        for player in game.get_player_dict().values():
+            if player.answer is None:
+                player.order_move_to_next_page()
+
+
 class check_move_next_page(TXTService):
     NAME = "/check_move_next_page"
 
@@ -349,11 +359,11 @@ class check_move_question(TXTService):
 
 
 class get_score(TXTService):
-    NAME = "/get_personal_leaderboard"
+    NAME = "/get_score"
 
     def __init__(self, game):
         super(get_score, self).__init__()
         self._game = game
 
     def content(self):
-        return str(self._game.get_score)
+        return "%d, %d" % (self._game.get_score(), self._game.get_place())

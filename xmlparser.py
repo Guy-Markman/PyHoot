@@ -39,7 +39,7 @@ class XMLParser(object):
     def get_question_answers(self):
         right_answer = []
         answers = self._root.findall(
-            "./Quiz/Question")[self.question_number].findall("./Answer")
+            "./Quiz/Question")[self.question_number - 1].findall("./Answer")
         for ans in answers:
             if "correct" in ans.attrib and ans.attrib["correct"] == "1":
                 right_answer.append(["A", "B", "C", "D"][answers.index(ans)])

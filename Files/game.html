@@ -30,28 +30,26 @@
 			}
 
 			function switch_screens() {
+				console.log("state "+state);
 				switch (state) {
 					case "question":
-						from = "leaderboard";
-						to = "question";
-						break;
-					case "leaderboard":
-						from = "question";
 						to = "leaderboard";
 						break;
-					case "wait":
-						from = "question";
-						to = "wait";
+					case "leaderboard":
+						to = "question";
 						break;
-					case "finish":
-						from = "leaderboard";
-						to = "finish";
+					case "wait":
+						to = "question";
+						break;
+					case "wait_answer":
+						state = "wait";
+						to = "leaderboard";
 						break;
 				}
-				var from_style_display = document.getElementById(from).style.display;
+				var from_style_display = document.getElementById(state).style.display;
 				var to_style_display = document.getElementById(to).style.display;
 				from_style_display = [to_style_display, to_style_display = from_style_display][0];
-				document.getElementById(from).style.display = from_style_display;
+				document.getElementById(state).style.display = from_style_display;
 				document.getElementById(to).style.display = to_style_display;
 			}
 
@@ -64,11 +62,39 @@
 							}, 1000);
 							state = "wait";
 							switch_screens();
+							sate = "wait_question";
 						}
 					}
 				);
 			}
 
+			function get_score(){
+				xmlrequest("get_score",
+					function(){
+							if (this.readyState == 4 && this.status == 200){
+								score_place = this.responseText.split(",");
+								document.getElementById("score").innerHTML = score_place[0];
+								document.getElementById("place").innerHTML = ordinal_suffix_of(score_place[1]);
+
+							}
+					}
+			);
+			}
+
+			function ordinal_suffix_of(i) {
+			    var j = i % 10,
+			        k = i % 100;
+			    if (j == 1 && k != 11) {
+			        return i + "st";
+			    }
+			    if (j == 2 && k != 12) {
+			        return i + "nd";
+			    }
+			    if (j == 3 && k != 13) {
+			        return i + "rd";
+			    }
+			    return i + "th";
+			}
 
 			function check_move_to_next() {
 				xmlrequest("check_move_next_page",
@@ -76,12 +102,18 @@
 						if (this.readyState == 4 && this.status == 200) {
 							if (this.responseText == "True") {
 								if (state == "wait") {
-									state = "question";
 									switch_screens();
+									state = "questions";
 								}
 								if (state == "question") {
-									state = "leaderboard";
 									switch_screens();
+									state = "leaderboard";
+									clearInterval(timer);
+								}
+								if (state == "wait_answer"){
+									get_score();
+									switch_screens();
+									state = "leaderboard";
 								}
 							}
 						}
@@ -132,8 +164,13 @@
 					</tr>
 				</table>
 			</div>
+			<!--FIXME: Goes to next question instead of moving to personal leaderboard-->
 			<div id="leaderboard" style="display:none">
-				wip
+				<font size="6">Your score right now is </font>
+				<font size = "6" id = "score"></font><br />
+				<font size = "6">and you </font>
+				<font size = "6" id = "place"></font>
+				<font size="6"> place</font>
 			</div>
 		</center>
 	</body>

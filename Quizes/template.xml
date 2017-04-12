@@ -1,4 +1,3 @@
-<!--TODO: change the template by test.xml-->
 <?xml version="1.0" encoding ="UTF-8"?>
 <Root>
     <Quiz name="The name of the quiz" number_of_questions="The number of questions in the quiz">
