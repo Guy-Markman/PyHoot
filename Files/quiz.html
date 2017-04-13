@@ -6,10 +6,7 @@
         <title>PyHoot!</title>
         <script>
             var state = "Registeration";
-            var timer = window.setInterval(function() {
-                getnames();
-            }, 1000);
-
+            var timer = window.setInterval(getnames, 1000);
 
             function xmlrequest(url, state_change) {
                 var xhttp = new XMLHttpRequest();
@@ -44,11 +41,9 @@
 
             function change_Registeration_Opening() {
                 state = "Opening";
-                clearInterval(timer);
                 set_timer("5");
-                timer = window.setInterval(function() {
-                    check_timer_change();
-                }, 1000);
+                clearInterval(timer);
+                timer = window.setInterval(check_timer_change, 1000);
                 getinfo();
                 document.getElementById('Registration').style.display = "none";
                 document.getElementById('Opening').style.display = "inline";
@@ -69,19 +64,15 @@
             }
 
             function change_Opening_Question() {
-                console.log("change_Opening_Question");
                 order_move_all_players();
-                console.log("after order_move_all_players");
                 document.getElementById('Opening').style.display = "none";
                 document.getElementById('Question').style.display = "inline";
             }
 
             function change_Question_Leaderboard() {
-                console.log("change_Question_Leaderboard");
                 xmlrequest("get_xml_leaderboard",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            clearInterval(timer);
                             parser = new DOMParser();
                             xmlDoc = parser.parseFromString(this.responseText, "text/xml");
                             leaderboard = document.getElementById("Leaderboard");
@@ -92,7 +83,7 @@
                                 "       <th>Score</th>" +
                                 "   </tr>";
                             var list_players = xmlDoc.getElementsByTagName("Player");
-                            for (i=0;  i < list_players.length; i++) {
+                            for (i = 0; i < list_players.length; i++) {
                                 player = list_players[i];
                                 leaderboard.innerHTML += "<tr>" +
                                     "   <td>" +
@@ -176,10 +167,7 @@
                                 "text/xml");
                             question = xmlDoc.getElementsByTagName("Question")[0];
                             set_timer(question.getAttribute("duration"));
-                            clearInterval(timer);
-                            var timer = window.setInterval(function() {
-                                check_move_question();
-                            }, 1000);
+                            timer = window.setInterval(check_move_question, 1000);
                             document.getElementById("question_title").innerHTML =
                                 question.childNodes[1].firstChild.nodeValue;
                             var questionsID = ["A_answer", "B_answer", "C_answer", "D_answer"];
@@ -194,7 +182,6 @@
                     }
                 );
             }
-
         </script>
     </head>
 
@@ -246,7 +233,6 @@
                     </tr>
                 </table>
             </div>
-            <!--FIXME: Not stopping to reload the Leaderboard-->
             <div id="Leaderboard" style="display:none">
             </div>
         </center>
