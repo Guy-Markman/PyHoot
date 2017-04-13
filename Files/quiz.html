@@ -44,6 +44,7 @@
 
             function change_Registeration_Opening() {
                 state = "Opening";
+                clearInterval(timer);
                 set_timer("5");
                 timer = window.setInterval(function() {
                     check_timer_change();
