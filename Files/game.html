@@ -6,9 +6,7 @@
 		<title>PyHoot!</title>
 		<script>
 			var state = "wait";
-			var timer = window.setInterval(function() {
-				check_move_to_next();
-			}, 1000);
+			var timer = window.setInterval(check_move_to_next, 1000);
 
 			function xmlrequest(url, state_change) {
 				var xhttp = new XMLHttpRequest();
@@ -30,7 +28,7 @@
 			}
 
 			function switch_screens() {
-				console.log("state "+state);
+				console.log("state " + state);
 				switch (state) {
 					case "question":
 						to = "leaderboard";
@@ -46,6 +44,8 @@
 						to = "leaderboard";
 						break;
 				}
+				console.log("state " + state);
+				console.log("to" + to);
 				var from_style_display = document.getElementById(state).style.display;
 				var to_style_display = document.getElementById(to).style.display;
 				from_style_display = [to_style_display, to_style_display = from_style_display][0];
@@ -53,47 +53,44 @@
 				document.getElementById(to).style.display = to_style_display;
 			}
 
-			function sent_answer(letter) {
+			function send_answer(letter) {
 				xmlrequest("answer?letter=" + letter,
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
-							timer = window.setInterval(function() {
-								check_move_to_next();
-							}, 1000);
 							state = "wait";
 							switch_screens();
-							sate = "wait_question";
+							state = "wait_question";
 						}
 					}
 				);
 			}
 
-			function get_score(){
+			function get_score() {
 				xmlrequest("get_score",
-					function(){
-							if (this.readyState == 4 && this.status == 200){
-								score_place = this.responseText.split(",");
-								document.getElementById("score").innerHTML = score_place[0];
-								document.getElementById("place").innerHTML = ordinal_suffix_of(score_place[1]);
+					function() {
+						if (this.readyState == 4 && this.status == 200) {
+							score_place = this.responseText.split(",");
+							document.getElementById("score").innerHTML = score_place[0];
+							document.getElementById("place").innerHTML = ordinal_suffix_of(score_place[1]);
 
-							}
+						}
 					}
-			);
+				);
 			}
 
 			function ordinal_suffix_of(i) {
-			    var j = i % 10,
-			        k = i % 100;
-			    if (j == 1 && k != 11) {
-			        return i + "st";
-			    }
-			    if (j == 2 && k != 12) {
-			        return i + "nd";
-			    }
-			    if (j == 3 && k != 13) {
-			        return i + "rd";
-			    }
-			    return i + "th";
+				var j = i % 10,
+					k = i % 100;
+				if (j == 1 && k != 11) {
+					return i + "st";
+				}
+				if (j == 2 && k != 12) {
+					return i + "nd";
+				}
+				if (j == 3 && k != 13) {
+					return i + "rd";
+				}
+				return i + "th";
 			}
 
 			function check_move_to_next() {
@@ -101,16 +98,16 @@
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
 							if (this.responseText == "True") {
+								console.log(state);
 								if (state == "wait") {
 									switch_screens();
 									state = "questions";
-								}
-								if (state == "question") {
+								} else if (state == "question") {
 									switch_screens();
 									state = "leaderboard";
 									clearInterval(timer);
-								}
-								if (state == "wait_answer"){
+								} else if (state == "wait_answer") {
+									clearInterval(timer);
 									get_score();
 									switch_screens();
 									state = "leaderboard";
@@ -120,7 +117,6 @@
 					}
 				);
 			}
-
 		</script>
 	</head>
 
@@ -137,13 +133,13 @@
 					<tr>
 						<td>
 							<button type="button" style="float:left; height: 150px;
-							 width: 150px; font-size: 50px;" onclick="sent_answer('A');">
+							 width: 150px; font-size: 50px;" onclick="send_answer('A');">
 								A
 							</button>
 						</td>
 						<td>
 							<button type="button" style="float:left; height: 150px;
-							width: 150px; font-size: 50px;" onclick="sent_answer('B');">
+							width: 150px; font-size: 50px;" onclick="send_answer('B');">
 								B
 							</button>
 						</td>
@@ -151,13 +147,13 @@
 					<tr>
 						<td>
 							<button type="button" style="float:left; height: 150px;
-							 width: 150px; font-size: 50px;" onclick="sent_answer('C');">
+							 width: 150px; font-size: 50px;" onclick="send_answer('C');">
 								C
 							</button>
 						</td>
 						<td>
 							<button type="button" style="float:left; height: 150px;
-							 width: 150px; font-size: 50px;" onclick="sent_answer('D');">
+							 width: 150px; font-size: 50px;" onclick="send_answer('D');">
 								D
 							</button>
 						</td>
@@ -167,9 +163,9 @@
 			<!--FIXME: Goes to next question instead of moving to personal leaderboard-->
 			<div id="leaderboard" style="display:none">
 				<font size="6">Your score right now is </font>
-				<font size = "6" id = "score"></font><br />
-				<font size = "6">and you </font>
-				<font size = "6" id = "place"></font>
+				<font size="6" id="score"></font><br />
+				<font size="6">and you </font>
+				<font size="6" id="place"></font>
 				<font size="6"> place</font>
 			</div>
 		</center>
