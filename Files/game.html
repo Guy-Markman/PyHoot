@@ -28,7 +28,6 @@
 			}
 
 			function switch_screens() {
-				console.log("state " + state);
 				switch (state) {
 					case "question":
 						to = "leaderboard";
@@ -39,13 +38,11 @@
 					case "wait":
 						to = "question";
 						break;
-					case "wait_answer":
+					case "wait_question":
 						state = "wait";
 						to = "leaderboard";
 						break;
 				}
-				console.log("state " + state);
-				console.log("to" + to);
 				var from_style_display = document.getElementById(state).style.display;
 				var to_style_display = document.getElementById(to).style.display;
 				from_style_display = [to_style_display, to_style_display = from_style_display][0];
@@ -98,7 +95,6 @@
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
 							if (this.responseText == "True") {
-								console.log(state);
 								if (state == "wait") {
 									switch_screens();
 									state = "questions";
@@ -106,7 +102,7 @@
 									switch_screens();
 									state = "leaderboard";
 									clearInterval(timer);
-								} else if (state == "wait_answer") {
+								} else if (state == "wait_question") {
 									clearInterval(timer);
 									get_score();
 									switch_screens();
@@ -160,11 +156,10 @@
 					</tr>
 				</table>
 			</div>
-			<!--FIXME: Goes to next question instead of moving to personal leaderboard-->
 			<div id="leaderboard" style="display:none">
 				<font size="6">Your score right now is </font>
 				<font size="6" id="score"></font><br />
-				<font size="6">and you </font>
+				<font size="6">and you are </font>
 				<font size="6" id="place"></font>
 				<font size="6"> place</font>
 			</div>

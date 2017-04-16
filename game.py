@@ -95,7 +95,6 @@ class GameMaster(Game):
             )
         root = ElementTree.Element("Root")
         score_sorted = sorted(dic_score_name, reverse=True)
-        print len(dic_score_name)
         for i in range(min(5, len(dic_score_name))):
             score = score_sorted[i]
             ElementTree.SubElement(
@@ -107,16 +106,12 @@ class GameMaster(Game):
         return ElementTree.tostring(root, encoding=constants.ENCODING)
 
     def get_place(self, pid):
-        dic_score_pid = {}
-        for pid in self._players_list:
-            dic_score_pid.update(
-                {
-                    self._players_list[pid]["_score"]:
-                    pid
-                }
-            )
-        dic_score_pid = sorted(dic_score_pid, reverse=True)
-        return dic_score_pid.values().index(pid) + 1
+        scores_by_place = []
+        for p in self._players_list:
+            scores_by_place.append(self._players_list[p]["_score"])
+        # Remove doubles and sort
+        return sorted(list(set(scores_by_place)), reverse=True).index(
+            self._players_list[pid]["_score"]) + 1
 
     def get_question(self):
         return self._parser.get_xml_question()
