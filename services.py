@@ -367,3 +367,11 @@ class get_score(TXTService):
 
     def content(self):
         return "%d, %d" % (self._game.get_score(), self._game.get_place())
+
+
+class start_question(TXTService):
+    NAME = "/start_question"
+
+    def __init__(self, game):
+        super(start_question, self).__init__()
+        game.start_question()

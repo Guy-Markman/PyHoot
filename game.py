@@ -1,5 +1,4 @@
 """Game objects for the game, there is both player and master"""
-
 import base64
 import os
 import random
@@ -56,6 +55,7 @@ class GameMaster(Game):
             if join_number not in common.join_number.keys():
                 break
         self._join_number = join_number
+        self._time = None
 
     def add_player(self, new_pid, game_player):
         self._players_list[new_pid] = {"player": game_player, "_score": 0}
@@ -80,29 +80,39 @@ class GameMaster(Game):
         for pid in self._players_list:
             player = self._players_list[pid]["player"]
             if player.answer in right_answers:
-                self._players_list[pid]["_score"] += 1
+                self._players_list[pid]["_score"] += self._time - player.time
                 # TODO: score by time
+            player.answer = None
 
     def get_xml_leaderboard(self):
         self._update_score()
-        dic_score_name = {}
+        dic_name_score = {}
         for pid in self._players_list:
-            dic_score_name.update(
+            dic_name_score.update(
                 {
-                    self._players_list[pid]["_score"]:
-                    self._players_list[pid]["player"].name
+                    self._players_list[pid]["player"].name:
+                    self._players_list[pid]["_score"]
+
                 }
             )
+        dic_score_names = {}
+        for name in dic_name_score:
+            score = dic_name_score[name]
+            if score in dic_score_names:
+                dic_score_names[score].append(name)
+            else:
+                dic_score_names[score] = [name]
         root = ElementTree.Element("Root")
-        score_sorted = sorted(dic_score_name, reverse=True)
-        for i in range(min(5, len(dic_score_name))):
+        score_sorted = sorted(dic_score_names, reverse=True)
+        for i in range(min(5, len(dic_score_names))):
             score = score_sorted[i]
-            ElementTree.SubElement(
-                root, "Player", {
-                    "name": dic_score_name[score],
-                    "score": str(score)
-                }
-            )
+            for player in dic_score_names[score]:
+                ElementTree.SubElement(
+                    root, "Player", {
+                        "name": player,
+                        "score": str(score)
+                    }
+                )
         return ElementTree.tostring(root, encoding=constants.ENCODING)
 
     def get_place(self, pid):
@@ -121,6 +131,10 @@ class GameMaster(Game):
 
     def get_left_questions(self):
         return self._parser.get_left_questions()
+
+    def start_question(self):
+        self._time = self._parser.get_duration_question() * 100 + int(
+            time.time() * 100)
 
     def check_all_players_answered(self):
         ans = True
@@ -145,7 +159,7 @@ class GamePlayer(Game):
         self._name = name
         self._game_master = master  # Game object GameMaster
         self._answer = None
-        self._time = 0
+        self._time = None
 
     def get_score(self):
         return self._game_master.get_score(self._pid)
@@ -175,15 +189,16 @@ class GamePlayer(Game):
 
     @answer.setter
     def answer(self, answer):
-        if answer in ["A", "B", "C", "D"]:
+        if answer in ["A", "B", "C", "D"] or answer is None:
             self._answer = answer
+            self._time = int(time.time() * 100)
         else:
             raise Exception("Answer not allowd")
 
     @property
-    def timeanswer(self):
+    def time(self):
         return self._time
 
-    @timeanswer.setter
-    def timeanswer(self, new_time):
+    @time.setter
+    def time(self, new_time):
         self._time = new_time

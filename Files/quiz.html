@@ -65,6 +65,7 @@
 
             function change_Opening_Question() {
                 order_move_all_players();
+                xmlrequest("start_question", null);
                 document.getElementById('Opening').style.display = "none";
                 document.getElementById('Question').style.display = "inline";
             }
@@ -78,25 +79,20 @@
                             leaderboard = document.getElementById("Leaderboard");
                             //TODO: Move as much as I can into the HTML page
                             var list_players = xmlDoc.getElementsByTagName("Player");
-                            var lb = "<font size = '7'>Top players</font><br/>" +
-                                "<table>" +
-                                "   <tr>" +
-                                "       <th>Player</th>" +
-                                "       <th>Score</th>" +
-                                "   </tr>";
+                            var lb = "<table>";
                             for (i = 0; i < list_players.length; i++) {
-                                    player = list_players[i];
-                                    lb += "<tr>" +
-                                        "   <td>" +
-                                        player.getAttribute("name") +
-                                        "   </td>" +
-                                        "   <td>" +
-                                        player.getAttribute("score") +
-                                        "   </td>" +
-                                        "</tr>";
-                                }
+                                player = list_players[i];
+                                lb += "<tr>" +
+                                    "   <td>" +
+                                    player.getAttribute("name") +
+                                    "   </td>" +
+                                    "   <td>" +
+                                    player.getAttribute("score") +
+                                    "   </td>" +
+                                    "</tr>";
+                            }
                             lb += "</table>";
-                            document.getElementById("Leaderboard").innerHTML = lb;
+                            document.getElementById("Leaderboard_content").innerHTML = lb;
                             order_move_all_players();
                             document.getElementById("Question").style.display = "none";
                             document.getElementById("Leaderboard").style.display = "inline";
@@ -236,7 +232,20 @@
                     </tr>
                 </table>
             </div>
+            <!--<div id="Answer" style="display:none">
+                <font size="6">The right answer is<br /></font>
+                <font size="6" id="ans"></font>
+            </div>-->
             <div id="Leaderboard" style="display:none">
+                <font size="7">Top players</font><br/>
+                <table>
+                    <tr>
+                        <th>Player</th>
+                        <th>Score</th>
+                    </tr>
+                </table>
+                <div id="Leaderboard_content">
+                </div>
             </div>
         </center>
     </body>
