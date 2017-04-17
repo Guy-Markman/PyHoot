@@ -56,8 +56,32 @@
                         if (this.readyState == 4 && this.status == 200) {
                             if (this.responseText == "True") {
                                 clearInterval(timer);
-                                change_Question_Leaderboard();
+                                change_Question_Answer();
                             }
+                        }
+                    }
+                );
+            }
+
+            function change_Question_Answer() {
+                xmlrequest("get_answers",
+                    function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            xmlrequest("order_move_all_not_answered", null);
+                            var ans = this.responseText.replace(", ", "");
+                            answer_html = document.getElementById("ans");
+                            answer_html.innerHTML = "";
+                            console.log(ans);
+                            for (var a in ans) {
+                                //FIXME: Unable to get property 'innerHTML' of undefined or null reference
+                                answer_html.innerHTML += document.getElementById(a + "_answer").innerHTML + "<br />";
+                            }
+                            document.getElementById("Question").style.display = "none";
+                            document.getElementById("Answer").style.display = "inline";
+                            clearInterval(timer);
+                            state = "Answer";
+                            set_timer("3");
+                            timer = window.setInterval(check_timer_change, 1000);
                         }
                     }
                 );
@@ -70,7 +94,7 @@
                 document.getElementById('Question').style.display = "inline";
             }
 
-            function change_Question_Leaderboard() {
+            function change_Answer_Leaderboard() {
                 xmlrequest("get_xml_leaderboard",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
@@ -94,9 +118,8 @@
                             lb += "</table>";
                             document.getElementById("Leaderboard_content").innerHTML = lb;
                             order_move_all_players();
-                            document.getElementById("Question").style.display = "none";
+                            document.getElementById("answer").style.display = "none";
                             document.getElementById("Leaderboard").style.display = "inline";
-
                         }
                     }
                 );
@@ -135,6 +158,9 @@
                                 clearInterval(timer);
                                 if (state == "Opening") {
                                     move_to_next_question();
+                                }
+                                if (state == "Answer") {
+                                    change_Answer_Leaderboard();
                                 }
                             }
                         }
@@ -232,10 +258,10 @@
                     </tr>
                 </table>
             </div>
-            <!--<div id="Answer" style="display:none">
-                <font size="6">The right answer is<br /></font>
+            <div id="Answer" style="display:none">
+                <font size="6">The right answer/s is/are<br /></font>
                 <font size="6" id="ans"></font>
-            </div>-->
+            </div>
             <div id="Leaderboard" style="display:none">
                 <font size="7">Top players</font><br/>
                 <table>

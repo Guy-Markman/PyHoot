@@ -375,3 +375,17 @@ class start_question(TXTService):
     def __init__(self, game):
         super(start_question, self).__init__()
         game.start_question()
+
+
+class get_answers(TXTService):
+    NAME = "/get_answers"
+
+    def __init__(self, game):
+        super(get_answers, self).__init__()
+        self._game = game
+
+    def content(self):
+        ans = str(self._game.get_answers())
+        for letter in ["[", "]", "'"]:
+            ans = ans.replace(letter, "")
+        return ans

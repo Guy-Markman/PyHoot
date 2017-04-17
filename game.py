@@ -81,7 +81,6 @@ class GameMaster(Game):
             player = self._players_list[pid]["player"]
             if player.answer in right_answers:
                 self._players_list[pid]["_score"] += self._time - player.time
-                # TODO: score by time
             player.answer = None
 
     def get_xml_leaderboard(self):
@@ -144,6 +143,9 @@ class GameMaster(Game):
                 ans = False
                 break
         return ans
+
+    def get_answers(self):
+        return self._parser.get_question_answers()
 
     @property
     def join_number(self):
