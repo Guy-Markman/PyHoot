@@ -68,13 +68,11 @@
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
                             xmlrequest("order_move_all_not_answered", null);
-                            var ans = this.responseText.replace(", ", "");
+                            var ans = this.responseText.split(", ");
                             answer_html = document.getElementById("ans");
                             answer_html.innerHTML = "";
-                            console.log(ans);
-                            for (var a in ans) {
-                                //FIXME: Unable to get property 'innerHTML' of undefined or null reference
-                                answer_html.innerHTML += document.getElementById(a + "_answer").innerHTML + "<br />";
+                            for (var i = 0; i < ans.length; i++) {
+                                answer_html.innerHTML += document.getElementById(ans[i] + "_answer").innerHTML + "<br />";
                             }
                             document.getElementById("Question").style.display = "none";
                             document.getElementById("Answer").style.display = "inline";
@@ -118,7 +116,7 @@
                             lb += "</table>";
                             document.getElementById("Leaderboard_content").innerHTML = lb;
                             order_move_all_players();
-                            document.getElementById("answer").style.display = "none";
+                            document.getElementById("Answer").style.display = "none";
                             document.getElementById("Leaderboard").style.display = "inline";
                         }
                     }
@@ -259,7 +257,7 @@
                 </table>
             </div>
             <div id="Answer" style="display:none">
-                <font size="6">The right answer/s is/are<br /></font>
+                <font size="7">The right answer/s is/are:<br /></font>
                 <font size="6" id="ans"></font>
             </div>
             <div id="Leaderboard" style="display:none">
