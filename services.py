@@ -322,7 +322,32 @@ class move_to_next_question(TXTService):
         return str(self._game.get_left_questions())
 
 
+class set_ended(TXTService):
+    NAME = "/set_ended"
+
+    def __init__(self, game, new):
+        super(move_to_next_question, self).__init__()
+        if new == "True":
+            game.ended = True
+        else:
+            game.ended = False
+
+
+class get_ended(TXTService):
+    NAME = "/get_ended"
+
+    def __init__(self, game):
+        super(get_ended, self).__init__()
+        self._game = game
+
+    def content(self):
+        if self._game.TYPE == "PLAYER":
+            return self._game.game_master.ended
+        return self._game.ended
+
+
 class get_question(TXTService):
+    #  FIXME: It sends what is the right answer
     NAME = "/get_question"
 
     def __init__(self, game):

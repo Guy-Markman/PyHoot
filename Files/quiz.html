@@ -7,6 +7,7 @@
         <script>
             var state = "Registration";
             var timer = window.setInterval(getnames, 1000);
+            var number_of_questions = null;
 
             function xmlrequest(url, state_change) {
                 var xhttp = new XMLHttpRequest();
@@ -27,34 +28,37 @@
                     }
                 );
             }
-			
-			function switch_screens() {
-				switch (state) {
-					case "Opening":
-						start = "Registration";
-						break;
-					case "Answer":
-						start = "Question";
-						break;
-					case "Question":
-						//If something was loaded to ans it means that I already did one question
-						if (document.getElementById("ans").innerHTML){
-							start = "Leaderboard";
-						} else {
-							start = "Opening";
-						};
-						break;
-					case "Leaderboard":
-						start = "Answer";
-						break;
-				}
-				var state_style_display = document.getElementById(state).style.display;
-				var start_style_display = document.getElementById(start).style.display;
-				state_style_display = [start_style_display, start_style_display = state_style_display][0];
-				document.getElementById(state).style.display = state_style_display;
-				document.getElementById(start).style.display = start_style_display;
-			}
-			
+
+            function switch_screens() {
+                switch (state) {
+                    case "Opening":
+                        start = "Registration";
+                        break;
+                    case "Answer":
+                        start = "Question";
+                        break;
+                    case "Question":
+                        //If something was loaded to ans it means that I already did one question
+                        if (document.getElementById("ans").innerHTML) {
+                            start = "Leaderboard";
+                        } else {
+                            start = "Opening";
+                        }
+                        break;
+                    case "Leaderboard":
+                        start = "Answer";
+                        break;
+                }
+                console.log("Starting switcihing");
+                console.log("state " + state);
+                console.log("start " + start);
+                var state_style_display = document.getElementById(state).style.display;
+                var start_style_display = document.getElementById(start).style.display;
+                state_style_display = [start_style_display, start_style_display = state_style_display][0];
+                document.getElementById(state).style.display = state_style_display;
+                document.getElementById(start).style.display = start_style_display;
+            }
+
             function getnames() {
                 setInnerHTML("getnames", "names", true);
             }
@@ -72,7 +76,7 @@
                 clearInterval(timer);
                 timer = window.setInterval(check_timer_change, 1000);
                 getinfo();
-				switch_screens()
+                switch_screens();
             }
 
             function check_move_question() {
@@ -99,10 +103,11 @@
                             for (var i = 0; i < ans.length; i++) {
                                 answer_html.innerHTML += document.getElementById(ans[i] + "_answer").innerHTML + "<br />";
                             }
-							state = "Answer";
-                            clearInterval(timer);                            
+                            state = "Answer";
+                            switch_screens();
+                            clearInterval(timer);
                             set_timer("5");
-							timer = window.setInterval(check_timer_change, 1000);
+                            timer = window.setInterval(check_timer_change, 1000);
                         }
                     }
                 );
@@ -111,8 +116,8 @@
             function change_Opening_Question() {
                 order_move_all_players();
                 xmlrequest("start_question", null);
-				state = "Question";
-				switch_screens()
+                state = "Question";
+                switch_screens();
             }
 
             function change_Answer_Leaderboard() {
@@ -139,10 +144,10 @@
                             lb += "</table>";
                             document.getElementById("Leaderboard_content").innerHTML = lb;
                             order_move_all_players();
-							state = "Leaderboard";
-							switch_screens();
-							set_timer("5");
-							
+                            state = "Leaderboard";
+                            switch_screens();
+                            set_timer("5");
+                            timer = window.setInterval(check_timer_change, 1000);
                         }
                     }
                 );
@@ -185,9 +190,15 @@
                                 if (state == "Answer") {
                                     change_Answer_Leaderboard();
                                 }
-								if (state == "Leaderboard")	{
-									move_to_next_question();
-								}
+                                if (state == "Leaderboard") {
+                                    if (number_of_questions > -1) {
+                                        move_to_next_question();
+                                    } else {
+                                        xmlrequest("set_ended?new=True", null);
+                                        state = "Finish";
+                                        // WIP
+                                    }
+                                }
                             }
                         }
                     }
@@ -198,7 +209,9 @@
                 xmlrequest("move_to_next_question",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            if (parseInt(this.responseText) >= 0) {
+                            console.log("move_to_next_question " + this.responseText);
+                            number_of_questions = parseInt(this.responseText);
+                            if (number_of_questions >= 0) {
                                 get_question();
                             } else {
                                 state = "finish";
@@ -232,6 +245,7 @@
                     }
                 );
             }
+
         </script>
     </head>
 

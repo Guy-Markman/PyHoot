@@ -95,24 +95,29 @@
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
 							if (this.responseText == "True") {
-								if (state == "wait") {
-									switch_screens();
-									state = "questions";
-								} else if (state == "question") {
-									switch_screens();
-									state = "leaderboard";
-									clearInterval(timer);
-								} else if (state == "wait_question") {
-									clearInterval(timer);
-									get_score();
-									switch_screens();
-									state = "leaderboard";
+								switch (state) {
+									case "wait":
+										switch_screens();
+										state = "questions";
+										break;
+									case "question":
+										switch_screens();
+										state = "leaderboard";
+										break;
+									case "wait_question":
+										get_score();
+										switch_screens();
+										state = "leaderboard";
+										break;
+									case "leaderboard":
+										switch_screens();
 								}
 							}
 						}
 					}
 				);
 			}
+
 		</script>
 	</head>
 

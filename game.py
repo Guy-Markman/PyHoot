@@ -56,6 +56,7 @@ class GameMaster(Game):
                 break
         self._join_number = join_number
         self._time = None
+        self._ended = False
 
     def add_player(self, new_pid, game_player):
         self._players_list[new_pid] = {"player": game_player, "_score": 0}
@@ -151,6 +152,16 @@ class GameMaster(Game):
     def join_number(self):
         """The number of the object in the database"""
         return self._join_number
+
+    @property
+    def ended(self):
+        return self._ended
+
+    @ended.setter
+    def ended(self, new):
+        if type(new) is not bool:
+            raise Exception("DON'T MESS WITH THIS!")
+        self._ended = new
 
 
 class GamePlayer(Game):
