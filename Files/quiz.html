@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>PyHoot!</title>
         <script>
-            var state = "Registeration";
+            var state = "Registration";
             var timer = window.setInterval(getnames, 1000);
 
             function xmlrequest(url, state_change) {
@@ -27,7 +27,34 @@
                     }
                 );
             }
-
+			
+			function switch_screens() {
+				switch (state) {
+					case "Opening":
+						start = "Registration";
+						break;
+					case "Answer":
+						start = "Question";
+						break;
+					case "Question":
+						//If something was loaded to ans it means that I already did one question
+						if (document.getElementById("ans").innerHTML){
+							start = "Leaderboard";
+						} else {
+							start = "Opening";
+						};
+						break;
+					case "Leaderboard":
+						start = "Answer";
+						break;
+				}
+				var state_style_display = document.getElementById(state).style.display;
+				var start_style_display = document.getElementById(start).style.display;
+				state_style_display = [start_style_display, start_style_display = state_style_display][0];
+				document.getElementById(state).style.display = state_style_display;
+				document.getElementById(start).style.display = start_style_display;
+			}
+			
             function getnames() {
                 setInnerHTML("getnames", "names", true);
             }
@@ -45,9 +72,7 @@
                 clearInterval(timer);
                 timer = window.setInterval(check_timer_change, 1000);
                 getinfo();
-                document.getElementById('Registration').style.display = "none";
-                document.getElementById('Opening').style.display = "inline";
-
+				switch_screens()
             }
 
             function check_move_question() {
@@ -74,12 +99,10 @@
                             for (var i = 0; i < ans.length; i++) {
                                 answer_html.innerHTML += document.getElementById(ans[i] + "_answer").innerHTML + "<br />";
                             }
-                            document.getElementById("Question").style.display = "none";
-                            document.getElementById("Answer").style.display = "inline";
-                            clearInterval(timer);
-                            state = "Answer";
-                            set_timer("3");
-                            timer = window.setInterval(check_timer_change, 1000);
+							state = "Answer";
+                            clearInterval(timer);                            
+                            set_timer("5");
+							timer = window.setInterval(check_timer_change, 1000);
                         }
                     }
                 );
@@ -88,8 +111,8 @@
             function change_Opening_Question() {
                 order_move_all_players();
                 xmlrequest("start_question", null);
-                document.getElementById('Opening').style.display = "none";
-                document.getElementById('Question').style.display = "inline";
+				state = "Question";
+				switch_screens()
             }
 
             function change_Answer_Leaderboard() {
@@ -116,8 +139,10 @@
                             lb += "</table>";
                             document.getElementById("Leaderboard_content").innerHTML = lb;
                             order_move_all_players();
-                            document.getElementById("Answer").style.display = "none";
-                            document.getElementById("Leaderboard").style.display = "inline";
+							state = "Leaderboard";
+							switch_screens();
+							set_timer("5");
+							
                         }
                     }
                 );
@@ -160,6 +185,9 @@
                                 if (state == "Answer") {
                                     change_Answer_Leaderboard();
                                 }
+								if (state == "Leaderboard")	{
+									move_to_next_question();
+								}
                             }
                         }
                     }
@@ -201,7 +229,6 @@
                             state = "Question";
                             change_Opening_Question();
                         }
-
                     }
                 );
             }
