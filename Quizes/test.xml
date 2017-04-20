@@ -8,22 +8,22 @@
 			]]></Text>
 			<Answer>
 				<Text><![CDATA[
-				<font size = "5">A: 1</font>
+				<font size = "6">A: 1</font>
 				]]></Text>
 			</Answer>
 			<Answer correct="1">
 				<Text><![CDATA[
-				<font size = "5">B: 2</font>
+				<font size = "6">B: 2</font>
 				]]></Text>
 			</Answer>
 			<Answer>
 				<Text><![CDATA[
-				<font size = "5">C: 3</font>
+				<font size = "6">C: 3</font>
 				]]></Text>
 			</Answer>
 			<Answer>
 				<Text><![CDATA[
-				<font size = "5">D: 4</font>
+				<font size = "6">D: 4</font>
 				]]></Text>
 			</Answer>
 		</Question>

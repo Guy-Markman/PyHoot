@@ -13,6 +13,11 @@ class XMLParser(object):
         self.question_number = 0  # 0 Represent the starting page
         self.file_name = file_name
 
+
+    def get_backuproot(self):
+        return ElementTree.parse(
+            "PyHoot\Quizes\%s.xml" % self.file_name).getroot()
+
     def get_question_number(self):
         return self.question_number
 
@@ -23,17 +28,16 @@ class XMLParser(object):
         )
 
     def get_information(self):
-        backup_root = ElementTree.parse(
-            "PyHoot\Quizes\%s.xml" % self.file_name).getroot()
+        backup_root = self.get_backuproot()
         for question in backup_root.findall("./Quiz/Question"):
             backup_root.find("./Quiz").remove(question)
         return ElementTree.tostring(backup_root, encoding=constants.ENCODING)
 
     def get_xml_question(self):
-        question = self._root.findall(
+        question = self.get_backuproot().findall(
             "./Quiz/Question")[self.question_number - 1]
-        for ans in question.findall("answer"):
-            ans.remove(ans.find("right_wrong"))
+        for ans in question.findall("Answer"):
+            ans.attrib.pop("correct", None)
         return ElementTree.tostring(question, encoding=constants.ENCODING)
 
     def get_question_answers(self):
