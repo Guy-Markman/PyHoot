@@ -1,8 +1,9 @@
 """All the services get the method we need and return the data
 """
-
+# TODO: change all TXTService to XMLService
 import os.path
 import time
+from xml.etree import ElementTree
 
 from . import base, constants, game, util
 
@@ -55,10 +56,23 @@ class TXTService(Service):
             self._content_page = self.content()
         return util.create_headers_response(200,
                                             len(self._content_page),
-                                            extra_headers=extra, type=".html")
+                                            extra_headers=extra, type=".txt")
 
     def content(self):
         return "done"
+
+
+class XMLService(Service):
+
+    def __init__(self):
+        super(XMLService, self).__init__()
+
+    def headers(self, extra):
+        if self._content_page is None:
+            self._content_page = self.content()
+        return util.create_headers_response(200,
+                                            len(self._content_page),
+                                            extra_headers=extra, type=".xml")
 
 
 class Clock(Service):
@@ -121,7 +135,7 @@ class answer(Service):
         game.answer = letter[0]
 
 
-class getnames(TXTService):
+class getnames(XMLService):
     NAME = "/getnames"
 
     def __init__(self, game, common):
@@ -130,12 +144,12 @@ class getnames(TXTService):
         self._common = common
 
     def content(self):
-        names = []
+        root = ElementTree.Element("Root")
         for player in self._game.get_player_dict().values():
             name = player.name
             if name is not None:
-                names.append(name)
-        return "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".join(names)
+                ElementTree.SubElement(root, "player", {"name": name})
+        return util.to_string(root)
 
 
 class diconnect_user(Service):
@@ -149,7 +163,7 @@ class diconnect_user(Service):
             pass
 
 
-class check_test(TXTService):
+class check_test(XMLService):
     NAME = "/check_test"
 
     def __init__(self, join_number, common):
@@ -158,13 +172,17 @@ class check_test(TXTService):
         self.common = common
 
     def content(self):
-        return str((
-            self.data in self.common.join_number and
-            self.common.join_number[self.data].TYPE == "MASTER"
-        ))
+        return util.to_string(
+            ElementTree.Element("Root", {"answer": str(
+                (
+                    self.data in self.common.join_number and
+                    self.common.join_number[self.data].TYPE == "MASTER"
+                )
+            )
+            }))
 
 
-class check_name(TXTService):
+class check_name(XMLService):
     NAME = "/check_name"
 
     def __init__(self, join_number, name, common):
@@ -183,7 +201,10 @@ class check_name(TXTService):
                     name_list.append(player.name)
                 if self.name not in name_list:
                     ans = "True"
-        return ans
+        return util.to_string(
+            ElementTree.Element(
+                "Root", {
+                    "answer": str(ans)}))
 
 
 class join(Service):

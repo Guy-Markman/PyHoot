@@ -4,19 +4,13 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>PyHoot!</title>
+		<script src="util.js" /></script>
         <script>
+			var extranal = "";
+			var PLAYERS_IN_LINE = 3;
             var state = "Registration";
             var timer = window.setInterval(getnames, 1000);
-            var number_of_questions = null;
-
-            function xmlrequest(url, state_change) {
-                var xhttp = new XMLHttpRequest();
-                if (state_change !== null) {
-                    xhttp.onreadystatechange = state_change;
-                }
-                xhttp.open("GET", url, true);
-                xhttp.send();
-            }
+            var number_of_questions = null;            
 
             function setInnerHTML(url, id) {
                 xmlrequest(url,
@@ -52,9 +46,6 @@
 						start = "Leaderboard";
 						break;
                 }
-                console.log("Starting switcihing");
-                console.log("state " + state);
-                console.log("start " + start);
                 var state_style_display = document.getElementById(state).style.display;
                 var start_style_display = document.getElementById(start).style.display;
                 state_style_display = [start_style_display, start_style_display = state_style_display][0];
@@ -63,7 +54,23 @@
             }
 
             function getnames() {
-                setInnerHTML("getnames", "names", true);
+                xmlrequest("getnames", function(){
+						if (this.readyState == 4 && this.status == 200) {
+							xmlDoc = parse_xml_from_string(this.responseText)
+							players = xmlDoc.getElementsByTagName("player")
+							string_players=""
+							console.log(players)
+							for (i = 0; i < players.length; i++){
+								string_players += players[i].getAttribute("name")
+								if (i%PLAYERS_IN_LINE == 0 && i!=0){
+									string_players+="<br/>"
+								}
+							}
+							console.log(string_players)
+							document.getElementById("names").innerHTML = string_players
+						}
+					}
+				);
             }
 
             //continue only if at least one user is online

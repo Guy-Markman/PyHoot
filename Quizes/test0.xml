@@ -30,7 +30,6 @@
 		<Question duration="30">
        		<Text><![CDATA[
 				<font size="7">2+2</font><br />
-				<img src="questineer-pics/test/2.png" style="width:304px;height:228px;"/>
 			]]></Text>
 			<Answer>
 				<Text><![CDATA[

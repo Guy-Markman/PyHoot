@@ -4,6 +4,7 @@
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
+		<script src="util.js"></script>
 		<script>
 			function changeDiv() {
 				document.getElementById('p1').style.display =
@@ -23,35 +24,35 @@
 			}
 
 			function check(type) { //Check if name / test exist
-				var xhttp = new XMLHttpRequest();
-				xhttp.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						if (type == "test") {
-							if (this.responseText == "True") {
-								changeDiv();
-							} else {
-								document.getElementById("p1_title").innerHTML =
-									"No such Game Pin, enter right one";
-							}
-						} else if (type == "name") {
-							if (this.responseText == "True") {
-								document.getElementById("join").submit();
-							} else {
-								document.getElementById("p2_title").innerHTML =
-									"Name taken, choose another name";
-							}
-						}
-					}
-				};
 				var data = document.getElementById("join_number").value;
 				if (type == "name") {
 					data += "&name=" + document.getElementById("name")
 						.value;
-				}
-				xhttp.open("GET", "check_" + type +
-					"?join_number=" +
-					data, true);
-				xhttp.send();
+				}				
+				xmlrequest("check_" + type +	"?join_number=" + data,
+					function(){
+						if (this.readyState == 4 && this.status == 200) {
+							var xmlDoc = parse_xml_from_string(this.responseText)
+							console.log(xmlDoc.getElementsByTagName("Root")[0])
+							var ans = xmlDoc.getElementsByTagName("Root")[0].getAttribute("answer")
+							if (type == "test") {
+								if (ans == "True") {
+									changeDiv();
+								} else {
+									document.getElementById("p1_title").innerHTML =
+										"No such Game Pin, enter right one";
+								}
+							} else if (type == "name") {
+								if (ans == "True") {
+									document.getElementById("join").submit();
+								} else {
+									document.getElementById("p2_title").innerHTML =
+										"Name taken, choose another name";
+								}
+							}
+						}
+					}
+				)
 			}
 		</script>
 	</head>
@@ -64,7 +65,9 @@
 					<input type="number" inputmode="numeric" pattern="\d*" title="Non-negative integral number" id="join_number" name="join_number" style="width: 200px;" min="100000" max="999999" autocomplete="off" autofocus>
 					<br /><br />
 					<button type="button" style="height:50px;width:150px;" onclick="check('test');">
-						Join!</button>
+						Join!</button><br /><br />
+					<button type="button" style="height:50px;width:150px" onclick="location.href='/new'">
+					Creat new game </button>
 				</p>
 				<p id="p2" style="display:none">
 					<font id="p2_title" size="6">Choose name</font><br />
@@ -73,8 +76,7 @@
 				     Start Playing!</button>
 				</p>
 			</form>
-			<button type="button" style="height:50px;width:150px" onclick="location.href='/new'">
-			Creat new game </button>
+			
 		</center>
 	</body>
 

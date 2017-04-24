@@ -2,6 +2,7 @@
 import httplib
 import mimetypes
 import socket
+from xml.etree import ElementTree
 
 from . import constants
 
@@ -86,3 +87,7 @@ def remove_from_sysyem(common, pid):
         if g.TYPE == "PLAYER":
             if g.game_master is not None:
                 g.game_master.remove_player(pid)
+
+
+def to_string(element):
+    return ElementTree.tostring(element, constants.ENCODING)

@@ -13,7 +13,6 @@ class XMLParser(object):
         self.question_number = 0  # 0 Represent the starting page
         self.file_name = file_name
 
-
     def get_backuproot(self):
         return ElementTree.parse(
             "PyHoot\Quizes\%s.xml" % self.file_name).getroot()
