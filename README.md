@@ -29,7 +29,11 @@ TODO:
 - [X] Show question on the screen and move to the next part (timer)
 - [X] Get answers and analyze them
 - [X] Update database of player with score
-- [ ] Show answer
+- [X] Show answer
 - [X] Show leaderboard
-- [ ] End of game
+- [X] End of game
+- [ ] XML only
+- [ ] CSS Day!
+- [ ] Python Client Random Answer
+- [ ] Python Client Fetch images
 - [ ] Hide\ Find string in picture
