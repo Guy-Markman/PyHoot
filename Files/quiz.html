@@ -2,9 +2,13 @@
 <html>
 
     <head>
+
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>PyHoot!</title>
+        <link rel="icon" type="image/png" href="icon.png">
+
         <script src="util.js"></script>
+        <link rel="icon" type="image/png" href="icon.png">
         <script>
             var PLAYERS_IN_LINE = 3;
             var state = "Registration";
@@ -200,7 +204,7 @@
                 xmlrequest("check_timer_change",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            if (this.responseText == "True") {
+                            if (xmlstring_to_boolean(this.responseText)) {
                                 clearInterval(timer);
                                 if (state == "Opening") {
                                     move_to_next_question();
@@ -228,8 +232,11 @@
                 xmlrequest("move_to_next_question",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            number_of_questions = parseInt(this.responseText);
-                            if (number_of_questions >= 0) {
+                            // Take the xml we got, parse it and compare the
+                            // argument "number_of_questions" bigger than 0
+                            if (parse_xml_from_string.getElementsByTagName(
+                                    "question")[0].getAttribute(
+                                    "number_of_questions") >= 0) {
                                 get_question();
                             } else {
                                 state = "Finish";
@@ -247,9 +254,7 @@
                 xmlrequest("get_question",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            parser = new DOMParser();
-                            xmlDoc = parser.parseFromString(this.responseText,
-                                "text/xml");
+                            xmlDoc = util.parse_xml_from_string(this.responseText);
                             question = xmlDoc.getElementsByTagName("Question")[0];
                             set_timer(question.getAttribute("duration"));
                             timer = window.setInterval(check_move_question, 1000);

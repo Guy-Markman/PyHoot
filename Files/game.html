@@ -2,29 +2,22 @@
 <html>
 
 	<head>
+
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
+		<link rel="icon" type="image/png" href="icon.png">
+
+		<script src="util.js"></script>
 		<script>
 			var state = "wait";
 			var timer = window.setInterval(check_move_to_next, 1000);
 
-			function xmlrequest(url, state_change) {
-				var xhttp = new XMLHttpRequest();
-				if (state_change !== null) {
-					xhttp.onreadystatechange = state_change;
-				}
-				xhttp.open("GET", url, true);
-				xhttp.send();
-				return false;
-			}
-
 			function disconnect_user() {
-				xmlrequest("diconnect_user",
-					function() {
-						if (this.readyState == 4 && this.status == 200) {
-							window.location.href = '/';
-						}
-					});
+				xmlrequest("diconnect_user", function() {
+					if (this.readyState == 4 && this.status == 200) {
+						window.location.href = '/';
+					}
+				});
 			}
 
 			function switch_screens() {
@@ -66,10 +59,9 @@
 				xmlrequest("get_score",
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
-							score_place = this.responseText.split(",");
-							document.getElementById("score").innerHTML = score_place[0];
-							document.getElementById("place").innerHTML = ordinal_suffix_of(score_place[1]);
-
+							score_place = parse_xml_from_string(this.responseText).getElementsByTagName("score&place")[0];
+							document.getElementById("score").innerHTML = score_place.getAttribute("score");
+							document.getElementById("place").innerHTML = ordinal_suffix_of(score_place.getAttribute("place"));
 						}
 					}
 				);
@@ -94,7 +86,7 @@
 				xmlrequest("check_move_next_page",
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
-							if (this.responseText == "True") {
+							if (xmlstring_to_boolean(this.responseText)) {
 								switch (state) {
 									case "wait":
 										switch_screens();

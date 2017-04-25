@@ -13,6 +13,7 @@ class Service(base.Base):
     NAME = 'base'  # The uri path needed to use this services
 
     def __init__(self):
+        super(Service, self).__init__()
         self.finished_reading = False  # Did we read everything from read?
         self.read_pointer = 0  # How much did we read from read
         self._content_page = None
@@ -30,7 +31,8 @@ class Service(base.Base):
             self._content_page = self.content()
         return util.create_headers_response(200,
                                             len(self._content_page),
-                                            extra_headers=extra, type=".html")
+                                            extra,
+                                            ".html")
 
     def read_buff(self, buff_size):
         """return the content page and update self._finished_reading"""
@@ -56,10 +58,8 @@ class TXTService(Service):
             self._content_page = self.content()
         return util.create_headers_response(200,
                                             len(self._content_page),
-                                            extra_headers=extra, type=".txt")
-
-    def content(self):
-        return "done"
+                                            extra,
+                                            ".txt")
 
 
 class XMLService(Service):
@@ -72,7 +72,8 @@ class XMLService(Service):
             self._content_page = self.content()
         return util.create_headers_response(200,
                                             len(self._content_page),
-                                            extra_headers=extra, type=".xml")
+                                            extra,
+                                            ".xml")
 
 
 class Clock(Service):
@@ -276,7 +277,7 @@ class get_information(XMLService):
         return self._game.get_parser().get_information()
 
 
-class set_timer_change(TXTService):
+class set_timer_change(Service):
     NAME = "/set_timer_change"
 
     def __init__(self, game, new_time):
@@ -284,7 +285,7 @@ class set_timer_change(TXTService):
         game.set_time_change(int(new_time[0]))
 
 
-class check_timer_change(TXTService):
+class check_timer_change(XMLService):
     NAME = "/check_timer_change"
 
     def __init__(self, game):
@@ -292,10 +293,10 @@ class check_timer_change(TXTService):
         self._game = game
 
     def content(self):
-        return str(self._game.check_timer_change())
+        return util.boolean_to_xml(self._game.check_timer_change())
 
 
-class order_move_all_players(TXTService):
+class order_move_all_players(Service):
     NAME = "/order_move_all_players"
 
     def __init__(self, game):
@@ -304,7 +305,7 @@ class order_move_all_players(TXTService):
             player.order_move_to_next_page()
 
 
-class order_move_all_not_answered(TXTService):
+class order_move_all_not_answered(Service):
     NAME = "/order_move_all_not_answered"
 
     def __init__(self, game):
@@ -314,7 +315,7 @@ class order_move_all_not_answered(TXTService):
                 player.order_move_to_next_page()
 
 
-class check_move_next_page(TXTService):
+class check_move_next_page(XMLService):
     NAME = "/check_move_next_page"
 
     def __init__(self, game):
@@ -325,10 +326,10 @@ class check_move_next_page(TXTService):
         ans = self._game.get_move_to_next_page()
         if ans:
             self._game.moved_to_next_page()
-        return str(ans)
+        return util.boolean_to_xml(ans)
 
 
-class move_to_next_question(TXTService):
+class move_to_next_question(XMLService):
     NAME = "/move_to_next_question"
 
     def __init__(self, game):
@@ -337,34 +338,16 @@ class move_to_next_question(TXTService):
         game.move_to_next_question()
 
     def content(self):
-        return str(self._game.get_left_questions())
+        root = ElementTree.Element("Root")
+        ElementTree.SubElement(
+            root,
+            "question",
+            {"number_of_questions": self._game.get_left_questions()}
+        )
+        return util.to_string(root)
 
 
-class set_ended(TXTService):
-    NAME = "/set_ended"
-
-    def __init__(self, game, new):
-        super(move_to_next_question, self).__init__()
-        if new == "True":
-            game.ended = True
-        else:
-            game.ended = False
-
-
-class get_ended(TXTService):
-    NAME = "/get_ended"
-
-    def __init__(self, game):
-        super(get_ended, self).__init__()
-        self._game = game
-
-    def content(self):
-        if self._game.TYPE == "PLAYER":
-            return self._game.game_master.ended
-        return self._game.ended
-
-
-class get_question(TXTService):
+class get_question(XMLService):
     #  FIXME: It sends what is the right answer
     NAME = "/get_question"
 
@@ -376,7 +359,7 @@ class get_question(TXTService):
         return self._game.get_question()
 
 
-class get_xml_leaderboard(TXTService):
+class get_xml_leaderboard(XMLService):
     NAME = "/get_xml_leaderboard"
 
     def __init__(self, game):
@@ -387,7 +370,7 @@ class get_xml_leaderboard(TXTService):
         return self._game.get_xml_leaderboard()
 
 
-class check_move_question(TXTService):
+class check_move_question(XMLService):
     NAME = "/check_move_question"
 
     def __init__(self, game):
@@ -395,13 +378,13 @@ class check_move_question(TXTService):
         self._game = game
 
     def content(self):
-        return str(
+        return util.boolean_to_xml(
             self._game.check_timer_change() or
             self._game.check_all_players_answered()
         )
 
 
-class get_score(TXTService):
+class get_score(XMLService):
     NAME = "/get_score"
 
     def __init__(self, game):
@@ -409,10 +392,19 @@ class get_score(TXTService):
         self._game = game
 
     def content(self):
-        return "%d, %d" % (self._game.get_score(), self._game.get_place())
+        root = ElementTree.Element("Root")
+        ElementTree.SubElement(
+            root,
+            "score&place",
+            {
+                "score": self._game.get_score(),
+                "place":  self._game.get_place()
+            }
+        )
+        return util.to_string(root)
 
 
-class start_question(TXTService):
+class start_question(Service):
     NAME = "/start_question"
 
     def __init__(self, game):
@@ -428,7 +420,7 @@ class get_answers(TXTService):
         self._game = game
 
     def content(self):
-        ans = str(self._game.get_answers())
-        for letter in ["[", "]", "'"]:
-            ans = ans.replace(letter, "")
-        return ans
+        root = ElementTree.Element("Root")
+        for letter in self._game.get_answers():
+            ElementTree.SubElement(root, answer, {"answer": letter})
+        return util.to_string(root)

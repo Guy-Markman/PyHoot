@@ -122,7 +122,7 @@ class Client(base.Base):
                 util.create_headers_response(200,
                                              self._file.get_file_size(),
                                              self._extra_headers,
-                                             type=file_type)
+                                             file_type)
             )
         else:
             self._send_buff += self._file.headers(self._extra_headers)
