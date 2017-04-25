@@ -28,22 +28,20 @@
 				if (type == "name") {
 					data += "&name=" + document.getElementById("name")
 						.value;
-				}				
-				xmlrequest("check_" + type +	"?join_number=" + data,
-					function(){
+				}
+				xmlrequest("check_" + type + "?join_number=" + data,
+					function() {
 						if (this.readyState == 4 && this.status == 200) {
-							var xmlDoc = parse_xml_from_string(this.responseText)
-							console.log(xmlDoc.getElementsByTagName("Root")[0])
-							var ans = xmlDoc.getElementsByTagName("Root")[0].getAttribute("answer")
+							var ans = xmlstring_to_boolean(this.responseText);
 							if (type == "test") {
-								if (ans == "True") {
+								if (ans) {
 									changeDiv();
 								} else {
 									document.getElementById("p1_title").innerHTML =
 										"No such Game Pin, enter right one";
 								}
 							} else if (type == "name") {
-								if (ans == "True") {
+								if (ans) {
 									document.getElementById("join").submit();
 								} else {
 									document.getElementById("p2_title").innerHTML =
@@ -52,7 +50,7 @@
 							}
 						}
 					}
-				)
+				);
 			}
 		</script>
 	</head>
@@ -76,7 +74,7 @@
 				     Start Playing!</button>
 				</p>
 			</form>
-			
+
 		</center>
 	</body>
 

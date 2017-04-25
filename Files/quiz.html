@@ -4,24 +4,12 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>PyHoot!</title>
-		<script src="util.js" /></script>
+        <script src="util.js"></script>
         <script>
-			var extranal = "";
-			var PLAYERS_IN_LINE = 3;
+            var PLAYERS_IN_LINE = 3;
             var state = "Registration";
             var timer = window.setInterval(getnames, 1000);
-            var number_of_questions = null;            
-
-            function setInnerHTML(url, id) {
-                xmlrequest(url,
-                    function() {
-                        if (this.readyState == 4 && this.status == 200) {
-                            document.getElementById(id).innerHTML =
-                                this.responseText;
-                        }
-                    }
-                );
-            }
+            var number_of_questions = null;
 
             function switch_screens() {
                 switch (state) {
@@ -42,9 +30,9 @@
                     case "Leaderboard":
                         start = "Answer";
                         break;
-					case "Finish":
-						start = "Leaderboard";
-						break;
+                    case "Finish":
+                        start = "Leaderboard";
+                        break;
                 }
                 var state_style_display = document.getElementById(state).style.display;
                 var start_style_display = document.getElementById(start).style.display;
@@ -53,24 +41,35 @@
                 document.getElementById(start).style.display = start_style_display;
             }
 
+            function get_join_number() {
+                xmlrequest(
+                    "get_join_number",
+                    function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            xmlDoc = parse_xml_from_string(this.responseText);
+                            console.log(xmlDoc);
+                            extranal = xmlDoc;
+                            document.getElementById("join_number").innerHTML = xmlDoc.getElementsByTagName("join_number")[0].textContent;
+                        }
+                    }
+                );
+            }
+
             function getnames() {
-                xmlrequest("getnames", function(){
-						if (this.readyState == 4 && this.status == 200) {
-							xmlDoc = parse_xml_from_string(this.responseText)
-							players = xmlDoc.getElementsByTagName("player")
-							string_players=""
-							console.log(players)
-							for (i = 0; i < players.length; i++){
-								string_players += players[i].getAttribute("name")
-								if (i%PLAYERS_IN_LINE == 0 && i!=0){
-									string_players+="<br/>"
-								}
-							}
-							console.log(string_players)
-							document.getElementById("names").innerHTML = string_players
-						}
-					}
-				);
+                xmlrequest("getnames", function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        xmlDoc = parse_xml_from_string(this.responseText);
+                        players = xmlDoc.getElementsByTagName("player");
+                        string_players = "";
+                        for (i = 0; i < players.length; i++) {
+                            string_players += players[i].getAttribute("name");
+                            if (i % PLAYERS_IN_LINE === 0 && i !== 0) {
+                                string_players += "<br/>";
+                            }
+                        }
+                        document.getElementById("names").innerHTML = string_players;
+                    }
+                });
             }
 
             //continue only if at least one user is online
@@ -179,15 +178,15 @@
                     }
                 );
             }
-			
-			function get_winner(){
-				var oTable = document.getElementById("Leaderboard_content").getElementsByTagName("table")[0];
-				
-				var oCells = oTable.rows.item(0).cells;
-				
-				document.getElementById("Finish_name").innerHTML = oCells.item(0).innerHTML;
-				document.getElementById("Finish_score").innerHTML = oCells.item(1).innerHTML;
-			}
+
+            function get_winner() {
+                var oTable = document.getElementById("Leaderboard_content").getElementsByTagName("table")[0];
+
+                var oCells = oTable.rows.item(0).cells;
+
+                document.getElementById("Finish_name").innerHTML = oCells.item(0).innerHTML;
+                document.getElementById("Finish_score").innerHTML = oCells.item(1).innerHTML;
+            }
 
             function order_move_all_players() {
                 xmlrequest("order_move_all_players", null);
@@ -214,7 +213,7 @@
                                         move_to_next_question();
                                     } else {
                                         xmlrequest("set_ended?new=True", null);
-										order_move_all_players();
+                                        order_move_all_players();
                                         state = "Finish";
                                         // WIP
                                     }
@@ -229,15 +228,14 @@
                 xmlrequest("move_to_next_question",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            console.log("move_to_next_question " + this.responseText);
                             number_of_questions = parseInt(this.responseText);
                             if (number_of_questions >= 0) {
                                 get_question();
                             } else {
                                 state = "Finish";
-								get_winner();
-								switch_screens();
-								clearInterval(timer);
+                                get_winner();
+                                switch_screens();
+                                clearInterval(timer);
                             }
                         }
                     }
@@ -256,11 +254,11 @@
                             set_timer(question.getAttribute("duration"));
                             timer = window.setInterval(check_move_question, 1000);
                             document.getElementById("question_title").innerHTML =
-                                question.childNodes[1].firstChild.nodeValue;
+                                question.childNodes[1].textContent;
                             var questionsID = ["A_answer", "B_answer", "C_answer", "D_answer"];
                             for (i = 0; i < 4; i++) {
                                 document.getElementById(questionsID[i]).innerHTML =
-                                    xmlDoc.getElementsByTagName("Answer")[i].childNodes[1].firstChild.nodeValue;
+                                    xmlDoc.getElementsByTagName("Answer")[i].textContent;
                             }
                             state = "Question";
                             change_Opening_Question();
@@ -268,11 +266,10 @@
                     }
                 );
             }
-
         </script>
     </head>
 
-    <body onload="setInnerHTML('get_join_number', 'join_number');">
+    <body onload="get_join_number();">
         <center>
             <div id="Registration" style="display:inline">
                 <font size="7">Now you can join the Game!<br /></font>
@@ -327,13 +324,13 @@
                 <div id="Leaderboard_content">
                 </div>
             </div>
-			<div id = "Finish" style="display:none">
-				<font size="7">And this winner is... <br /></font>
-				<font size="7" id="Finish_name"></font>
-				<font size="6"><br />with </font>
-				<font size="7" id="Finish_score"></font>
-				<font size="6">points!</font>
-			<div>
+            <div id="Finish" style="display:none">
+                <font size="7">And this winner is... <br /></font>
+                <font size="7" id="Finish_name"></font>
+                <font size="6"><br />with </font>
+                <font size="7" id="Finish_score"></font>
+                <font size="6">points!</font>
+            </div>
         </center>
     </body>
 

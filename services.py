@@ -139,6 +139,7 @@ class getnames(XMLService):
     NAME = "/getnames"
 
     def __init__(self, game, common):
+        print "getnames"
         super(getnames, self).__init__()
         self._game = game
         self._common = common
@@ -172,14 +173,10 @@ class check_test(XMLService):
         self.common = common
 
     def content(self):
-        return util.to_string(
-            ElementTree.Element("Root", {"answer": str(
-                (
-                    self.data in self.common.join_number and
-                    self.common.join_number[self.data].TYPE == "MASTER"
-                )
-            )
-            }))
+        return util.boolean_to_xml(
+            self.data in self.common.join_number and
+            self.common.join_number[self.data].TYPE == "MASTER"
+        )
 
 
 class check_name(XMLService):
@@ -201,10 +198,7 @@ class check_name(XMLService):
                     name_list.append(player.name)
                 if self.name not in name_list:
                     ans = "True"
-        return util.to_string(
-            ElementTree.Element(
-                "Root", {
-                    "answer": str(ans)}))
+        return util.boolean_to_xml(ans)
 
 
 class join(Service):
@@ -232,7 +226,7 @@ class join(Service):
         return g
 
 
-class check_test_exist(TXTService):
+class check_test_exist(XMLService):
     NAME = "/check_test_exist"
 
     def __init__(self, quiz_name):
@@ -240,7 +234,7 @@ class check_test_exist(TXTService):
         self._quiz_name = quiz_name[0]
 
     def content(self):
-        return str(
+        return util.boolean_to_xml(
             os.path.isfile(
                 os.path.normpath("PyHoot\Quizes\%s.xml" %
                                  os.path.normpath(self._quiz_name)
@@ -257,7 +251,7 @@ class new(Service):
         return util.create_headers_response(302, extra_headers=extra)
 
 
-class get_join_number(TXTService):
+class get_join_number(XMLService):
     NAME = "/get_join_number"
 
     def __init__(self, pid, common):
@@ -265,10 +259,13 @@ class get_join_number(TXTService):
         self._join_number = str(common.pid_client[pid].join_number)
 
     def content(self):
-        return self._join_number
+        root = ElementTree.Element("Root")
+        ElementTree.SubElement(
+            root, "join_number").text = self._join_number
+        return util.to_string(root)
 
 
-class get_information(TXTService):
+class get_information(XMLService):
     NAME = "/get_information"
 
     def __init__(self, game):

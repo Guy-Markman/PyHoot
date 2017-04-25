@@ -91,3 +91,7 @@ def remove_from_sysyem(common, pid):
 
 def to_string(element):
     return ElementTree.tostring(element, constants.ENCODING)
+
+
+def boolean_to_xml(boolean):
+    return to_string(ElementTree.Element("Root", {"answer": str(boolean)}))
