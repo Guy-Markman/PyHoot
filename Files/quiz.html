@@ -51,8 +51,6 @@
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
                             xmlDoc = parse_xml_from_string(this.responseText);
-                            console.log(xmlDoc);
-                            extranal = xmlDoc;
                             document.getElementById("join_number").innerHTML = xmlDoc.getElementsByTagName("join_number")[0].textContent;
                         }
                     }
@@ -96,7 +94,7 @@
                 xmlrequest("check_move_question",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            if (this.responseText == "True") {
+                            if (xmlstring_to_boolean(this.responseText)) {
                                 clearInterval(timer);
                                 change_Question_Answer();
                             }
@@ -110,11 +108,12 @@
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
                             xmlrequest("order_move_all_not_answered", null);
-                            var ans = this.responseText.split(", ");
+                            xmlDoc = parse_xml_from_string(this.responseText);
                             answer_html = document.getElementById("ans");
                             answer_html.innerHTML = "";
-                            for (var i = 0; i < ans.length; i++) {
-                                answer_html.innerHTML += document.getElementById(ans[i] + "_answer").innerHTML + "<br />";
+                            list_answers = xmlDoc.getElementsByTagName("answer");
+                            for (var i = 0; i < list_answers.length; i++) {
+                                answer_html.innerHTML += document.getElementById(list_answers[i].getAttribute("answer") + "_answer").innerHTML + "<br />";
                             }
                             state = "Answer";
                             switch_screens();
@@ -234,7 +233,7 @@
                         if (this.readyState == 4 && this.status == 200) {
                             // Take the xml we got, parse it and compare the
                             // argument "number_of_questions" bigger than 0
-                            if (parse_xml_from_string.getElementsByTagName(
+                            if (parse_xml_from_string(this.responseText).getElementsByTagName(
                                     "question")[0].getAttribute(
                                     "number_of_questions") >= 0) {
                                 get_question();
@@ -254,7 +253,7 @@
                 xmlrequest("get_question",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            xmlDoc = util.parse_xml_from_string(this.responseText);
+                            xmlDoc = parse_xml_from_string(this.responseText);
                             question = xmlDoc.getElementsByTagName("Question")[0];
                             set_timer(question.getAttribute("duration"));
                             timer = window.setInterval(check_move_question, 1000);

@@ -342,7 +342,7 @@ class move_to_next_question(XMLService):
         ElementTree.SubElement(
             root,
             "question",
-            {"number_of_questions": self._game.get_left_questions()}
+            {"number_of_questions": str(self._game.get_left_questions())}
         )
         return util.to_string(root)
 
@@ -397,8 +397,8 @@ class get_score(XMLService):
             root,
             "score&place",
             {
-                "score": self._game.get_score(),
-                "place":  self._game.get_place()
+                "score": str(self._game.get_score()),
+                "place":  str(self._game.get_place())
             }
         )
         return util.to_string(root)
@@ -412,7 +412,7 @@ class start_question(Service):
         game.start_question()
 
 
-class get_answers(TXTService):
+class get_answers(XMLService):
     NAME = "/get_answers"
 
     def __init__(self, game):
@@ -422,5 +422,5 @@ class get_answers(TXTService):
     def content(self):
         root = ElementTree.Element("Root")
         for letter in self._game.get_answers():
-            ElementTree.SubElement(root, answer, {"answer": letter})
+            ElementTree.SubElement(root, "answer", {"answer": letter})
         return util.to_string(root)
