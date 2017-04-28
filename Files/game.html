@@ -11,6 +11,7 @@
 		<script>
 			var state = "wait";
 			var timer = window.setInterval(check_move_to_next, 1000);
+			var exteranl = "";
 
 			function disconnect_user() {
 				xmlrequest("diconnect_user", function() {
@@ -59,8 +60,7 @@
 				xmlrequest("get_score",
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
-							var score_place = parse_xml_from_string(this.responseText).getElementsByTagName("score&place")[0];
-                            console.log(score_place);
+							var score_place = parse_xml_from_string(this.responseText).getElementsByTagName("score_place")[0];
 							document.getElementById("score").innerHTML = score_place.getAttribute("score");
 							document.getElementById("place").innerHTML = ordinal_suffix_of(score_place.getAttribute("place"));
 						}

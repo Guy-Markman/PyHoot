@@ -395,7 +395,7 @@ class get_score(XMLService):
         root = ElementTree.Element("Root")
         ElementTree.SubElement(
             root,
-            "score&place",
+            "score_place",
             {
                 "score": str(self._game.get_score()),
                 "place":  str(self._game.get_place())
