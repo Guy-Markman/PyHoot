@@ -34,9 +34,10 @@ def parse_args():
         type=int,
         help="Buff size for each time, default %(default)d"
     )
+    print os.path.dirname(__file__)
     parser.add_argument(
         "--base",
-        default="PyHoot/Files/",
+        default=os.path.dirname(__file__),
         type=str,
         help="Base directory"
     )

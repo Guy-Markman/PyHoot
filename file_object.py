@@ -23,7 +23,7 @@ class FileObject(base.Base):
         """
         super(FileObject, self).__init__()
         # Build the address and open the file
-        self._fd = os.open(os.path.normpath('%s%s' % (
+        self._fd = os.open(os.path.normpath('%s\Files\%s' % (
             base_directory, os.path.normpath(file_name))),
             os.O_RDONLY | os.O_BINARY
         )

@@ -97,7 +97,7 @@ class Clock(Service):
 class register_quiz(Service):
     NAME = "/register_quiz"
 
-    def __init__(self, quiz_name, common, pid=None):
+    def __init__(self, quiz_name, common, base_directory, pid=None):
         super(register_quiz, self).__init__()
         self._quiz_name = quiz_name[0]
         if pid is not None:
@@ -105,7 +105,7 @@ class register_quiz(Service):
                 common,
                 pid,
             )
-        g = self.register_master(quiz_name[0], common)
+        g = self.register_master(quiz_name[0], common, base_directory)
         self.master_pid = g.pid
 
     def headers(self, extra):
@@ -113,8 +113,8 @@ class register_quiz(Service):
                       "Set-Cookie": "pid=%s" % self.master_pid})
         return util.create_headers_response(302, extra_headers=extra)
 
-    def register_master(self, quiz_name, common):
-        m = game.GameMaster(quiz_name, common)
+    def register_master(self, quiz_name, common, base_directory):
+        m = game.GameMaster(quiz_name, common, base_directory)
         common.pid_client[m.pid] = m
         common.join_number[m.join_number] = m
         return m
@@ -230,15 +230,17 @@ class join(Service):
 class check_test_exist(XMLService):
     NAME = "/check_test_exist"
 
-    def __init__(self, quiz_name):
+    def __init__(self, quiz_name, base_directory):
         super(check_test_exist, self).__init__()
         self._quiz_name = quiz_name[0]
+        self._base_directory = base_directory
 
     def content(self):
         return util.boolean_to_xml(
             os.path.isfile(
-                os.path.normpath("PyHoot\Quizes\%s.xml" %
-                                 os.path.normpath(self._quiz_name)
+                os.path.normpath("%s\Quizes\%s.xml" %
+                                 (self._base_directory,
+                                  os.path.normpath(self._quiz_name))
                                  )
             )
         )

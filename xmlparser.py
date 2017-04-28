@@ -6,16 +6,18 @@ from . import constants, custom_exceptions
 
 class XMLParser(object):
 
-    def __init__(self, file_name):
-        test_file("%s.xml" % file_name, "PyHoot\Quizes")
+    def __init__(self, file_name, base_directory):
+        test_file("%s.xml" % file_name, "%s\Quizes" % base_directory)
         self._root = ElementTree.parse(
-            "PyHoot\Quizes\%s.xml" % file_name).getroot()
+            "%s\Quizes\%s.xml" % (base_directory, file_name)).getroot()
         self.question_number = 0  # 0 Represent the starting page
         self.file_name = file_name
+        self._base_directory = base_directory
 
     def get_backuproot(self):
         return ElementTree.parse(
-            "PyHoot\Quizes\%s.xml" % self.file_name).getroot()
+            "%s\Quizes\%s.xml" % (self._base_directory, self.file_name)
+        ).getroot()
 
     def get_question_number(self):
         return self.question_number

@@ -45,11 +45,11 @@ class Game(object):
 class GameMaster(Game):
     TYPE = "MASTER"
 
-    def __init__(self, quiz_name, common):
+    def __init__(self, quiz_name, common, base_directory):
         super(GameMaster, self).__init__(common)
         self._quiz = quiz_name
         self._players_list = {}  # {pid: {"player": GamePlayer, "_score":score}
-        self._parser = xmlparser.XMLParser(quiz_name)
+        self._parser = xmlparser.XMLParser(quiz_name, base_directory)
         while True:
             join_number = random.randint(constants.MIN_PID, constants.MAX_PID)
             if join_number not in common.join_number.keys():
