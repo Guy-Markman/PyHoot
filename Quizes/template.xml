@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+<Root>
+    <Quiz name="The name of the quiz" number_of_questions="The number of questions in the quiz">
+        <Question duration="The for each question">
+            <Text><![CDATA[
+                    The question itself
+            ]]></Text>
+            <!---There must be 4 answers for each question-->
+            <Answer correct="1 for right, without the attribute for wrong">
+                <Text><![CDATA[
+                        The answer
+                ]]></Text>
+            </Answer>
+        </Question>
+    </Quiz>
+</Root>

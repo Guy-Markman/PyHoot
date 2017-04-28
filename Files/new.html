@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>PyHoot!</title>
+        <link rel="icon" type="image/png" href="/icon.png" />
+        <script src="util.js"></script>
+        <script>
+            function check_test_exist() {
+                xmlrequest(
+                    "check_test_exist?quiz_name=" + document.getElementById("quiz_name").value,
+                    function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            if (xmlstring_to_boolean(this.responseText)) {
+                                document.getElementById("register_quiz").submit();
+                            } else {
+                                document.getElementById("title_register").innerHTML =
+                                    "No such quiz!<br />Name of quiz:";
+                            }
+                        }
+                    }
+                );
+            }
+        </script>
+    </head>
+
+    <body>
+        <center>
+            <form action="/register_quiz" id="register_quiz" method="get">
+                <font size="5">
+                    <p id="title_register">Name of quiz:</p>
+                </font>
+                <input type="text" id="quiz_name" name="quiz_name" size="21" autocomplete="off" autofocus>
+                <br /><br />
+                <button type="button" style="height:50px; width:150px" onclick="check_test_exist();">
+                    Start game!
+                </button>
+            </form>
+        </center>
+    </body>
+
+</html>

@@ -24,10 +24,16 @@ TODO:
 - [X] Make server send files
 - [X] Create XML class
 - [X] Quiz editor (independent)
-- [ ] Registrater players
-- [ ] Show question on the screen and move to the next part (timer)
-- [ ] Get answers and analyze them
-- [ ] Update database of player with score
-- [ ] Show answer and leaderboard
-- [ ] End of game
+- [X] Add support to services
+- [X] Registrater players
+- [X] Show question on the screen and move to the next part (timer)
+- [X] Get answers and analyze them
+- [X] Update database of player with score
+- [X] Show answer
+- [X] Show leaderboard
+- [X] End of game
+- [ ] XML only
+- [ ] CSS Day!
+- [ ] Python Client Random Answer
+- [ ] Python Client Fetch images
 - [ ] Hide\ Find string in picture

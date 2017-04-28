@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Root>
+	<Quiz name="test" number_of_questions="2">
+		<Question duration="30">
+       		<Text><![CDATA[
+				<font size="7">1+1</font><br />
+				<img src="questineer-pics/test/2.png" style="width:304px;height:228px;"/>
+			]]></Text>
+			<Answer>
+				<Text><![CDATA[
+				<font size = "5">A: 1</font>
+				]]></Text>
+			</Answer>
+			<Answer correct="1">
+				<Text><![CDATA[
+				<font size = "5">B: 2</font>
+				]]></Text>
+			</Answer>
+			<Answer>
+				<Text><![CDATA[
+				<font size = "5">C: 3</font>
+				]]></Text>
+			</Answer>
+			<Answer>
+				<Text><![CDATA[
+				<font size = "5">D: 4</font>
+				]]></Text>
+			</Answer>
+		</Question>
+		<Question duration="30">
+       		<Text><![CDATA[
+				<font size="7">2+2</font><br />
+			]]></Text>
+			<Answer>
+				<Text><![CDATA[
+				<font size = "5">A: 1</font>
+				]]></Text>
+			</Answer>
+			<Answer>
+				<Text><![CDATA[
+				<font size = "5">B: 2</font>
+				]]></Text>
+			</Answer>
+			<Answer>
+				<Text><![CDATA[
+				<font size = "5">C: 3</font>
+				]]></Text>
+			</Answer>
+			<Answer  correct="1">
+				<Text><![CDATA[
+				<font size = "5">D: 4</font>
+				]]></Text>
+			</Answer>
+		</Question>
+	</Quiz>
+</Root>

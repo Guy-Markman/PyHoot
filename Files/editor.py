@@ -1,47 +1,56 @@
 import os
-import string
 from xml.dom import minidom
 from xml.etree import ElementTree
 
 N_ANSWERS = 4
-ENCODING = 'utf-8'
 
 
 def main():
-    quiz = ElementTree.Element("quiz")
-    settings = ElementTree.SubElement(quiz, "settings")
-    name = raw_input("Name of the quiz. ")
-    n_questions = raw_input("How many question in the quiz? ")
-    ElementTree.SubElement(settings, 'name').text = name
-    ElementTree.SubElement(settings, 'number_of_questions').text = n_questions
-    questions = ElementTree.SubElement(quiz, "questions")
-    for x in range(int(n_questions)):
-        q = ElementTree.SubElement(questions, "question", number=str(x + 1))
-        ElementTree.SubElement(q, "question_text").text = raw_input(
-            "What is the question? ")
-        for z in range(N_ANSWERS):
-            answer = ElementTree.SubElement(
-                q, "answer", number=string.ascii_uppercase[z])
-            ElementTree.SubElement(
-                answer, "answer_text").text = raw_input("Enter the answer ")
-            ElementTree.SubElement(answer, "right_wrong").text = raw_input(
-                "Is the answer right or wrong? ")
-    build = prettify(quiz)
+    root = ElementTree.Element("Root")
+    ElementTree.SubElement(root, "Quiz", {
+        "name": raw_input("Name of the quiz. "),
+        "number_of_questions": raw_input("How many question in the quiz? ")
+    })
+    for question in root.find("./Quiz").attrib["number_of_questions"]:
+        q = ElementTree.SubElement(
+            root.find("./Quiz"), "Question", {
+                "duration": raw_input("How long is this question? In seconds ")
+            })
+        ElementTree.SubElement(q, "Text").text = "<![CDATA[%s]]>" % (
+            raw_input("What is the question? "))
+        for answer in range(N_ANSWERS):
+            ans = ElementTree.SubElement(
+                q, "Answer")
+            ans.text = raw_input("Enter the answer ")
+            right_wrong = raw_input(
+                "Is the answer right or wrong? (answer in true or false) ")
+            if right_wrong == "true":
+                ans.attrib["correct"] = "1"
+    build = prettify(root)
     print build
-    fd = os.open("../Files/%s.xml" % name, os.O_CREAT | os.O_WRONLY)
+    name = root.find("./Quiz").attrib["name"]
     try:
-        while build:
+        fd = os.open("../Quizes/%s.xml" % name, os.O_CREAT | os.O_WRONLY)
+        try:
             build = build[os.write(fd, build):]
-    finally:
-        os.close(fd)
+        finally:
+            os.close(fd)
+    except OSError:
+        fd = os.open("%s.xml" % name, os.O_CREAT | os.O_WRONLY)
+        try:
+            build = build[os.write(fd, build):]
+        finally:
+            os.close(fd)
 
 
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.
     """
-    rough_string = ElementTree.tostring(elem, ENCODING)
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ", encoding="utf-8")
+    print "Start"
+    return minidom.parseString(
+        ElementTree.tostring(
+            elem, 'utf-8')
+    ).toprettyxml(encoding='utf-8')
 
 
 if __name__ == "__main__":

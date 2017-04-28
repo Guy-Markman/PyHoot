@@ -5,8 +5,7 @@ class Disconnect(RuntimeError):
         super(Disconnect, self).__init__("Disconnect")
 
 
-class AccessDenied(RuntimeError):
-    """Represent an error that happend when the user tries to access a file
-    they are not allowed to access"""
-    def __init__(self):
-        super(AccessDenied, self).__init__("Access Denied")
+class CorruptXML(RuntimeError):
+
+    def __init__(self, message):
+        super(CorruptXML, self).__init__("Corrupt XML: %s" % message)
