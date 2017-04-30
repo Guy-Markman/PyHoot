@@ -10,12 +10,12 @@
 		<script src="util.js"></script>
 		<script>
 			var state = "wait";
-			var timer = window.setInterval(check_move_to_next, 1000);
 			var exteranl = "";
-
+			check_move_to_next();
+			
 			function disconnect_user() {
 				xmlrequest("diconnect_user", function() {
-					if (this.readyState == 4 && this.status == 200) {
+					if (this.readyState == 4) {
 						window.location.href = '/';
 					}
 				});
@@ -92,23 +92,29 @@
 									case "wait":
 										switch_screens();
 										state = "questions";
+										xmlrequest("moved_to_next_question", null);
 										break;
 									case "question":
 										switch_screens();
 										state = "leaderboard";
+										xmlrequest("moved_to_next_question", null);
 										break;
 									case "wait_question":
 										get_score();
 										switch_screens();
 										state = "leaderboard";
+										xmlrequest("moved_to_next_question", null);
 										break;
 									case "leaderboard":
 										switch_screens();
+										xmlrequest("moved_to_next_question", null);
+										break;
 								}
 							}
 						}
 					}
 				);
+				setTimeout(check_move_to_next, 1000);
 			}
 		</script>
 	</head>
@@ -119,7 +125,7 @@
 				<!--Will check when it should switch to question everysecond-->
 				<font size="6">Please wait</font>
 				<br /><br />
-				<input type="button" value="Disconnect" onclick="disconnect_user();" />
+				<input type="button" value="Disconnect" style="height:50px; width:150px; font-size: 120%" onclick="disconnect_user();" />
 			</p>
 			<div id="question" style="display:none">
 				<table>
@@ -159,6 +165,10 @@
 				<font size="6">and you are </font>
 				<font size="6" id="place"></font>
 				<font size="6"> place</font>
+				<br/><br/>
+				<button type="button" style="height:50px; width:150px; font-size: 120%" onclick="disconnect_user();">
+					Leave the game
+				</button>
 			</div>
 		</center>
 	</body>
