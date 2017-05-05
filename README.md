@@ -32,7 +32,7 @@ TODO:
 - [X] Show answer
 - [X] Show leaderboard
 - [X] End of game
-- [ ] XML only
+- [X] XML only
 - [ ] CSS Day!
 - [ ] Python Client Random Answer
 - [ ] Python Client Fetch images

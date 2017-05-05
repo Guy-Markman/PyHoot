@@ -133,7 +133,7 @@ class Server(base.Base):
                             self.logger.debug("Client send")
                             entry["client"].send()
                             if entry["client"].check_finished_request():
-                                self.logger.info("Finished Request for %s" % s)
+                                self.logger.info("Finished Request for %s",  s)
                                 self._change_to_close(self._database[s])
                         if entry["state"] == constants.CLOSE:
                             self.logger.debug("Close send")
@@ -153,7 +153,7 @@ class Server(base.Base):
                     entry = self._database[s]
                     if entry["state"] == constants.CLIENT:
                         if entry["client"].check_finished_request():
-                            self.logger.info("Finished Request for %s" % s)
+                            self.logger.info("Finished Request for %s",  s)
                             self._change_to_close(self._database[s])
                     if entry["state"] == constants.CLOSE:
                         if entry["buff"] == "":
@@ -176,7 +176,7 @@ class Server(base.Base):
         while self._database[s]["buff"]:
             try:
                 sent = s.send(self._database[s]["buff"])
-                self.logger.debug("sent %s" % sent)
+                self.logger.debug("sent %s",  sent)
                 self._database[s]["buff"] = self._database[s]["buff"][sent:]
             except socket.error as e:
                 self.logger.error(traceback.format_exc())
@@ -185,4 +185,4 @@ class Server(base.Base):
                 else:
                     self.logger.debug("ERROR WOULD BLOCK")
                     break
-        self.logger.debug("left %s" % len(self._database[s]["buff"]))
+        self.logger.debug("left %s",  len(self._database[s]["buff"]))

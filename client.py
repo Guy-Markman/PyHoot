@@ -142,7 +142,7 @@ class Client(base.Base):
                     split_line = line.split(":")
                     dic_headers[split_line[0].lower()] = split_line[
                         1].lstrip(' ')
-            self.logger.debug("dic_headers %s" % dic_headers)
+            self.logger.debug("dic_headers %s", dic_headers)
             if uri in SERVICES_HEADERS.keys():
                 for header in SERVICES_HEADERS[uri]:
                     self._request.add_header(header, dic_headers[header])
@@ -165,7 +165,7 @@ class Client(base.Base):
             pid = cookie["pid"].value
             if pid in self.common.pid_client:
                 self._game = self.common.pid_client[pid]
-                self.logger.debug("Set game as %s" % self._game)
+                self.logger.debug("Set game as %s", self._game)
         else:
             self.logger.debug("Game object not found")
 
@@ -193,8 +193,8 @@ class Client(base.Base):
                 self._test_http_and_creat_objects()
 
             # If we do have request line, get headers
-            self.logger.debug("state %s" % self._state)
-            self.logger.debug("Now recv_buff is %s" % self._recv_buff)
+            self.logger.debug("state %s",  self._state)
+            self.logger.debug("Now recv_buff is %s", self._recv_buff)
 
         except OSError as e:
             self.logger.error('Exception ', exc_info=True)
@@ -243,7 +243,7 @@ class Client(base.Base):
 
     def _send_my_buff(self):
         """Send the data in self._send_buff"""
-        self.logger.debug("start sending my buff, send_buff %s" %
+        self.logger.debug("start sending my buff, send_buff %s",
                           self._send_buff)
         try:
             while self._send_buff:
@@ -256,7 +256,7 @@ class Client(base.Base):
                     raise custom_exceptions.Disconnect()
                 raise
 
-        self.logger.debug("Sent all that I could, send_buff %s" %
+        self.logger.debug("Sent all that I could, send_buff %s", 
                           self._send_buff)
 
     def get_send_buff(self):
