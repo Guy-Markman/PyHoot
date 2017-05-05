@@ -18,7 +18,7 @@ def create_headers_response(
     code,
     length=None,
     extra_headers=None,
-    type=None,
+    extension=None,
 ):
     """create the headers part of the request
         Args:
@@ -26,9 +26,7 @@ def create_headers_response(
             length - length of the message
             extra_headers - a list of lists where every list is the header name
                             and then header content.
-                            example: [["header name", "header content"]]
-            type - The type of the file (is we send a file).
-                   example: ".py"
+            extension - The extension of the file (is we send a file).
     """
     message = ("%s %s %s%s" % (
         constants.HTTP_VERSION,
@@ -39,10 +37,10 @@ def create_headers_response(
     )
     if length is not None:
         message += "Content-Length: %s%s" % (length, constants.CRLF)
-    if type is not None:
+    if extension is not None:
         mimetypes.init()
-        if type in mimetypes.types_map and type != ".py":
-            content_type = mimetypes.types_map[type]
+        if extension in mimetypes.types_map and extension != ".py":
+            content_type = mimetypes.types_map[extension]
         else:
             content_type = 'application/octet-stream'
         message += "Content-Type: %s%s" % (content_type, constants.CRLF)

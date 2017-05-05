@@ -2,8 +2,11 @@
 <html>
 
 	<head>
+
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
+		<link rel="icon" type="image/png" href="icon.png">
+
 		<script src="util.js"></script>
 		<script>
 			function changeDiv() {
@@ -62,15 +65,15 @@
 					<font size="7" id="p1_title">Game PIN</font><br />
 					<input type="number" inputmode="numeric" pattern="\d*" title="Non-negative integral number" id="join_number" name="join_number" style="width: 200px;" min="100000" max="999999" autocomplete="off" autofocus>
 					<br /><br />
-					<button type="button" style="height:50px;width:150px;" onclick="check('test');">
+					<button type="button" style="height:50px;width:150px; font-size: 170%" onclick="check('test');">
 						Join!</button><br /><br />
-					<button type="button" style="height:50px;width:150px" onclick="location.href='/new'">
+					<button type="button" style="height:50px;width:150px; font-size: 110%" onclick="location.href='/new'">
 					Creat new game </button>
 				</p>
 				<p id="p2" style="display:none">
 					<font id="p2_title" size="6">Choose name</font><br />
 					<input type="text" name="name" id="name" pattern=".{3,}" required title="3 characters minimum" style="width: 200px;"><br /><br />
-					<button type="button" style="height:50px;width:150px" onclick="check_length_name()">
+					<button type="button" style="height:50px;width:150px; font-size: 110%" onclick="check_length_name()">
 				     Start Playing!</button>
 				</p>
 			</form>

@@ -2,9 +2,13 @@
 <html>
 
     <head>
+
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>PyHoot!</title>
+        <link rel="icon" type="image/png" href="icon.png">
+
         <script src="util.js"></script>
+        <link rel="icon" type="image/png" href="icon.png">
         <script>
             var PLAYERS_IN_LINE = 3;
             var state = "Registration";
@@ -47,8 +51,6 @@
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
                             xmlDoc = parse_xml_from_string(this.responseText);
-                            console.log(xmlDoc);
-                            extranal = xmlDoc;
                             document.getElementById("join_number").innerHTML = xmlDoc.getElementsByTagName("join_number")[0].textContent;
                         }
                     }
@@ -62,7 +64,7 @@
                         players = xmlDoc.getElementsByTagName("player");
                         string_players = "";
                         for (i = 0; i < players.length; i++) {
-                            string_players += players[i].getAttribute("name");
+                            string_players += players[i].getAttribute("name")+ "&emsp;";
                             if (i % PLAYERS_IN_LINE === 0 && i !== 0) {
                                 string_players += "<br/>";
                             }
@@ -92,7 +94,7 @@
                 xmlrequest("check_move_question",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            if (this.responseText == "True") {
+                            if (xmlstring_to_boolean(this.responseText)) {
                                 clearInterval(timer);
                                 change_Question_Answer();
                             }
@@ -106,11 +108,12 @@
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
                             xmlrequest("order_move_all_not_answered", null);
-                            var ans = this.responseText.split(", ");
+                            xmlDoc = parse_xml_from_string(this.responseText);
                             answer_html = document.getElementById("ans");
                             answer_html.innerHTML = "";
-                            for (var i = 0; i < ans.length; i++) {
-                                answer_html.innerHTML += document.getElementById(ans[i] + "_answer").innerHTML + "<br />";
+                            list_answers = xmlDoc.getElementsByTagName("answer");
+                            for (var i = 0; i < list_answers.length; i++) {
+                                answer_html.innerHTML += document.getElementById(list_answers[i].getAttribute("answer") + "_answer").innerHTML + "<br />";
                             }
                             state = "Answer";
                             switch_screens();
@@ -200,7 +203,7 @@
                 xmlrequest("check_timer_change",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            if (this.responseText == "True") {
+                            if (xmlstring_to_boolean(this.responseText)) {
                                 clearInterval(timer);
                                 if (state == "Opening") {
                                     move_to_next_question();
@@ -228,8 +231,11 @@
                 xmlrequest("move_to_next_question",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            number_of_questions = parseInt(this.responseText);
-                            if (number_of_questions >= 0) {
+                            // Take the xml we got, parse it and compare the
+                            // argument "number_of_questions" bigger than 0
+                            if (parse_xml_from_string(this.responseText).getElementsByTagName(
+                                    "question")[0].getAttribute(
+                                    "number_of_questions") >= 0) {
                                 get_question();
                             } else {
                                 state = "Finish";
@@ -247,9 +253,7 @@
                 xmlrequest("get_question",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            parser = new DOMParser();
-                            xmlDoc = parser.parseFromString(this.responseText,
-                                "text/xml");
+                            xmlDoc = parse_xml_from_string(this.responseText);
                             question = xmlDoc.getElementsByTagName("Question")[0];
                             set_timer(question.getAttribute("duration"));
                             timer = window.setInterval(check_move_question, 1000);
@@ -282,7 +286,7 @@
                 <p id="br2">
                     <br /><br />
                 </p>
-                <input type="button" id="Start_playing" value="Start playing" onclick="check_moveable()">
+                <input type="button" id="Start_playing" style="height:50px; width:150px; font-size: 130%" value="Start playing" onclick="check_moveable()">
             </div>
             <div id="Opening" style="display:none">
                 <font size="7" id="quiz_name">
@@ -330,6 +334,10 @@
                 <font size="6"><br />with </font>
                 <font size="7" id="Finish_score"></font>
                 <font size="6">points!</font>
+				<br/><br/>
+				<button type="button" style="height:50px; width:150px; font-size: 120%" onclick="location.href='/';">
+					Return to home page
+				</button>
             </div>
         </center>
     </body>
