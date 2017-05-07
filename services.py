@@ -329,11 +329,12 @@ class check_move_next_page(XMLService):
 
 
 class moved_to_next_page(Service):
-    NAME ="/moved_to_next_question"
-    
+    NAME = "/moved_to_next_question"
+
     def __init__(self, game):
         super(moved_to_next_page, self).__init__()
         game.moved_to_next_page()
+
 
 class move_to_next_question(XMLService):
     NAME = "/move_to_next_question"
