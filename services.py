@@ -1,6 +1,5 @@
 """All the services get the method we need and return the data
 """
-# TODO: change all TXTService to XMLService
 import os.path
 import time
 from xml.etree import ElementTree
