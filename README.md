@@ -34,6 +34,6 @@ TODO:
 - [X] End of game
 - [X] XML only
 - [ ] CSS Day!
-- [ ] Python Client Random Answer
-- [ ] Python Client Fetch images
+- [X] Python Client Random Answer
+- [X] Python Client Fetch images
 - [ ] Hide\ Find string in picture
