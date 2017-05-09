@@ -7,6 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>PyHoot!</title>
         <link rel="icon" type="image/png" href="/icon.png" />
+        <link rel="stylesheet" type="text/css" href="common.css">
         <link rel="stylesheet" type="text/css" href="new.css">
         <script src="util.js"></script>
         <script>
@@ -25,19 +26,16 @@
                     }
                 );
             }
-
         </script>
     </head>
 
     <body>
         <center>
             <form action="/register_quiz" id="register_quiz" method="get">
-                <font size="5">
-                    <p id="title_register">Name of quiz:</p>
-                </font>
-                <input type="text" id="quiz_name" name="quiz_name" size="21" autocomplete="off" autofocus>
+                <p id="title_register" class="title_register">Name of quiz:</p>
+                <input type="text" id="quiz_name" name="quiz_name" autocomplete="off" autofocus>
                 <br /><br />
-                <button type="button" style="height:50px; width:150px; font-size: 150%;" onclick="check_test_exist();">
+                <button type="button" onclick="check_test_exist();">
                     Start game!
                 </button>
             </form>

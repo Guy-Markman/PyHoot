@@ -1,0 +1,30 @@
+input, button {
+    font-size: 0.75em;
+}
+
+input, .move, .check_test {
+    max-height: 0.75em;
+    max-width: 0.75
+}
+
+.move, .check_test {
+    min-width: 0.20em;
+}
+
+input {
+    min-width: 1.26em;
+    min-height: 1.2em;
+}
+
+.check_test {
+    min-width: 9em;
+}
+
+.title {
+    font-size: 1.25em;
+    background-color: white;
+}
+
+.p2 {
+    display: none
+}

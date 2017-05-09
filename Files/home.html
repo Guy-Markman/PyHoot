@@ -2,7 +2,8 @@
 <html>
 
 	<head>
-
+		<link rel="stylesheet" type="text/css" href="common.css" />
+		<link rel="stylesheet" type="text/css" href="home.css" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
 		<link rel="icon" type="image/png" href="icon.png">
@@ -61,21 +62,21 @@
 	<body>
 		<center>
 			<form id="join" action="/join" method="get">
-				<p id="p1">
-					<font size="7" id="p1_title">Game PIN</font><br />
+				<div id="p1">
+					<div id="p1_title" class="title">Game PIN</div><br />
 					<input type="number" inputmode="numeric" pattern="\d*" title="Non-negative integral number" id="join_number" name="join_number" style="width: 200px;" min="100000" max="999999" autocomplete="off" autofocus>
 					<br /><br />
-					<button type="button" style="height:50px;width:150px; font-size: 170%" onclick="check('test');">
+					<button type="button" class="check_test" onclick="check('test');">
 						Join!</button><br /><br />
-					<button type="button" style="height:50px;width:150px; font-size: 110%" onclick="location.href='/new'">
+					<button type="button" class="move" onclick="location.href='/new'">
 					Creat new game </button>
-				</p>
-				<p id="p2" style="display:none">
-					<font id="p2_title" size="6">Choose name</font><br />
-					<input type="text" name="name" id="name" pattern=".{3,}" required title="3 characters minimum" style="width: 200px;"><br /><br />
-					<button type="button" style="height:50px;width:150px; font-size: 110%" onclick="check_length_name()">
+				</div>
+				<div id="p2" class="p2">
+					<div id="p2_title" class="title">Choose name</div><br />
+					<input type="text" name="name" id="name" pattern=".{3,}" required title="3 characters minimum"><br /><br />
+					<button type="button" class="move" style="" onclick="check_length_name()">
 				     Start Playing!</button>
-				</p>
+				</div>
 			</form>
 
 		</center>
