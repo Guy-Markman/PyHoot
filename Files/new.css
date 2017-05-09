@@ -1,0 +1,39 @@
+body {
+    -moz-animation: random 15s infinite;
+    -webkit-animation: random 15s infinite;
+    animation: random 15s infinite;
+    background-color: purple;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+
+@keyframes random {
+    15% {
+        background-color: red;
+    }
+    45% {
+        background-color: ForestGreen;
+    }
+    60% {
+        background-color: blue;
+    }
+    75% {
+        background-color: yellow;
+    }
+}
+
+p {
+    background-color: white;
+    border-radius: 0.1em;
+    max-width: 7em;
+}
+
+input {
+    border-radius: 0.1em;
+    border: 0.2em solid lightgrey;
+}
+
+button {
+    background-color: white;
+    border-radius: 0.5em;
+    min-height: 3em;
+}
