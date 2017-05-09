@@ -1,0 +1,46 @@
+body {
+    font-family: 'Ravi Prakash', cursive;
+    background: purple;
+}
+
+div {
+    display: none;
+}
+
+input {
+    font-family: 'Ravi Prakash', cursive;
+}
+
+.button_left, .button_right {
+    font-family: 'Ravi Prakash', cursive;
+    height: 150px;
+    width: 150px;
+    border-radius: 0.5em;
+    font-size: 50px;
+}
+
+.button_right {
+    float: left;
+}
+
+.button_right {
+    float: right;
+}
+
+.leave {
+    font-size: 120%;
+    height: 50px;
+    width: 150px;
+}
+
+p {
+    color: white;
+}
+
+.leaderboard {
+    font-size: 1.5em;
+}
+
+.wait {
+    font-size: 2em;
+}

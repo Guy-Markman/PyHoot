@@ -6,6 +6,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
 		<link rel="icon" type="image/png" href="icon.png">
+		<link rel="stylesheet" type="text/css" href="game.css" />
+		<link href="https://fonts.googleapis.com/css?family=Ravi+Prakash" rel="stylesheet">
 
 		<script src="util.js"></script>
 		<script>
@@ -25,16 +27,20 @@
 				switch (state) {
 					case "question":
 						to = "leaderboard";
+						color = "green";
 						break;
 					case "leaderboard":
 						to = "question";
+						color = "white"
 						break;
 					case "wait":
 						to = "question";
+						color = "white"
 						break;
 					case "wait_question":
 						state = "wait";
 						to = "leaderboard";
+						color = "green"
 						break;
 				}
 				var from_style_display = document.getElementById(state).style.display;
@@ -42,6 +48,7 @@
 				from_style_display = [to_style_display, to_style_display = from_style_display][0];
 				document.getElementById(state).style.display = from_style_display;
 				document.getElementById(to).style.display = to_style_display;
+				document.body.style.background = color
 			}
 
 			function send_answer(letter) {
@@ -50,6 +57,8 @@
 						if (this.readyState == 4 && this.status == 200) {
 							state = "wait";
 							switch_screens();
+							//HACK: This is a bad way to do this. I must find better one.
+							document.body.style.background = "purple"
 							state = "wait_question";
 						}
 					}
@@ -122,52 +131,48 @@
 
 	<body>
 		<center>
-			<p id="wait" style="display:inline">
+			<div id="wait" style="display:inline">
 				<!--Will check when it should switch to question everysecond-->
-				<font size="6">Please wait</font>
+				<p class="wait">Please wait</p>
 				<br /><br />
-				<input type="button" value="Disconnect" style="height:50px; width:150px; font-size: 120%" onclick="disconnect_user();" />
-			</p>
-			<div id="question" style="display:none">
+				<input type="button" value="Disconnect" class="leave" onclick="disconnect_user();" />
+			</div>
+			<div id="question">
 				<table>
 					<tr>
 						<td>
-							<button type="button" style="float:left; height: 150px;
-							 width: 150px; font-size: 50px;" onclick="send_answer('A');">
+							<button type="button" class="button_left" onclick="send_answer('A');">
 								A
 							</button>
 						</td>
 						<td>
-							<button type="button" style="float:left; height: 150px;
-							width: 150px; font-size: 50px;" onclick="send_answer('B');">
+							<button type="button" class="button_right" onclick="send_answer('B');">
 								B
 							</button>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<button type="button" style="float:left; height: 150px;
-							 width: 150px; font-size: 50px;" onclick="send_answer('C');">
+							<button type="button" class="button_left" onclick="send_answer('C');">
 								C
 							</button>
 						</td>
 						<td>
-							<button type="button" style="float:left; height: 150px;
-							 width: 150px; font-size: 50px;" onclick="send_answer('D');">
+							<button type="button" class="button_right" onclick="send_answer('D');">
 								D
 							</button>
 						</td>
 					</tr>
 				</table>
 			</div>
-			<div id="leaderboard" style="display:none">
-				<font size="6">Your score right now is </font>
-				<font size="6" id="score"></font><br />
-				<font size="6">and you are </font>
-				<font size="6" id="place"></font>
-				<font size="6"> place</font>
+			<div id="leaderboard">
+				<p class="leaderboard">Your score right now is </p>
+				<p class="leaderboard" id="score"></p><br />
+				<p class="leaderboard">and you are </p>
+				<p class="leaderboard" id="place"></p>
+				<p class="leaderboard"> place</p>
 				<br/><br/>
-				<button type="button" style="height:50px; width:150px; font-size: 120%" onclick="disconnect_user();">
+				<button type="button" class="leave" onclick="disconnect_user();">
 					Leave the game
 				</button>
 			</div>

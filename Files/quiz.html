@@ -64,7 +64,7 @@
                         players = xmlDoc.getElementsByTagName("player");
                         string_players = "";
                         for (i = 0; i < players.length; i++) {
-                            string_players += players[i].getAttribute("name")+ "&emsp;";
+                            string_players += players[i].getAttribute("name") + "&emsp;";
                             if (i % PLAYERS_IN_LINE === 0 && i !== 0) {
                                 string_players += "<br/>";
                             }
@@ -107,6 +107,7 @@
                 xmlrequest("get_answers",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
+                            // FIXME: If you didn't answer you will stay in place
                             xmlrequest("order_move_all_not_answered", null);
                             xmlDoc = parse_xml_from_string(this.responseText);
                             answer_html = document.getElementById("ans");
@@ -334,8 +335,8 @@
                 <font size="6"><br />with </font>
                 <font size="7" id="Finish_score"></font>
                 <font size="6">points!</font>
-				<br/><br/>
-				<button type="button" style="height:50px; width:150px; font-size: 120%" onclick="location.href='/';">
+                <br/><br/>
+                <button type="button" style="height:50px; width:150px; font-size: 120%" onclick="location.href='/';">
 					Return to home page
 				</button>
             </div>
