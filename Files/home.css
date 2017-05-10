@@ -2,6 +2,12 @@ input, button {
     font-size: 0.75em;
 }
 
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    margin: 0;
+}
+
 input, .move, .check_test {
     max-height: 0.75em;
     max-width: 0.75

@@ -1,23 +1,23 @@
 body {
-    -moz-animation: random 15s infinite;
-    -webkit-animation: random 15s infinite;
-    animation: random 15s infinite;
-    background-color: purple;
+    -moz-animation: random 20s infinite;
+    -webkit-animation: random 20s infinite;
+    animation: random 20s infinite;
+    background-color: #471F5E;
     font-family: 'Ravi Prakash', cursive;
 }
 
 @keyframes random {
     15% {
-        background-color: red;
+        background-color: #991115;
     }
     45% {
-        background-color: ForestGreen;
+        background-color: #00401E;
     }
     60% {
-        background-color: blue;
+        background-color: #FCB825;
     }
     75% {
-        background-color: yellow;
+        background-color: #0D407F;
     }
 }
 
@@ -35,10 +35,10 @@ input {
 }
 
 button {
-    font-family: 'Ravi Prakash', cursive;
-    border: solid white;
     background-color: white;
     border-radius: 0.5em;
+    border: solid white;
+    font-family: 'Ravi Prakash', cursive;
     font-size: 150%;
     min-height: 3.4em;
     min-width: 10em;

@@ -30,7 +30,8 @@ def main():
     print build
     name = root.find("./Quiz").attrib["name"]
     try:
-        fd = os.open("../Quizes/%s.xml" % name, os.O_CREAT | os.O_WRONLY | os.O_BINARY)
+        fd = os.open("../Quizes/%s.xml" % name,
+                     os.O_CREAT | os.O_WRONLY | os.O_BINARY)
         try:
             build = build[os.write(fd, build):]
         finally:

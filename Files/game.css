@@ -1,36 +1,52 @@
-body {
+button, input, body {
     font-family: 'Ravi Prakash', cursive;
-    background: purple;
+}
+
+body {
+    background: #471F5E;
 }
 
 div {
     display: none;
 }
 
-input {
-    font-family: 'Ravi Prakash', cursive;
-}
-
-.button_left, .button_right {
-    font-family: 'Ravi Prakash', cursive;
+.button_A, .button_B, .button_C, .button_D {
+    color: White;
     height: 150px;
     width: 150px;
+    border-style: hidden;
     border-radius: 0.5em;
     font-size: 50px;
 }
 
-.button_right {
+.button_A, .button_C {
     float: left;
 }
 
-.button_right {
+.button_B, .button_D {
     float: right;
+}
+
+.button_A {
+    background-color: #991115;
+}
+
+.button_B {
+    background-color: #0D407F
+}
+
+.button_C {
+    background-color: #FCB825;
+}
+
+.button_D {
+    background-color: #00401E;
 }
 
 .leave {
     font-size: 120%;
-    height: 50px;
-    width: 150px;
+    height: 3em;
+    width: 9em;
 }
 
 p {
