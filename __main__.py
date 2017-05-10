@@ -3,12 +3,13 @@ import argparse
 import logging
 import os
 import signal
+import socket
 
 from . import base, compat, constants, server
 
 
 def parse_args():
-    """parse args"""
+    """parse argu"""
     LOG_STR_LEVELS = {
         'DEBUG': logging.DEBUG,
         'INFO': logging.INFO,
@@ -24,22 +25,23 @@ def parse_args():
     )
     parser.add_argument(
         "--address",
-        default=["localhost:8080"],
+        default=["%s:80" % socket.gethostbyname(socket.gethostname())],
         nargs="+",
-        help="The address(es) we will connect to, default %(default)s",
+        help="""This argument is the address or addresses we will connect to.
+         Default %(default)s""",
     )
     parser.add_argument(
         "--buff-size",
         default=constants.BUFF_SIZE,
         type=int,
-        help="Buff size for each time, default %(default)d"
+        help="The buff size for each time. Default %(default)d"
     )
     print os.path.dirname(__file__)
     parser.add_argument(
         "--base",
         default=os.path.dirname(__file__),
         type=str,
-        help="Base directory"
+        help="The base directory"
     )
     c = []
     if os.name != 'nt':
@@ -49,21 +51,22 @@ def parse_args():
         "--io-mode",
         default=c[0],
         choices=c,
-        help="IO that will be used, default %(default)s"
+        help="""The Asynchronous I/O protocol that will be used.
+        Default %(default)s"""
     )
     parser.add_argument(
         '--log-level',
         dest='log_level_str',
         default='INFO',
         choices=LOG_STR_LEVELS.keys(),
-        help='Log level',
+        help='The log level that will be used for logging',
     )
     parser.add_argument(
         '--log-file',
         dest='log_file',
         metavar='FILE',
         required=False,
-        help='Logfile to write to, otherwise will log to console.',
+        help='The logfile to write to, otherwise will write to console.',
     )
     args = parser.parse_args()
     args.log_level = LOG_STR_LEVELS[args.log_level_str]
@@ -73,7 +76,7 @@ def parse_args():
         a = a.split(":")
         if len(a) != 2:
             raise ValueError(
-                """--Address need to be in the next format:
+                """The argument '--address' needs to be in the next format:
                     server_address:server_port"""
             )
         address_list.append((a[0], int(a[1])),)
@@ -82,7 +85,8 @@ def parse_args():
 
 
 def main():
-    """main function. Parsing args, setting up servers and starting them"""
+    """This is the main function: Parsing arguments, setting up servers and
+     starting them"""
     compat.__init__()
     args = parse_args()
     close_file = []
@@ -96,11 +100,11 @@ def main():
         logger = base.setup_logging(
             level=args.log_level,
         )
-    logger.info("Parsed args and created logger")
+    logger.info("Parsed arguments and created logger")
     Server = server.Server(args.buff_size, args.base, args.io_mode)
 
     def terminate_handler(signo, frame):
-        """Signals set and handlers for nice shutdown"""
+        """The settings of the signals and handlers for a nice shutdown"""
         Server.terminate()
     signal.signal(signal.SIGINT, terminate_handler)
     signal.signal(signal.SIGTERM, terminate_handler)
