@@ -1,0 +1,116 @@
+input, body, .Start_playing, .Return_home {
+    font-family: 'Ravi Prakash', cursive;
+}
+
+div, table {
+    background-color: White;
+    border-radius: 0.5em;
+}
+
+input {
+    border-style: hidden;
+    font-size: 1.7em;
+    min-width: 6em;
+    border-radius: 0.2em;
+}
+
+body {
+    color: Black;
+    background-color: Orange;
+    /*Jokaero Orange*/
+}
+
+div {
+    border-style: hidden;
+    color: Black;
+    display: none;
+    padding-top: 1em;
+}
+
+.button_start {
+    background-color: Orange;
+    border-color: Orange;
+    border-style: solid;
+    border-width: 1em;
+    border-radius: 0.1em;
+}
+
+h2 {
+    background-color: White;
+    border-radius: 0.5em;
+    width: 12em;
+    height: 1.2em;
+    font-size: 3em;
+}
+
+.number {
+    width: 3.75em;
+}
+
+table {
+    font-size: 150%;
+    width: 20%;
+}
+
+.Leaderboard_content {
+    display: inline;
+}
+
+.answer_A, .answer_B, .answer_C, .answer_D {
+    color: White;
+    width: 2em;
+    font-size: 3em;
+    border-radius: 0.5em;
+}
+
+.answer_A, .answer_C {
+    float: left;
+}
+
+.answer_B, .answer_D {
+    float: right;
+}
+
+.answer_A {
+    background-color: #991115;
+}
+
+.answer_B {
+    background-color: #0D407F;
+}
+
+.answer_C {
+    background-color: #FCB825;
+}
+
+.answer_D {
+    background-color: #00401E;
+}
+
+input, body, .Start_playing, .Return_home {
+    font-family: 'Ravi Prakash', cursive;
+}
+
+.Start_playing, .Return_home {
+    font-family: 'Ravi Prakash', cursive;
+    height: 2em;
+    width: 6.7em;
+    padding-top: 0.5em;
+}
+
+p {
+    font-size: 1.5em;
+}
+
+.Start_playing {
+    font-size: 1.5em;
+}
+
+.Return_home {
+    border-color: #96A5A9;
+    border-style: solid;
+    border-radius: 0.5em;
+    font-size: 110%;
+    min-height: 6em;
+    width: 9em;
+}

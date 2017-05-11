@@ -27,20 +27,20 @@
 				switch (state) {
 					case "question":
 						to = "leaderboard";
-						color = "green";
+						color = "#00401E";
 						break;
 					case "leaderboard":
 						to = "question";
-						color = "white"
+						color = "White";
 						break;
 					case "wait":
 						to = "question";
-						color = "white"
+						color = "White"
 						break;
 					case "wait_question":
 						state = "wait";
 						to = "leaderboard";
-						color = "green"
+						color = "#00401E"
 						break;
 				}
 				var from_style_display = document.getElementById(state).style.display;
@@ -58,7 +58,7 @@
 							state = "wait";
 							switch_screens();
 							//HACK: This is a bad way to do this. I must find better one.
-							document.body.style.background = "purple"
+							document.body.style.background = "#471F5E"
 							state = "wait_question";
 						}
 					}

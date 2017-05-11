@@ -32,7 +32,7 @@ div {
 }
 
 .button_B {
-    background-color: #0D407F
+    background-color: #0D407F;
 }
 
 .button_C {
@@ -59,4 +59,10 @@ p {
 
 .wait {
     font-size: 2em;
+}
+
+input {
+    background-color: White;
+    border-style: hidden;
+    border-radius: 0.5em;
 }
