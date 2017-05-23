@@ -430,3 +430,14 @@ class get_answers(XMLService):
         for letter in self._game.get_answers():
             ElementTree.SubElement(root, "answer", {"answer": letter})
         return util.to_string(root)
+
+
+class get_title(XMLService):
+    NAME = "get_title"
+
+    def __init__(self, game):
+        super(get_title, self).__init__()
+        self._game = game
+
+    def content(self):
+        return self._game.get_title()

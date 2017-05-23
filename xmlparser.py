@@ -1,7 +1,7 @@
 import os.path
 from xml.etree import ElementTree
 
-from . import constants, custom_exceptions
+from . import custom_exceptions, util
 
 
 class XMLParser(object):
@@ -22,6 +22,9 @@ class XMLParser(object):
     def get_question_number(self):
         return self.question_number
 
+    def get_current_question(self, root):
+        return root.findall("./Quiz/Question")[self.question_number - 1]
+
     def get_left_questions(self):
         return (
             int(self._root.find(
@@ -30,21 +33,29 @@ class XMLParser(object):
 
     def get_information(self):
         backup_root = self.get_backuproot()
-        for question in backup_root.findall("./Quiz/Question"):
+        for question in self._get_current_question(backup_root):
             backup_root.find("./Quiz").remove(question)
-        return ElementTree.tostring(backup_root, encoding=constants.ENCODING)
+        return util.to_string(backup_root)
 
     def get_xml_question(self):
-        question = self.get_backuproot().findall(
-            "./Quiz/Question")[self.question_number - 1]
+        question = self.get_current_question(self.get_backuproot())
         for ans in question.findall("Answer"):
             ans.attrib.pop("correct", None)
-        return ElementTree.tostring(question, encoding=constants.ENCODING)
+        return util.to_string(question)
+
+    def get_xml_question_title(self):
+        root = ElementTree.Element("Root")
+        ElementTree.SubElement(
+            root,
+            "title",
+            self.get_current_question(
+                self._root).find(".\Text")
+        )
+        return util.to_string(root)
 
     def get_question_answers(self):
         right_answer = []
-        answers = self._root.findall(
-            "./Quiz/Question")[self.question_number - 1].findall("./Answer")
+        answers = self.get_current_question(self._root).findall("./Answer")
         for ans in answers:
             if "correct" in ans.attrib and ans.attrib["correct"] == "1":
                 right_answer.append(["A", "B", "C", "D"][answers.index(ans)])

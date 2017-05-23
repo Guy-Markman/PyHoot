@@ -40,7 +40,7 @@
 					case "wait_question":
 						state = "wait";
 						to = "leaderboard";
-						color = "#00401E"
+						color = "#471F5E"
 						break;
 				}
 				var from_style_display = document.getElementById(state).style.display;
@@ -55,7 +55,6 @@
 				xmlrequest("answer?letter=" + letter,
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
-							state = "wait";
 							switch_screens();
 							//HACK: This is a bad way to do this. I must find better one.
 							document.body.style.background = "#471F5E"
@@ -92,6 +91,17 @@
 				return i + "th";
 			}
 
+			function get_title() {
+				xmlrequest("get_title",
+					function() {
+						if (this.readyState == 4 && this.status == 200) {
+							document.getElementById("title")[0].innerHTML =
+								parse_xml_from_string(this.responseText).getElementsByTagName("Text")[0].textContent
+						}
+					}
+				)
+			}
+
 			function check_move_to_next() {
 				xmlrequest("check_move_next_page",
 					function() {
@@ -101,6 +111,7 @@
 									case "wait":
 										switch_screens();
 										state = "questions";
+										get_title()
 										xmlrequest("moved_to_next_question", null);
 										break;
 									case "question":
@@ -126,6 +137,7 @@
 				);
 				setTimeout(check_move_to_next, 1000);
 			}
+
 		</script>
 	</head>
 
@@ -138,6 +150,8 @@
 				<input type="button" value="Disconnect" class="leave" onclick="disconnect_user();" />
 			</div>
 			<div id="question">
+				<div id="title">
+				</div>
 				<table>
 					<tr>
 						<td>

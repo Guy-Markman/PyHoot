@@ -126,6 +126,9 @@ class GameMaster(Game):
     def get_question(self):
         return self._parser.get_xml_question()
 
+    def get_title(self):
+        return self._parser.get_current_question_title()
+
     def move_to_next_question(self):
         self._parser.move_to_next_question()
 
