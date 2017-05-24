@@ -1,6 +1,4 @@
 <!doctype html>
-<!--"Comic Sans MS", cursive, sans-serif-->
-
 <html>
 
     <head>
@@ -9,7 +7,6 @@
         <link rel="icon" type="image/png" href="/icon.png" />
         <link href="https://fonts.googleapis.com/css?family=Ravi+Prakash" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="common.css">
-        <link rel="stylesheet" type="text/css" href="new.css">
         <script src="util.js"></script>
         <script>
             function check_test_exist() {
@@ -33,8 +30,10 @@
     <body>
         <center>
             <form action="/register_quiz" id="register_quiz" method="get">
-                <p id="title_register" class="title_register">Name of quiz:</p>
-                <input type="text" id="quiz_name" name="quiz_name" autocomplete="off" autofocus>
+                <h1>
+                    <span id="title_register" class="title_register">Name of quiz:</span>
+                </h1>
+                <input type="text" id="quiz_name" class="name" name="quiz_name" autocomplete="off" autofocus>
                 <br /><br />
                 <button type="button" onclick="check_test_exist();">
                     Start game!

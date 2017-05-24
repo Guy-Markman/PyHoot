@@ -64,18 +64,23 @@
 		<center>
 			<form id="join" action="/join" method="get">
 				<div id="p1">
-					<div id="p1_title" class="title">Game PIN</div><br />
-					<input type="number" inputmode="numeric" pattern="\d*" title="Non-negative integral number" id="join_number" name="join_number" style="width: 200px;" min="100000" max="999999" autocomplete="off" autofocus>
+					<h1><span>Game PIN</span></h1><br />
+					<input type="number" inputmode="numeric" class="pin" pattern="\d*" title="Non-negative integral number" id="join_number" name="join_number" min="100000" max="999999" autocomplete="off" autofocus>
+					<br /><br /><br />
+					<button type="button" onclick="check('test');">
+						Join!</button>
 					<br /><br />
-					<button type="button" class="check_test" onclick="check('test');">
-						Join!</button><br /><br />
 					<button type="button" class="move" onclick="location.href='/new'">
 					Create new game </button>
 				</div>
 				<div id="p2" class="p2">
-					<div id="p2_title" class="title">Choose name</div><br />
-					<input type="text" name="name" id="name" pattern=".{3,}" required title="3 characters minimum"><br /><br />
-					<button type="button" class="move" autocorrect="off" onclick="check_length_name()">
+					<h1>
+						<span id="p2_title">Choose name</span>
+					</h1>
+					<br />
+					<br />
+					<input type="text" name="name" class="name" autocomplete="off" autocorrect="off" id="name" pattern=".{3,}" required title="3 characters minimum"><br /><br />
+					<button type="button" onclick="check_length_name()">
 				     Start Playing!</button>
 				</div>
 			</form>

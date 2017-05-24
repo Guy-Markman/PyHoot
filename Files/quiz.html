@@ -286,24 +286,24 @@
     <body onload="get_join_number();">
         <center>
             <div id="Registration" style="display:inline">
-                <h2>Now you can join the Game!<br /></h2>
-                <h2 id="join_number" class="number"></h2>
-                <p id="br1" class="br1">
-                    <br /><br />Connected players
-                </p>
-                <p id="names">
-                </p>
-                <br/><br />
-                <div class="button_start" style="display:inline">
-                    <input type="button" id="Start_playing" class="Start_playing" value="Start playing" onclick="check_moveable()">
-                </div>
+                <h1><span>Now you can join the Game!</span><br /></h1>
+                <h2><span id="join_number"></span></h2>
+                <br /><br />
+                <span id="br1">Connected players</span>
+                <br/>
+                <span id="names">
+                </span>
+                <br/><br /><br/><br/>
+                <button type="button" id="Start_playing" class="button_start" onclick="check_moveable()">
+                    Start playing
+                </button>
             </div>
             <div id="Opening">
-                <font size="7" id="quiz_name" class="quiz_name">
-                </font>
+                <span id="quiz_name" class="quiz_name">
+                </span>
                 <br /><br />
-                <font size="4" id="number_questions" class="number_questions">
-                </font>
+                <span size="4" id="number_questions" class="number_questions">
+                </span>
             </div>
             <div id="Question">
                 <p id="question_title">

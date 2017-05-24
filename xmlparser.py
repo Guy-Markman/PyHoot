@@ -33,7 +33,7 @@ class XMLParser(object):
 
     def get_information(self):
         backup_root = self.get_backuproot()
-        for question in self._get_current_question(backup_root):
+        for question in self.get_current_question(backup_root):
             backup_root.find("./Quiz").remove(question)
         return util.to_string(backup_root)
 

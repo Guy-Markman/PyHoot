@@ -27,7 +27,7 @@
 				switch (state) {
 					case "question":
 						to = "leaderboard";
-						color = "#00401E";
+						color = "#00401F"; /*Caliban Green*/
 						break;
 					case "leaderboard":
 						to = "question";
@@ -40,7 +40,7 @@
 					case "wait_question":
 						state = "wait";
 						to = "leaderboard";
-						color = "#471F5E"
+						color = "#5A005A"; /*Xereus Purple*/
 						break;
 				}
 				var from_style_display = document.getElementById(state).style.display;
@@ -137,7 +137,6 @@
 				);
 				setTimeout(check_move_to_next, 1000);
 			}
-
 		</script>
 	</head>
 
@@ -145,9 +144,9 @@
 		<center>
 			<div id="wait" style="display:inline">
 				<!--Will check when it should switch to question everysecond-->
-				<p class="wait">Please wait</p>
-				<br /><br />
-				<input type="button" value="Disconnect" class="leave" onclick="disconnect_user();" />
+				<h2><span>Please wait</span></h2>
+				<button type="button" onclick="disconnect_user();"> Disconnect
+				</button>
 			</div>
 			<div id="question">
 				<div id="title">

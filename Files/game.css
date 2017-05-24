@@ -3,7 +3,7 @@ button, input, body {
 }
 
 body {
-    background: #471F5E;
+    background: #5A005A; /*Xereus Purple*/
 }
 
 div {
@@ -28,19 +28,19 @@ div {
 }
 
 .button_A {
-    background-color: #991115;
+    background-color: #991115;/*Mephiston Red*/
 }
 
 .button_B {
-    background-color: #0D407F;
+    background-color: #0D407F; /*Macraage Blue*/
 }
 
 .button_C {
-    background-color: #FCB825;
+    background-color: #FFCE00;/*Yriel Yellow*/
 }
 
 .button_D {
-    background-color: #00401E;
+    background-color: #00401F; /*Caliban Green*/
 }
 
 .leave {
@@ -65,4 +65,18 @@ input {
     background-color: White;
     border-style: hidden;
     border-radius: 0.5em;
+}
+span{
+    background-color: white;
+    border-radius: 0.2em;
+    font-size: 2em;
+    text-align: center;
+}
+button {
+    background-color: #6B6A74; /*Warpfiend Grey*/
+    border-color:  #6B6A74; /*Warpfiend Grey*/
+    border-radius: 0.5em;
+    color: White;
+    font-family: 'Ravi Prakash', cursive;
+    font-size: 1.80em;
 }
