@@ -354,7 +354,6 @@ class move_to_next_question(XMLService):
 
 
 class get_question(XMLService):
-    #  FIXME: It sends what is the right answer
     NAME = "/get_question"
 
     def __init__(self, game):
@@ -433,7 +432,7 @@ class get_answers(XMLService):
 
 
 class get_title(XMLService):
-    NAME = "get_title"
+    NAME = "/get_title"
 
     def __init__(self, game):
         super(get_title, self).__init__()

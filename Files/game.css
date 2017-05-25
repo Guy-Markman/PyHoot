@@ -6,6 +6,10 @@ body {
     background: #5A005A; /*Xereus Purple*/
 }
 
+img {
+    height: auto;
+    max-width: 20em;
+}
 div {
     display: none;
 }

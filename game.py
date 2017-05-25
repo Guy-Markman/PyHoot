@@ -76,6 +76,9 @@ class GameMaster(Game):
     def get_score(self, pid):
         return self._players_list[pid]["_score"]
 
+    def get_current_question_title(self):
+        return self._parser.get_current_question_title()
+
     def _update_score(self):
         right_answers = self._parser.get_question_answers()
         for pid in self._players_list:
@@ -125,9 +128,6 @@ class GameMaster(Game):
 
     def get_question(self):
         return self._parser.get_xml_question()
-
-    def get_title(self):
-        return self._parser.get_current_question_title()
 
     def move_to_next_question(self):
         self._parser.move_to_next_question()
@@ -182,6 +182,9 @@ class GamePlayer(Game):
 
     def get_place(self):
         return self._game_master.get_place(self._pid)
+
+    def get_title(self):
+        return self._game_master.get_current_question_title()
 
     @property
     def name(self):

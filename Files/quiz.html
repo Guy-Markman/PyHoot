@@ -73,9 +73,11 @@
                         players = xmlDoc.getElementsByTagName("player");
                         string_players = "";
                         for (i = 0; i < players.length; i++) {
-                            string_players += players[i].getAttribute("name") + "&emsp;";
+                            string_players += players[i].getAttribute("name");
                             if (i % PLAYERS_IN_LINE === 0 && i !== 0) {
                                 string_players += "<br/>";
+                            } else if ((i + 1) < players.length) {
+                                string_players += "&emsp;"
                             }
                         }
                         document.getElementById("names").innerHTML = string_players;
@@ -280,6 +282,7 @@
                     }
                 );
             }
+
         </script>
     </head>
 
@@ -290,7 +293,7 @@
                 <h2><span id="join_number"></span></h2>
                 <br /><br />
                 <span id="br1">Connected players</span>
-                <br/>
+                <br/><br/>
                 <span id="names">
                 </span>
                 <br/><br /><br/><br/>
@@ -308,7 +311,7 @@
             <div id="Question">
                 <p id="question_title">
                 </p>
-                <table style="width:20%">
+                <table>
                     <tr>
                         <td id="A_answer" class="answer_A">
                         </td>
@@ -328,7 +331,7 @@
                 <font size="6" id="ans"></font>
             </div>
             <div id="Leaderboard">
-                <font size="7">Top players</font><br />
+                <h1><span>Top players</span></h1><br />
                 <table>
                     <tr>
                         <th>Player</th>

@@ -33,7 +33,7 @@ class XMLParser(object):
 
     def get_information(self):
         backup_root = self.get_backuproot()
-        for question in self.get_current_question(backup_root):
+        for question in backup_root.findall("./Quiz/Question"):
             backup_root.find("./Quiz").remove(question)
         return util.to_string(backup_root)
 
@@ -43,14 +43,12 @@ class XMLParser(object):
             ans.attrib.pop("correct", None)
         return util.to_string(question)
 
-    def get_xml_question_title(self):
+    def get_current_question_title(self):
         root = ElementTree.Element("Root")
         ElementTree.SubElement(
             root,
-            "title",
-            self.get_current_question(
-                self._root).find(".\Text")
-        )
+            "title"
+        ).text = self.get_current_question(self._root).find("./Text").text
         return util.to_string(root)
 
     def get_question_answers(self):

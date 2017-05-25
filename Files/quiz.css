@@ -2,21 +2,23 @@ input, body, .Start_playing, .Return_home {
     font-family: 'Ravi Prakash', cursive;
 }
 
-table {
+td{
+    text-align: center;
+}
+tr {
     background-color: White;
     border-radius: 0.5em;
 }
 
-input {
-    border-style: hidden;
-    font-size: 1.7em;
-    min-width: 6em;
-    border-radius: 0.2em;
+
+img {
+    height: auto;
+    max-width: 20em;
 }
 
 body {
-    color: Black;
     background-color: #EC631A; /*Ryza Dust*/
+    color: Black;
 }
 
 span{
@@ -48,8 +50,8 @@ div {
 
 
 table {
+    display: table;
     font-size: 150%;
-    width: 20%;
 }
 
 .Leaderboard_content {
@@ -57,10 +59,10 @@ table {
 }
 
 .answer_A, .answer_B, .answer_C, .answer_D {
-    color: White;
-    width: 2em;
-    font-size: 3em;
     border-radius: 0.5em;
+    color: White;
+    font-size: 3em;
+    min-width: 1.5em;
 }
 
 .answer_A, .answer_C {

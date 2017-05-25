@@ -24,9 +24,10 @@
 			}
 
 			function switch_screens() {
+				console.log(state);
 				switch (state) {
 					case "question":
-						to = "leaderboard";
+						to = "wait";
 						color = "#00401F"; /*Caliban Green*/
 						break;
 					case "leaderboard":
@@ -56,8 +57,6 @@
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
 							switch_screens();
-							//HACK: This is a bad way to do this. I must find better one.
-							document.body.style.background = "#471F5E"
 							state = "wait_question";
 						}
 					}
@@ -95,8 +94,8 @@
 				xmlrequest("get_title",
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
-							document.getElementById("title")[0].innerHTML =
-								parse_xml_from_string(this.responseText).getElementsByTagName("Text")[0].textContent
+							document.getElementById("title").innerHTML =
+								parse_xml_from_string(this.responseText).getElementsByTagName("title")[0].textContent
 						}
 					}
 				)
@@ -110,7 +109,7 @@
 								switch (state) {
 									case "wait":
 										switch_screens();
-										state = "questions";
+										state = "question";
 										get_title()
 										xmlrequest("moved_to_next_question", null);
 										break;
@@ -137,6 +136,7 @@
 				);
 				setTimeout(check_move_to_next, 1000);
 			}
+
 		</script>
 	</head>
 
@@ -149,7 +149,7 @@
 				</button>
 			</div>
 			<div id="question">
-				<div id="title">
+				<div id="title" style="display:inline">
 				</div>
 				<table>
 					<tr>
