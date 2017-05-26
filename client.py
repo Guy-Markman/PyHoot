@@ -252,7 +252,11 @@ class Client(base.Base):
                 self.logger.debug("client sent")
         except Exception as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
-                if e.errno in (errno.WSABASEERR, errno.WSAECONNABORTED):
+                if e.errno in (
+                    errno.WSABASEERR,
+                    errno.WSAECONNABORTED,
+                    errno.WSAECONNRESET
+                ):
                     raise custom_exceptions.Disconnect()
                 raise
 

@@ -139,7 +139,6 @@ class getnames(XMLService):
     NAME = "/getnames"
 
     def __init__(self, game, common):
-        print "getnames"
         super(getnames, self).__init__()
         self._game = game
         self._common = common
