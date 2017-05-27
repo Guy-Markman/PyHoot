@@ -8,10 +8,6 @@ from xml.etree import ElementTree
 from . import constants, xmlparser
 
 
-# Registration -> Opening -> Question -> Answer -> Leaderboard -> Question
-# (number_of_questions > -1) -> Finish
-
-
 class Game(object):
     """Base game object, for the pid"""
 

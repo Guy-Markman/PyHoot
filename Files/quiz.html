@@ -17,7 +17,6 @@
             var timer = window.setInterval(getnames, 1000);
             var number_of_questions = null;
 
-            // FIXME: Change the order they work to the same way as game
             function switch_screens() {
                 switch (state) {
                     case "Opening":
@@ -29,7 +28,6 @@
                         color = "#EE3823"; //Jokaero Orange
                         break;
                     case "Question":
-                        //If something was loaded to ans it means that I already did one question
                         if (document.getElementById("ans").innerHTML) {
                             start = "Leaderboard";
                         } else {
@@ -118,7 +116,6 @@
                 xmlrequest("get_answers",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
-                            // FIXME: If you didn't answer you will stay in place
                             xmlrequest("order_move_all_not_answered", null);
                             xmlDoc = parse_xml_from_string(this.responseText);
                             answer_html = document.getElementById("ans");
@@ -151,7 +148,6 @@
                             parser = new DOMParser();
                             xmlDoc = parser.parseFromString(this.responseText, "text/xml");
                             leaderboard = document.getElementById("Leaderboard");
-                            //TODO: Move as much as I can into the HTML page
                             var list_players = xmlDoc.getElementsByTagName("Player");
                             var lb = "<table>";
                             for (i = 0; i < list_players.length; i++) {

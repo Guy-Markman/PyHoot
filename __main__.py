@@ -109,7 +109,6 @@ def main():
     signal.signal(signal.SIGINT, terminate_handler)
     signal.signal(signal.SIGTERM, terminate_handler)
     for address_list in args.address:
-        # FIXME: Only one server is set up, the first one
         Server.add_server(address_list)
     Server.start_server()
     for f in close_file:
