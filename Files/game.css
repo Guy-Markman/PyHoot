@@ -1,0 +1,86 @@
+button, input, body {
+    font-family: 'Ravi Prakash', cursive;
+}
+
+body {
+    background: #5A005A; /*Xereus Purple*/
+}
+
+img {
+    height: auto;
+    max-width: 20em;
+}
+div {
+    display: none;
+}
+
+.button_A, .button_B, .button_C, .button_D {
+    color: White;
+    height: 150px;
+    width: 150px;
+    border-style: hidden;
+    border-radius: 0.5em;
+    font-size: 50px;
+}
+
+.button_A, .button_C {
+    float: left;
+}
+
+.button_B, .button_D {
+    float: right;
+}
+
+.button_A {
+    background-color: #991115;/*Mephiston Red*/
+}
+
+.button_B {
+    background-color: #0D407F; /*Macraage Blue*/
+}
+
+.button_C {
+    background-color: #FFCE00;/*Yriel Yellow*/
+}
+
+.button_D {
+    background-color: #00401F; /*Caliban Green*/
+}
+
+.leave {
+    font-size: 120%;
+    height: 3em;
+    width: 9em;
+}
+
+p {
+    color: white;
+}
+
+.leaderboard {
+    font-size: 1.5em;
+}
+
+.wait {
+    font-size: 2em;
+}
+
+input {
+    background-color: White;
+    border-style: hidden;
+    border-radius: 0.5em;
+}
+span{
+    background-color: white;
+    border-radius: 0.2em;
+    font-size: 2em;
+    text-align: center;
+}
+button {
+    background-color: #6B6A74; /*Warpfiend Grey*/
+    border-color:  #6B6A74; /*Warpfiend Grey*/
+    border-radius: 0.5em;
+    color: White;
+    font-family: 'Ravi Prakash', cursive;
+    font-size: 1.80em;
+}

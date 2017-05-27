@@ -2,7 +2,7 @@ from . import base, common_events, constants, poll_object, select_object
 
 
 class AsyncIO(base.Base):
-    """AsyncIO object (will with select_object or poll_object).
+    """AsyncIO object (with select_object or poll_object).
     Return fd like poll no matter what protocol we use.
     Args:
         self.protocol, the protocol we are using

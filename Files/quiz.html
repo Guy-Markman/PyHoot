@@ -6,6 +6,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>PyHoot!</title>
         <link rel="icon" type="image/png" href="icon.png">
+        <link href="https://fonts.googleapis.com/css?family=Ravi+Prakash" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="quiz.css">
 
         <script src="util.js"></script>
         <link rel="icon" type="image/png" href="icon.png">
@@ -15,13 +17,16 @@
             var timer = window.setInterval(getnames, 1000);
             var number_of_questions = null;
 
+            // FIXME: Change the order they work to the same way as game
             function switch_screens() {
                 switch (state) {
                     case "Opening":
                         start = "Registration";
+                        color = "#0D407F" //Macragge Blue
                         break;
                     case "Answer":
                         start = "Question";
+                        color = "#EE3823"; //Jokaero Orange
                         break;
                     case "Question":
                         //If something was loaded to ans it means that I already did one question
@@ -30,12 +35,15 @@
                         } else {
                             start = "Opening";
                         }
+                        color = "#FFFFFF" //White
                         break;
                     case "Leaderboard":
                         start = "Answer";
+                        color = "Orange"; //Jokaero Orange
                         break;
                     case "Finish":
                         start = "Leaderboard";
+                        color = "#96A5A9"; //Celestra Grey
                         break;
                 }
                 var state_style_display = document.getElementById(state).style.display;
@@ -43,6 +51,7 @@
                 state_style_display = [start_style_display, start_style_display = state_style_display][0];
                 document.getElementById(state).style.display = state_style_display;
                 document.getElementById(start).style.display = start_style_display;
+                document.body.style.background = color
             }
 
             function get_join_number() {
@@ -67,6 +76,8 @@
                             string_players += players[i].getAttribute("name");
                             if (i % PLAYERS_IN_LINE === 0 && i !== 0) {
                                 string_players += "<br/>";
+                            } else if ((i + 1) < players.length) {
+                                string_players += "&emsp;"
                             }
                         }
                         document.getElementById("names").innerHTML = string_players;
@@ -107,6 +118,7 @@
                 xmlrequest("get_answers",
                     function() {
                         if (this.readyState == 4 && this.status == 200) {
+                            // FIXME: If you didn't answer you will stay in place
                             xmlrequest("order_move_all_not_answered", null);
                             xmlDoc = parse_xml_from_string(this.responseText);
                             answer_html = document.getElementById("ans");
@@ -270,62 +282,63 @@
                     }
                 );
             }
+
         </script>
     </head>
 
     <body onload="get_join_number();">
         <center>
             <div id="Registration" style="display:inline">
-                <font size="7">Now you can join the Game!<br /></font>
-                <font size="7" id="join_number"></font>
-                <p id="br1">
-                    <br /><br />Connected players
-                </p>
-                <font size="4" id="names">
-                </font>
-                <p id="br2">
-                    <br /><br />
-                </p>
-                <input type="button" id="Start_playing" value="Start playing" onclick="check_moveable()">
-            </div>
-            <div id="Opening" style="display:none">
-                <font size="7" id="quiz_name">
-                </font>
+                <h1><span>Now you can join the Game!</span><br /></h1>
+                <h2><span id="join_number"></span></h2>
                 <br /><br />
-                <font size="4" id="number_questions">
-                </font>
+                <span id="br1">Connected players</span>
+                <br/><br/>
+                <span id="names">
+                </span>
+                <br/><br /><br/><br/>
+                <button type="button" id="Start_playing" class="button_start" onclick="check_moveable()">
+                    Start playing
+                </button>
             </div>
-            <div id="Question" style="display:none">
+            <div id="Opening">
+                <span id="quiz_name" class="quiz_name">
+                </span>
+                <br /><br />
+                <span size="4" id="number_questions" class="number_questions">
+                </span>
+            </div>
+            <div id="Question">
                 <p id="question_title">
                 </p>
-                <table style="width:20%">
+                <table>
                     <tr>
-                        <td id="A_answer" style="text-align:left">
+                        <td id="A_answer" class="answer_A">
                         </td>
-                        <td id="B_answer" style="text-align:right">
+                        <td id="B_answer" class="answer_B">
                         </td>
                     </tr>
                     <tr>
-                        <td id="C_answer" style="text-align:left">
+                        <td id="C_answer" class="answer_C">
                         </td>
-                        <td id="D_answer" style="text-align:right">
+                        <td id="D_answer" class="answer_D">
                         </td>
                     </tr>
                 </table>
             </div>
-            <div id="Answer" style="display:none">
+            <div id="Answer">
                 <font size="7">The right answer/s is/are:<br /></font>
                 <font size="6" id="ans"></font>
             </div>
-            <div id="Leaderboard" style="display:none">
-                <font size="7">Top players</font><br />
+            <div id="Leaderboard">
+                <h1><span>Top players</span></h1><br />
                 <table>
                     <tr>
                         <th>Player</th>
                         <th>Score</th>
                     </tr>
                 </table>
-                <div id="Leaderboard_content">
+                <div id="Leaderboard_content" class="Leaderboard_content">
                 </div>
             </div>
             <div id="Finish" style="display:none">
@@ -334,6 +347,10 @@
                 <font size="6"><br />with </font>
                 <font size="7" id="Finish_score"></font>
                 <font size="6">points!</font>
+                <br/><br/>
+                <button type="button" class="Return_home" onclick="location.href='/';">
+					Return to home page
+				</button>
             </div>
         </center>
     </body>

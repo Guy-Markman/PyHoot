@@ -1,0 +1,49 @@
+body {
+    -moz-animation: random 20s infinite;
+    -webkit-animation: random 20s infinite;
+    animation: random 20s infinite;
+    background-color: #5A005A; /*Xereus Purple*/
+    font-family: 'Ravi Prakash', cursive;
+}
+
+span{
+    background-color: white;
+    border-radius: 0.2em;
+    font-size: 2em;
+    text-align: center;
+}
+
+@keyframes random {
+    15% {
+        background-color: #991115; /*Mephiston Red*/
+    }
+    45% {
+        background-color: #00401F; /*Caliban Green*/
+    }
+    60% {
+        background-color: #FFDA00;/*Yriel Yellow*/
+    }
+    75% {
+        background-color: #0D407F; /*Macraage Blue*/
+    }
+}
+
+input {
+    border-color: white;
+    font-size: 2em;
+    border-radius: 0.5em;
+    font-family: 'Ravi Prakash', cursive;
+}
+
+button {
+    background-color: #6B6A74; /*Warpfiend Grey*/
+    border-color:  #6B6A74; /*Warpfiend Grey*/
+    border-radius: 0.5em;
+    color: White;
+    font-family: 'Ravi Prakash', cursive;
+    font-size: 1.80em;
+}
+
+.name{
+    width:8em;
+}

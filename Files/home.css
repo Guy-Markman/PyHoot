@@ -1,0 +1,14 @@
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    text-align: center;
+}
+
+.pin{
+    width: 3.7em;
+}
+
+
+.p2{
+    display:none
+}

@@ -17,23 +17,21 @@ SERVICES_LIST = {service.NAME: service for service in
                   services.XMLService.__subclasses__()
                   )}
 
-# Argument call can use f(*[dic[arg] for arg in f.__code__.co_varnames if
-# arg in dic])
-
 
 class Client(base.Base):
-    """ Client of Server, handle everything by itself
-        Variables:
-                self._socket = The socket of the client
-                self._recv_buff = any data we recieved but hadn't procssed yet
-                self._send_buff = All the data that needed to be sent but
-                                  hadn't sent yet
-                self._buff_size = The buff size of the server
+    """The client of the server handles everything by itself
+        Arguments:
+                self.socket = The socket of the client.
+                self._recv_buff = Any data it has recieved but hasn't procssed
+                                  yet.
+                self._send_buff = All the data that needs to be sent but
+                                  hasn't been sent yet.
+                self._buff_size = The buff size of the server.
                 self._file = FileObject or service object of the file\service
-                             the request wants
-                self._request = Request object of the request we got
-                self._base_directory: The base directory whice we will use for
-                                      file locations
+                             the request wants.
+                self._request = The request object of the request we got
+                self._base_directory = The base directory which we will use for
+                                       the file locations.
     """
 
     def __init__(
@@ -43,14 +41,15 @@ class Client(base.Base):
         base_directory,
         common
     ):
-        """Client of Server, handle everything by itself
-        Arguements:
-        s: the socket of this client, CANNOT BE MODIFIED
-        buff_size: The buff size of the server
-        base_directory: The base directory whice we will use for file locations
+        """The client of the server handles everything by itself
+           Arguements:
+               s: the socket of this client, CANNOT BE MODIFIED.
+               buff_size: The buff size of the server.
+               base_directory: The base directory which we will use for the
+                               file locations.
         """
         super(Client, self).__init__()
-        self._socket = s
+        self.socket = s
         self._buff_size = buff_size
         self._base_directory = base_directory
         self.common = common
@@ -65,8 +64,8 @@ class Client(base.Base):
         self._extra_headers = {}
 
     def get_socket(self):
-        """Get the socket of this client, private arguement"""
-        return self._socket
+        """Get the socket of this client."""
+        return self.socket
 
     def _test_http_and_creat_objects(self):
         parsed_lines = self._recv_buff.split(constants.CRLF, 1)
@@ -93,7 +92,7 @@ class Client(base.Base):
             file_type = os.path.splitext(uri_path)[1]
             self._file = file_object.FileObject(uri_path, self._base_directory)
         else:
-            # The service initialzor
+            # The service initiatiator
             service_function = SERVICES_LIST[uri_path]
 
             # dictionary of the query of uri
@@ -143,7 +142,7 @@ class Client(base.Base):
                     split_line = line.split(":")
                     dic_headers[split_line[0].lower()] = split_line[
                         1].lstrip(' ')
-            self.logger.debug("dic_headers %s" % dic_headers)
+            self.logger.debug("dic_headers %s", dic_headers)
             if uri in SERVICES_HEADERS.keys():
                 for header in SERVICES_HEADERS[uri]:
                     self._request.add_header(header, dic_headers[header])
@@ -166,7 +165,7 @@ class Client(base.Base):
             pid = cookie["pid"].value
             if pid in self.common.pid_client:
                 self._game = self.common.pid_client[pid]
-                self.logger.debug("Set game as %s" % self._game)
+                self.logger.debug("Set game as %s", self._game)
         else:
             self.logger.debug("Game object not found")
 
@@ -194,8 +193,8 @@ class Client(base.Base):
                 self._test_http_and_creat_objects()
 
             # If we do have request line, get headers
-            self.logger.debug("state %s" % self._state)
-            self.logger.debug("Now recv_buff is %s" % self._recv_buff)
+            self.logger.debug("state %s",  self._state)
+            self.logger.debug("Now recv_buff is %s", self._recv_buff)
 
         except OSError as e:
             self.logger.error('Exception ', exc_info=True)
@@ -244,20 +243,24 @@ class Client(base.Base):
 
     def _send_my_buff(self):
         """Send the data in self._send_buff"""
-        self.logger.debug("start sending my buff, send_buff %s" %
+        self.logger.debug("start sending my buff, send_buff %s",
                           self._send_buff)
         try:
             while self._send_buff:
                 self._send_buff = self._send_buff[
-                    self._socket.send(self._send_buff):]
+                    self.socket.send(self._send_buff):]
                 self.logger.debug("client sent")
         except Exception as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
-                if e.errno in (errno.WSABASEERR, errno.WSAECONNABORTED):
+                if e.errno in (
+                    errno.WSABASEERR,
+                    errno.WSAECONNABORTED,
+                    errno.WSAECONNRESET
+                ):
                     raise custom_exceptions.Disconnect()
                 raise
 
-        self.logger.debug("Sent all that I could, send_buff %s" %
+        self.logger.debug("Sent all that I could, send_buff %s",
                           self._send_buff)
 
     def get_send_buff(self):
@@ -276,7 +279,7 @@ class Client(base.Base):
                 n = self._recv_buff.find(constants.CRLF)
                 if n != -1:
                     break
-                t = self._socket.recv(block_size)
+                t = self.socket.recv(block_size)
                 if not t:
                     raise custom_exceptions.Disconnect()
                 self._recv_buff += t

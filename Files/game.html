@@ -6,35 +6,42 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
 		<link rel="icon" type="image/png" href="icon.png">
+		<link rel="stylesheet" type="text/css" href="game.css" />
+		<link href="https://fonts.googleapis.com/css?family=Ravi+Prakash" rel="stylesheet">
 
 		<script src="util.js"></script>
 		<script>
 			var state = "wait";
-			var timer = window.setInterval(check_move_to_next, 1000);
 			var exteranl = "";
+			check_move_to_next();
 
 			function disconnect_user() {
 				xmlrequest("diconnect_user", function() {
-					if (this.readyState == 4 && this.status == 200) {
+					if (this.readyState == 4) {
 						window.location.href = '/';
 					}
 				});
 			}
 
 			function switch_screens() {
+				console.log(state);
 				switch (state) {
 					case "question":
-						to = "leaderboard";
+						to = "wait";
+						color = "#00401F"; /*Caliban Green*/
 						break;
 					case "leaderboard":
 						to = "question";
+						color = "White";
 						break;
 					case "wait":
 						to = "question";
+						color = "White"
 						break;
 					case "wait_question":
 						state = "wait";
 						to = "leaderboard";
+						color = "#5A005A"; /*Xereus Purple*/
 						break;
 				}
 				var from_style_display = document.getElementById(state).style.display;
@@ -42,13 +49,13 @@
 				from_style_display = [to_style_display, to_style_display = from_style_display][0];
 				document.getElementById(state).style.display = from_style_display;
 				document.getElementById(to).style.display = to_style_display;
+				document.body.style.background = color
 			}
 
 			function send_answer(letter) {
 				xmlrequest("answer?letter=" + letter,
 					function() {
 						if (this.readyState == 4 && this.status == 200) {
-							state = "wait";
 							switch_screens();
 							state = "wait_question";
 						}
@@ -83,6 +90,17 @@
 				return i + "th";
 			}
 
+			function get_title() {
+				xmlrequest("get_title",
+					function() {
+						if (this.readyState == 4 && this.status == 200) {
+							document.getElementById("title").innerHTML =
+								parse_xml_from_string(this.responseText).getElementsByTagName("title")[0].textContent
+						}
+					}
+				)
+			}
+
 			function check_move_to_next() {
 				xmlrequest("check_move_next_page",
 					function() {
@@ -91,74 +109,85 @@
 								switch (state) {
 									case "wait":
 										switch_screens();
-										state = "questions";
+										state = "question";
+										get_title()
+										xmlrequest("moved_to_next_question", null);
 										break;
 									case "question":
 										switch_screens();
 										state = "leaderboard";
+										xmlrequest("moved_to_next_question", null);
 										break;
 									case "wait_question":
 										get_score();
 										switch_screens();
 										state = "leaderboard";
+										xmlrequest("moved_to_next_question", null);
 										break;
 									case "leaderboard":
 										switch_screens();
+										xmlrequest("moved_to_next_question", null);
+										state = "question";
+										break;
 								}
 							}
 						}
 					}
 				);
+				setTimeout(check_move_to_next, 1000);
 			}
+
 		</script>
 	</head>
 
 	<body>
 		<center>
-			<p id="wait" style="display:inline">
+			<div id="wait" style="display:inline">
 				<!--Will check when it should switch to question everysecond-->
-				<font size="6">Please wait</font>
-				<br /><br />
-				<input type="button" value="Disconnect" onclick="disconnect_user();" />
-			</p>
-			<div id="question" style="display:none">
+				<h2><span>Please wait</span></h2>
+				<button type="button" onclick="disconnect_user();"> Disconnect
+				</button>
+			</div>
+			<div id="question">
+				<div id="title" style="display:inline">
+				</div>
 				<table>
 					<tr>
 						<td>
-							<button type="button" style="float:left; height: 150px;
-							 width: 150px; font-size: 50px;" onclick="send_answer('A');">
+							<button type="button" class="button_A" onclick="send_answer('A');">
 								A
 							</button>
 						</td>
 						<td>
-							<button type="button" style="float:left; height: 150px;
-							width: 150px; font-size: 50px;" onclick="send_answer('B');">
+							<button type="button" class="button_B" onclick="send_answer('B');">
 								B
 							</button>
 						</td>
 					</tr>
 					<tr>
 						<td>
-							<button type="button" style="float:left; height: 150px;
-							 width: 150px; font-size: 50px;" onclick="send_answer('C');">
+							<button type="button" class="button_C" onclick="send_answer('C');">
 								C
 							</button>
 						</td>
 						<td>
-							<button type="button" style="float:left; height: 150px;
-							 width: 150px; font-size: 50px;" onclick="send_answer('D');">
+							<button type="button" class="button_D" onclick="send_answer('D');">
 								D
 							</button>
 						</td>
 					</tr>
 				</table>
 			</div>
-			<div id="leaderboard" style="display:none">
-				<font size="6">Your score right now is </font>
-				<font size="6" id="score"></font><br />
-				<font size="6">and you are </font>
-				<font size="6" id="place"></font>
-				<font size="6"> place</font>
+			<div id="leaderboard">
+				<p class="leaderboard">Your score right now is </p>
+				<p class="leaderboard" id="score"></p><br />
+				<p class="leaderboard">and you are </p>
+				<p class="leaderboard" id="place"></p>
+				<p class="leaderboard"> place</p>
+				<br/><br/>
+				<button type="button" class="leave" onclick="disconnect_user();">
+					Leave the game
+				</button>
 			</div>
 		</center>
 	</body>

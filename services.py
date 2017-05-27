@@ -1,6 +1,5 @@
 """All the services get the method we need and return the data
 """
-# TODO: change all TXTService to XMLService
 import os.path
 import time
 from xml.etree import ElementTree
@@ -140,7 +139,6 @@ class getnames(XMLService):
     NAME = "/getnames"
 
     def __init__(self, game, common):
-        print "getnames"
         super(getnames, self).__init__()
         self._game = game
         self._common = common
@@ -325,10 +323,15 @@ class check_move_next_page(XMLService):
         self._game = game
 
     def content(self):
-        ans = self._game.get_move_to_next_page()
-        if ans:
-            self._game.moved_to_next_page()
-        return util.boolean_to_xml(ans)
+        return util.boolean_to_xml(self._game.get_move_to_next_page())
+
+
+class moved_to_next_page(Service):
+    NAME = "/moved_to_next_question"
+
+    def __init__(self, game):
+        super(moved_to_next_page, self).__init__()
+        game.moved_to_next_page()
 
 
 class move_to_next_question(XMLService):
@@ -350,7 +353,6 @@ class move_to_next_question(XMLService):
 
 
 class get_question(XMLService):
-    #  FIXME: It sends what is the right answer
     NAME = "/get_question"
 
     def __init__(self, game):
@@ -426,3 +428,14 @@ class get_answers(XMLService):
         for letter in self._game.get_answers():
             ElementTree.SubElement(root, "answer", {"answer": letter})
         return util.to_string(root)
+
+
+class get_title(XMLService):
+    NAME = "/get_title"
+
+    def __init__(self, game):
+        super(get_title, self).__init__()
+        self._game = game
+
+    def content(self):
+        return self._game.get_title()

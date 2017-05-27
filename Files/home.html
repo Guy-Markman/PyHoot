@@ -2,7 +2,9 @@
 <html>
 
 	<head>
-
+		<link rel="stylesheet" type="text/css" href="common.css" />
+		<link rel="stylesheet" type="text/css" href="home.css" />
+		<link href="https://fonts.googleapis.com/css?family=Ravi+Prakash" rel="stylesheet">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>PyHoot!</title>
 		<link rel="icon" type="image/png" href="icon.png">
@@ -61,21 +63,26 @@
 	<body>
 		<center>
 			<form id="join" action="/join" method="get">
-				<p id="p1">
-					<font size="7" id="p1_title">Game PIN</font><br />
-					<input type="number" inputmode="numeric" pattern="\d*" title="Non-negative integral number" id="join_number" name="join_number" style="width: 200px;" min="100000" max="999999" autocomplete="off" autofocus>
+				<div id="p1">
+					<h1><span>Game PIN</span></h1><br />
+					<input type="number" inputmode="numeric" class="pin" pattern="\d*" title="Non-negative integral number" id="join_number" name="join_number" min="100000" max="999999" autocomplete="off" autofocus>
+					<br /><br /><br />
+					<button type="button" onclick="check('test');">
+						Join!</button>
 					<br /><br />
-					<button type="button" style="height:50px;width:150px;" onclick="check('test');">
-						Join!</button><br /><br />
-					<button type="button" style="height:50px;width:150px" onclick="location.href='/new'">
-					Creat new game </button>
-				</p>
-				<p id="p2" style="display:none">
-					<font id="p2_title" size="6">Choose name</font><br />
-					<input type="text" name="name" id="name" pattern=".{3,}" required title="3 characters minimum" style="width: 200px;"><br /><br />
-					<button type="button" style="height:50px;width:150px" onclick="check_length_name()">
+					<button type="button" class="move" onclick="location.href='/new'">
+					Create new game </button>
+				</div>
+				<div id="p2" class="p2">
+					<h1>
+						<span id="p2_title">Choose name</span>
+					</h1>
+					<br />
+					<br />
+					<input type="text" name="name" class="name" autocomplete="off" autocorrect="off" id="name" pattern=".{3,}" required title="3 characters minimum"><br /><br />
+					<button type="button" onclick="check_length_name()">
 				     Start Playing!</button>
-				</p>
+				</div>
 			</form>
 
 		</center>

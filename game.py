@@ -8,6 +8,10 @@ from xml.etree import ElementTree
 from . import constants, xmlparser
 
 
+# Registration -> Opening -> Question -> Answer -> Leaderboard -> Question
+# (number_of_questions > -1) -> Finish
+
+
 class Game(object):
     """Base game object, for the pid"""
 
@@ -48,6 +52,7 @@ class GameMaster(Game):
     def __init__(self, quiz_name, common, base_directory):
         super(GameMaster, self).__init__(common)
         self._quiz = quiz_name
+        self._state = "Registration"
         self._players_list = {}  # {pid: {"player": GamePlayer, "_score":score}
         self._parser = xmlparser.XMLParser(quiz_name, base_directory)
         while True:
@@ -75,6 +80,12 @@ class GameMaster(Game):
 
     def get_score(self, pid):
         return self._players_list[pid]["_score"]
+
+    def moved_to_next_page(self):
+        self._move_to_next_page = False
+
+    def get_current_question_title(self):
+        return self._parser.get_current_question_title()
 
     def _update_score(self):
         right_answers = self._parser.get_question_answers()
@@ -179,6 +190,9 @@ class GamePlayer(Game):
 
     def get_place(self):
         return self._game_master.get_place(self._pid)
+
+    def get_title(self):
+        return self._game_master.get_current_question_title()
 
     @property
     def name(self):

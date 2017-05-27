@@ -31,11 +31,11 @@ class Server(base.Base):
 
     def add_server(
         self,
-        our_address=("localhost", 80)
+        our_address
     ):
-        """ Creat server side socket and add it to the database. \n
-            our_address: tupple of the address that the server will do bind to.
-                         format (address, port), default (localhost, 80)
+        """ Create the server side socket and add it to the database.
+            our_address: Tupple of the address that the server will bind to.
+                         format: (address, port)
         """
         s = util.creat_nonblocking_socket()
         s.bind(our_address)
@@ -45,11 +45,13 @@ class Server(base.Base):
 
     def _add_to_databases(self, s, state=constants.SERVER):
         """
-                Add the socket to the database, structre will be:
-                {socket :  {
-                "buff":buffer will contain the data we need to send,
-                "state": state of the socket, CLOSE, SERVER or CLIENT,
-                "fd": file descriptor of the socket
+                Add the socket to the database. The structre will be:
+                {socket :
+                    {
+                    "buff": The buffer will contain the data we need to send.
+                    "state": The state of the socket, CLOSE, SERVER or CLIENT.
+                    "fd": The file descriptor of the socket.
+                    }
                 }
         """
         if state not in (constants.CLOSE, constants.SERVER, constants.CLIENT):
@@ -65,16 +67,16 @@ class Server(base.Base):
                 s, self._buff_size, self._base_directory, self.common)
         self._fd_socket[s.fileno()] = s
         self.logger.debug(
-            "s added to database, {'%s': '%s'}",
+            "The socket was added to the database, {'%s': '%s'}.",
             s,
             self._database[s])
 
     def _close_socket(self, s):
-        """ close the socket, remove it from it's from the database"""
+        """ Close the socket and remove it from from the database."""
         s.close()
         if s in self._database.keys():
             self._database.pop(s)
-        self.logger.debug("Close success on socket %s", s)
+        self.logger.debug("The closing of the socket %s was successful.", s)
 
     def _change_to_close(self, entry):
         """Change the socket s to close state"""
@@ -87,21 +89,21 @@ class Server(base.Base):
         entry["state"] = constants.CLOSE
 
     def _connect_socket(self, server):
-        """accept socket to the system and add it to the database
+        """Accept the socket to the system and add it to the database.
         """
         accepted = None
         try:
             accepted, addr = server.accept()
             accepted.setblocking(0)
             self._add_to_databases(accepted, state=constants.CLIENT)
-            self.logger.info("connect the socket from '%s:%s'", *addr)
+            self.logger.info("Connected the socket from '%s:%s'", *addr)
         except Exception:
             self.logger.error("Exception ", exc_info=True)
             if accepted is not None:
                 accepted.close()
 
     def start_server(self):
-        """The main function of the class, makes everything work"""
+        """The main function of the class makes everything work"""
         while self._database:
             try:
                 self._async_io_object.create_object()
@@ -118,7 +120,7 @@ class Server(base.Base):
                         elif socket_state == constants.CLIENT:
                             self.logger.debug("Client Read")
                             self._database[s]["client"].recv()
-                            self.logger.debug("finished reciving")
+                            self.logger.debug("finished receiving")
 
                     if flag & common_events.CommonEvents.POLLHUP:
                         raise custom_exceptions.Disconnect()
@@ -133,27 +135,28 @@ class Server(base.Base):
                             self.logger.debug("Client send")
                             entry["client"].send()
                             if entry["client"].check_finished_request():
-                                self.logger.info("Finished Request for %s" % s)
+                                self.logger.info(
+                                    "Completed reading the request for %s",  s)
                                 self._change_to_close(self._database[s])
                         if entry["state"] == constants.CLOSE:
                             self.logger.debug("Close send")
                             self.send(s)
 
-                # check if the program need to stop, if it does starts the
-                # process of shuting down everything by changing all the states
-                # to close
+                # This part checks whether the program needs to stop. If it
+                # does, it starts the process of shuting down everything by
+                # changing all the states to close
                 if not self._run:
-                    self.logger.debug("closing all")
+                    self.logger.debug("Closing all")
                     for s in self._database.keys():
                         self._change_to_close(self._database[s])
 
-                # closing every socket that is ready for close (sent everything
+                # Closing every socket that is ready for close (sent everything
                 # and in close mode)
                 for s in self._database.keys():
                     entry = self._database[s]
                     if entry["state"] == constants.CLIENT:
                         if entry["client"].check_finished_request():
-                            self.logger.info("Finished Request for %s" % s)
+                            self.logger.info("Finished Request for %s",  s)
                             self._change_to_close(self._database[s])
                     if entry["state"] == constants.CLOSE:
                         if entry["buff"] == "":
@@ -163,7 +166,7 @@ class Server(base.Base):
                     self.logger.error(traceback.format_exc())
                     self._close_socket(s)
             except custom_exceptions.Disconnect:
-                self.logger.info("%s Disconneted", s)
+                self.logger.info("%s disconneted", s)
                 self._close_socket(s)
             except Exception:
                 self.logger.critical(traceback.format_exc())
@@ -172,11 +175,11 @@ class Server(base.Base):
         self.logger.debug(self._database)
 
     def send(self, s):
-        """Sending in case of a big error"""
+        """Sending everything in case of a big error"""
         while self._database[s]["buff"]:
             try:
                 sent = s.send(self._database[s]["buff"])
-                self.logger.debug("sent %s" % sent)
+                self.logger.debug("sent %s",  sent)
                 self._database[s]["buff"] = self._database[s]["buff"][sent:]
             except socket.error as e:
                 self.logger.error(traceback.format_exc())
@@ -185,4 +188,4 @@ class Server(base.Base):
                 else:
                     self.logger.debug("ERROR WOULD BLOCK")
                     break
-        self.logger.debug("left %s" % len(self._database[s]["buff"]))
+        self.logger.debug("left %s",  len(self._database[s]["buff"]))
