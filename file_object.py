@@ -1,4 +1,5 @@
-"""lkkkkkkkkkkkkkkkzssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+"""Object to handle read from files
+lkkkkkkkkkkkkkkkzssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
 ssssssssssssssssssssssssssssssssssssssssssssssssssx
 Never let your cat document the code for you"""
 
@@ -12,6 +13,8 @@ class FileObject(base.Base):
         self._fd = the file descriptor of the file
         self.finished_reading: Did we finished reading the file?
     """
+
+    ## Type is file
     NAME = "FILE"
 
     def __init__(self, file_name, base_directory):
@@ -27,6 +30,8 @@ class FileObject(base.Base):
             base_directory, os.path.normpath(file_name))),
             os.O_RDONLY | os.O_BINARY
         )
+
+        ## Finished reading the file
         self.finished_reading = False
 
     def read_buff(self, length):
@@ -46,4 +51,5 @@ class FileObject(base.Base):
         return os.fstat(self._fd).st_size
 
     def close(self):
+        """Closing the file"""
         os.close(self._fd)

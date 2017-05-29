@@ -1,14 +1,16 @@
+"""AsyncIO (with select_object or poll_object)"""
+
 from . import base, common_events, constants, poll_object, select_object
 
 
 class AsyncIO(base.Base):
     """AsyncIO object (with select_object or poll_object).
-    Return fd like poll no matter what protocol we use.
+    Return fd like poll no matter what API we use.
     Args:
-        self.protocol, the protocol we are using
-        self._protocol, the object we will use, depent on protocol.
-                        if we use, poll we will have poll_object,
-                        if we use select, select object
+        self.protocol= the API we are using
+        self._protocol= the object we will use, depent on API.
+                        if we use poll, poll we will have poll_object,
+                        if we use select, select_object
     """
 
     def __init__(self, protocol):
@@ -17,7 +19,11 @@ class AsyncIO(base.Base):
             protocol, the protocol we will use
         """
         super(AsyncIO, self).__init__()
+
+        ## The API we will use
         self.protocol = protocol
+
+        """API Object"""
         self._protocol_object = None
 
     def register_all(self, database):
@@ -42,7 +48,7 @@ class AsyncIO(base.Base):
             self._protocol_object.register([entry["fd"], s], events)
 
     def create_object(self):
-        """Create or re-create the protocol object
+        """Create or re - create the protocol object
         Args:
             database, the database with all the socket we will use
         """

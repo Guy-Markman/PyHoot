@@ -1,6 +1,6 @@
+"""Base module"""
 # -*- coding: utf-8 -*-
 # By Alon Bar-Lev @alonbl
-"""Base module"""
 
 
 import logging
@@ -9,6 +9,7 @@ import logging
 class Base(object):
     """Base of all objects"""
 
+    ## Log prefix to use.
     LOG_PREFIX = 'my'
 
     @property
@@ -27,6 +28,9 @@ class Base(object):
 
 
 def setup_logging(stream=None, level=logging.INFO):
+    """Setup logging system.
+    @returns (logger) program logger.
+    """
     logger = logging.getLogger(Base.LOG_PREFIX)
     logger.propagate = False
     logger.setLevel(level)

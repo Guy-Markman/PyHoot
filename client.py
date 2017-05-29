@@ -1,3 +1,4 @@
+"""The client of the server"""
 import Cookie
 import errno
 import os.path
@@ -7,13 +8,29 @@ import urlparse
 from . import (base, constants, custom_exceptions, file_object, request,
                services, util)
 
+### Methods supported for the server
 SUPPORTED_METHODS = ('GET')
-SERVICES_HEADERS = {}
 
-INITIALIZED, SENDING_STATUS, SENDING_DATA, FINISHED, ERROR = range(5)
+## States for the server
+## Havn't got status yet
+INITIALIZED = 0
+
+## Got status, sending own status
+SENDING_STATUS = 1
+
+## Sent status, sending data
+SENDING_DATA = 2
+
+## Finished request and response
+FINISHED = 3
+
+## Error in client
+ERROR = 4
+
+
+## Services availible
 SERVICES_LIST = {service.NAME: service for service in
                  (services.Service.__subclasses__() +
-                  services.TXTService.__subclasses__() +
                   services.XMLService.__subclasses__()
                   )}
 
@@ -22,6 +39,7 @@ class Client(base.Base):
     """The client of the server handles everything by itself
         Arguments:
                 self.socket = The socket of the client.
+                self.common = The common library for the client
                 self._recv_buff = Any data it has recieved but hasn't procssed
                                   yet.
                 self._send_buff = All the data that needs to be sent but
@@ -49,9 +67,13 @@ class Client(base.Base):
                                file locations.
         """
         super(Client, self).__init__()
+
+        ## The socket of this client, CANNOT BE MODIFIED
         self.socket = s
         self._buff_size = buff_size
         self._base_directory = base_directory
+
+        ## The common library for the client
         self.common = common
 
         self._file = None
@@ -133,7 +155,6 @@ class Client(base.Base):
     def _get_headers(self):
         """Getting and setting the headers"""
         self.logger.debug("Start _get_headers")
-        uri = self._request.uri
         if constants.CRLF in self._recv_buff:
             self.logger.debug("Inside crlf")
             dic_headers = {}
@@ -143,10 +164,6 @@ class Client(base.Base):
                     dic_headers[split_line[0].lower()] = split_line[
                         1].lstrip(' ')
             self.logger.debug("dic_headers %s", dic_headers)
-            if uri in SERVICES_HEADERS.keys():
-                for header in SERVICES_HEADERS[uri]:
-                    self._request.add_header(header, dic_headers[header])
-                    self.logger.debug("Added header, %s", line)
             if "cookie" in dic_headers:
                 self._request.add_header("cookie", dic_headers["cookie"])
                 self.logger.debug("Added cookie, %s", dic_headers["cookie"])
@@ -187,13 +204,13 @@ class Client(base.Base):
             # If we have the request line, but don't have request object, creat
             # one
             if (
-                self._state == INITIALIZED
-                and constants.CRLF in self._recv_buff
+                self._state == INITIALIZED and
+                constants.CRLF in self._recv_buff
             ):
                 self._test_http_and_creat_objects()
 
             # If we do have request line, get headers
-            self.logger.debug("state %s",  self._state)
+            self.logger.debug("state %s", self._state)
             self.logger.debug("Now recv_buff is %s", self._recv_buff)
 
         except OSError as e:
@@ -297,6 +314,7 @@ class Client(base.Base):
         return ans
 
     def can_send(self):
+        """Check if the user can send more data"""
         return (
             len(self._send_buff) > 0 or
             self._state in (SENDING_DATA, SENDING_STATUS)
