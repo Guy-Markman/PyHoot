@@ -1,8 +1,17 @@
+/**
+ * @file Files\quiz.js functions for game.html
+ * @{
+ */
 var PLAYERS_IN_LINE = 3;
 var state = "Registration";
 var timer = window.setInterval(getnames, 1000);
 var number_of_questions = null;
 
+
+/**
+ * switch screens for the next screen
+ * @return nothing
+ */
 // FIXME: Change the order they work to the same way as game
 function switch_screens() {
 	switch (state) {
@@ -21,7 +30,7 @@ function switch_screens() {
 			} else {
 				start = "Opening";
 			}
-			color = "#FFFFFF" //White
+			color = "#FFFFFF"; //White
 			break;
 		case "Leaderboard":
 			start = "Answer";
@@ -37,9 +46,12 @@ function switch_screens() {
 	state_style_display = [start_style_display, start_style_display = state_style_display][0];
 	document.getElementById(state).style.display = state_style_display;
 	document.getElementById(start).style.display = start_style_display;
-	document.body.style.background = color
+	document.body.style.background = color;
 }
 
+/**
+ * Get the join number and print it to the screen
+ */
 function get_join_number() {
 	xmlrequest(
 		"get_join_number",
@@ -52,6 +64,9 @@ function get_join_number() {
 	);
 }
 
+/**
+ * Get the names of all the players and print it to the screen
+ */
 function getnames() {
 	xmlrequest("getnames", function() {
 		if (this.readyState == 4 && this.status == 200) {
@@ -71,13 +86,18 @@ function getnames() {
 	});
 }
 
-//continue only if at least one user is online
+/**
+ *continue only if at least one user is online
+ */
 function check_moveable() {
 	if (document.getElementById("names").innerHTML.length > 0) {
 		change_Registeration_Opening();
 	}
 }
 
+/**
+ * Switch from Registration screen to Opening screen
+ */
 function change_Registeration_Opening() {
 	state = "Opening";
 	set_timer("5");
@@ -87,6 +107,9 @@ function change_Registeration_Opening() {
 	switch_screens();
 }
 
+/**
+ * Check if need to change question
+ */
 function check_move_question() {
 	xmlrequest("check_move_question",
 		function() {
@@ -101,6 +124,9 @@ function check_move_question() {
 	);
 }
 
+/**
+ * Swtich from Question screen to Answer screen
+ */
 function change_Question_Answer() {
 	xmlrequest("get_answers",
 		function() {
@@ -124,6 +150,9 @@ function change_Question_Answer() {
 	);
 }
 
+/**
+ * Switch from opening screen to Question screen
+ */
 function change_Opening_Question() {
 	order_move_all_players();
 	xmlrequest("start_question", null);
@@ -131,6 +160,9 @@ function change_Opening_Question() {
 	switch_screens();
 }
 
+/**
+ * Switch from Answer screen to Leadeboard screen
+ */
 function change_Answer_Leaderboard() {
 	xmlrequest("get_xml_leaderboard",
 		function() {
@@ -164,6 +196,9 @@ function change_Answer_Leaderboard() {
 	);
 }
 
+/**
+ * Get the information about the question and print it to the screen
+ */
 function getinfo() {
 	xmlrequest("get_information",
 		function() {
@@ -181,6 +216,9 @@ function getinfo() {
 	);
 }
 
+/**
+ * Get the winner and print it to screen
+ */
 function get_winner() {
 	var oTable = document.getElementById("Leaderboard_content").getElementsByTagName("table")[0];
 
@@ -190,14 +228,24 @@ function get_winner() {
 	document.getElementById("Finish_score").innerHTML = oCells.item(1).innerHTML;
 }
 
+/**
+ * Order all the players to move
+ */
 function order_move_all_players() {
 	xmlrequest("order_move_all_players", null);
 }
 
+/**
+ * Set timer
+ */
 function set_timer(new_time) {
 	xmlrequest("set_timer_change?new_time=" + new_time, null);
 }
 
+
+/**
+ * Check if need to change because of timer
+ */
 function check_timer_change() {
 	xmlrequest("check_timer_change",
 		function() {
@@ -226,6 +274,9 @@ function check_timer_change() {
 	);
 }
 
+/**
+ * Moving to the next part
+ */
 function move_to_next_question() {
 	xmlrequest("move_to_next_question",
 		function() {
@@ -247,7 +298,9 @@ function move_to_next_question() {
 	);
 }
 
-
+/**
+ * Getting the question
+ */
 function get_question() {
 	xmlrequest("get_question",
 		function() {
@@ -269,3 +322,5 @@ function get_question() {
 		}
 	);
 }
+
+/** @} */

@@ -1,3 +1,11 @@
+/**
+ * @file Files\new.js functions for game.html
+ * @{
+ */
+
+/**
+ * Check if test exist on the system
+ */
 function check_test_exist() {
 	xmlrequest(
 		"check_test_exist?quiz_name=" + document.getElementById("quiz_name").value,
@@ -13,3 +21,5 @@ function check_test_exist() {
 		}
 	);
 }
+
+/** @} */

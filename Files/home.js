@@ -1,3 +1,11 @@
+/**
+ * @file Files\new.js functions for game.html
+ * @{
+ */
+
+/**
+ * Change the parts of the page
+ */
 function changeDiv() {
 	document.getElementById('p1').style.display =
 		"none";
@@ -6,6 +14,9 @@ function changeDiv() {
 	document.getElementById('name').focus();
 }
 
+/**
+ * Make sure the name is valid
+ */
 function check_length_name() {
 	if (document.getElementById("name").value.length >= 3) {
 		check("name");
@@ -15,6 +26,9 @@ function check_length_name() {
 	}
 }
 
+/**
+ * Check if name / test exist
+ */
 function check(type) { //Check if name / test exist
 	var data = document.getElementById("join_number").value;
 	if (type == "name") {
@@ -44,3 +58,5 @@ function check(type) { //Check if name / test exist
 		}
 	);
 }
+
+/** @} */

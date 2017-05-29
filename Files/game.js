@@ -1,7 +1,19 @@
+/**
+ * @file Files\game.js functions for game.html
+ * @{
+ */
+
+
+// The current state of the game
 var state = "wait";
-var exteranl = "";
+
+//Checking every second if need to moved
 check_move_to_next();
 
+/**
+ * Disconnecting user from the system
+ * @return nothing
+ */
 function disconnect_user() {
 	xmlrequest("diconnect_user", function() {
 		if (this.readyState == 4) {
@@ -10,6 +22,10 @@ function disconnect_user() {
 	});
 }
 
+/**
+ * switch screens for the next screen
+ * @return nothing
+ */
 function switch_screens() {
 	console.log(state);
 	switch (state) {
@@ -39,6 +55,11 @@ function switch_screens() {
 	document.body.style.background = color
 }
 
+/**
+ * Send the answer the user clicked on
+ * @param letter (string) the letter of the answer
+ *
+ */
 function send_answer(letter) {
 	xmlrequest("answer?letter=" + letter,
 		function() {
@@ -50,6 +71,10 @@ function send_answer(letter) {
 	);
 }
 
+/**
+ * Get the score and place of the player from the server and print it to the screens
+ * @return nothing
+ */
 function get_score() {
 	xmlrequest("get_score",
 		function() {
@@ -62,6 +87,11 @@ function get_score() {
 	);
 }
 
+/**
+ * Add suffix to the number
+ * @param i the number we want to add the suffix to
+ * @returns the number with the suffix
+ */
 function ordinal_suffix_of(i) {
 	var j = i % 10,
 		k = i % 100;
@@ -77,6 +107,10 @@ function ordinal_suffix_of(i) {
 	return i + "th";
 }
 
+/**
+ * Get the title of the question and print it in the right place
+ *
+ */
 function get_title() {
 	xmlrequest("get_title",
 		function() {
@@ -88,6 +122,10 @@ function get_title() {
 	)
 }
 
+/**
+ * check if there is a need to move to the next part
+ * @return nothing 
+ */
 function check_move_to_next() {
 	xmlrequest("check_move_next_page",
 		function() {
@@ -123,3 +161,5 @@ function check_move_to_next() {
 	);
 	setTimeout(check_move_to_next, 1000);
 }
+
+/** @} */
