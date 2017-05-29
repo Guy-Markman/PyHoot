@@ -1,5 +1,5 @@
 /**
- * @file Files\new.js functions for game.html
+ * @file Files\home.js functions for game.html
  * @{
  */
 

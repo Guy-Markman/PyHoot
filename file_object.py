@@ -1,7 +1,8 @@
-"""Object to handle read from files
+"""Object to handle reading from files
 lkkkkkkkkkkkkkkkzssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
 ssssssssssssssssssssssssssssssssssssssssssssssssssx
 Never let your cat document the code for you"""
+## @file file_object.py Object to handle reading from files
 
 import os
 

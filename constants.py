@@ -1,4 +1,5 @@
 """Constants for the program"""
+## @file constants.py Constants for the program
 
 ## Base for  any HTTP page, you give it the title and the body of the page
 BASE_HTML = """<HTML>

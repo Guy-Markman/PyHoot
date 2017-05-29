@@ -1,4 +1,5 @@
 """Game objects for the game, there is both player and master"""
+## @file game.py Game objects for the game, there is both player and master
 import base64
 import os
 import random

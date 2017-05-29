@@ -1,4 +1,6 @@
-"""The client of the server"""
+"""@file client.py The client of the server"""
+## @file client.py The client of the server
+
 import Cookie
 import errno
 import os.path

@@ -1,4 +1,5 @@
 """main file"""
+## @file __main__.pymain file
 import argparse
 import logging
 import os

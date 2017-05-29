@@ -1,4 +1,5 @@
 """Setting up os for the program"""
+## @file compat.py Setting up os for the program
 
 import os
 

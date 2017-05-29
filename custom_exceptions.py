@@ -1,4 +1,5 @@
 """Special exceptions for the project"""
+## @file custom_exceptions.py Special exceptions for the project
 
 
 class Disconnect(RuntimeError):

@@ -1,4 +1,5 @@
 """The server class"""
+## @file server.py The server class
 
 import errno
 import select

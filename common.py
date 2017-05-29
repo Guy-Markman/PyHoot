@@ -1,5 +1,6 @@
 """Common class, It is just a nice way to share databases with all the clients
 """
+## @file common.py Common class, It is just a nice way to share databases
 
 
 class Common(object):

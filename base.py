@@ -1,6 +1,7 @@
 """Base module"""
+## @file base.py Base module
 # -*- coding: utf-8 -*-
-# By Alon Bar-Lev @alonbl
+# By Alon Bar-Lev alonbl
 
 
 import logging

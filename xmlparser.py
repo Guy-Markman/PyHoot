@@ -1,4 +1,5 @@
 """XML parser for test files"""
+## @file xmlparser.py XML parser for test files
 import os.path
 from xml.etree import ElementTree
 
