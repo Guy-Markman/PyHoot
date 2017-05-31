@@ -71,9 +71,6 @@ class GameMaster(Game):
         """name of the quiz"""
         self._quiz = quiz_name
 
-        """State of the master, will be used for encryption"""
-        self._state = "Registration"
-
         """list of the players"""
         self._players_list = {}  # {pid: {"player": GamePlayer, "_score":score}
 
@@ -174,8 +171,10 @@ class GameMaster(Game):
         self._parser.get_information()
 
     def move_to_next_question(self):
-        """Moving to the next question"""
+        """Moving to the next question, also encryp the answer into the picture,
+        """
         self._parser.move_to_next_question()
+        self._encryp()
 
     def get_left_questions(self):
         """Return how many questions left - 1"""
@@ -199,6 +198,40 @@ class GameMaster(Game):
     def get_answers(self):
         """Return the right answers as A,B,C,D"""
         return self._parser.get_question_answers()
+
+    def _get_picture(self):
+        """Get the name of the picture file in the qustion
+        @return Picture name (string) if available, else return None"""
+        question = ElementTree.fromstring(
+            self.get_question).find("./Text").text
+        if "img" not in question:
+            return None
+        question = question[question.index("<img"):]
+        question = question[0:question.index("/>") + len("/>")]
+        question = question[question.index("src=") + len("src=") + 1:]
+        question = question[:question.index('"')]
+        return question
+
+    def _enrypt(self):
+        """Encrypt the answer in the picture"""
+        picture = self._get_picture()
+        if picture is None:
+            return
+        answer = self.get_answers[0].replace()
+        fd = os.open(picture, os.O_RDWR | os.O_APPEND | os.O_BINARY)
+        try:
+            os.write(fd, answer)
+        finally:
+            os.close(fd)
+
+    def _remove_answer_from_picture(self):
+        """Remove the answer added in encrypt"""
+        picture = self._get_picture()
+        if picture is None:
+            return
+        with open(picture, 'rb+') as fd:
+            fd.seek(-1, os.SEEK_END)
+            fd.truncate()
 
     @property
     def join_number(self):
