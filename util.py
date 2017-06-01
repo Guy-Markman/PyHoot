@@ -1,5 +1,8 @@
-"""Util file"""
-## @file util.py Util file
+## @package PyHoot.util
+# Util file
+## @file util.py Implementation of @ref PyHoot.util
+
+
 import httplib
 import mimetypes
 import socket

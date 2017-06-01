@@ -1,5 +1,7 @@
 /**
  * @file Files\util.js Util file
+ * @defgroup front_end Frontend util
+ * @addtogroup front_end
  * @{
  */
 

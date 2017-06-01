@@ -1,5 +1,8 @@
-"""Select API for async_io."""
-## @file  poll_object.py Select API for async_io.
+## @package PyHoot.poll_object
+# Select API for async_io.
+## @file poll.py Implementation of @ref PyHoot.poll
+
+
 import select
 
 from . import base

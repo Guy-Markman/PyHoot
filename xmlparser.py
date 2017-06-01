@@ -1,5 +1,7 @@
-"""XML parser for test files"""
-## @file xmlparser.py XML parser for test files
+## @package PyHoot.xmlparser
+# XML parser for test files
+## @file xmlparser.py Implementation of @ref PyHoot.xmlparser
+
 import os.path
 from xml.etree import ElementTree
 

@@ -1,5 +1,8 @@
-"""Game objects for the game, there is both player and master"""
-## @file game.py Game objects for the game, there is both player and master
+## @package PyHoot.game
+# Game objects for the game, there is both player and master
+## @file game.py Implementation of @ref PyHoot.game
+
+
 import base64
 import os
 import random
