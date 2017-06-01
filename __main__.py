@@ -1,6 +1,6 @@
 ## @package PyHoot.__main__
 # Main file
-## @file __main__.pyImplementation of @ref PyHoot.__main__
+## @file __main__.py Implementation of @ref PyHoot.__main__
 
 import argparse
 import logging

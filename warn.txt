@@ -1,0 +1,15 @@
+C:/Users/Guy and Noam/Documents/GitHub/PyHoot/Files/home.js:4: warning: missing group name after \addgroup
+C:/Users/Guy and Noam/Documents/GitHub/PyHoot/Files/game.js:3: warning: group front_end: ignoring title ".game" that does not match old title "Frontend implementation"
+
+C:/Users/Guy and Noam/Documents/GitHub/PyHoot/Files/new.js:4: warning: group front_end: ignoring title ".new" that does not match old title "Frontend implementation"
+
+C:/Users/Guy and Noam/Documents/GitHub/PyHoot/Files/quiz.js:4: warning: group front_end: ignoring title ".quiz" that does not match old title "Frontend implementation"
+
+C:/Users/Guy and Noam/Documents/GitHub/PyHoot/Files/util.js:5: warning: group front_end: ignoring title ".util Frontend implementation from Util files" that does not match old title "Frontend implementation"
+
+C:/Users/Guy and Noam/Documents/GitHub/PyHoot/Files/util.js:7: warning: group front_end: ignoring title ".util" that does not match old title "Frontend implementation"
+
+C:/Users/Guy and Noam/Documents/GitHub/PyHoot/Files/game.js:2: warning: unable to resolve reference to `front_end.game' for \ref command
+C:/Users/Guy and Noam/Documents/GitHub/PyHoot/Files/home.js:2: warning: unable to resolve reference to `front_end.home' for \ref command
+C:/Users/Guy and Noam/Documents/GitHub/PyHoot/Files/new.js:2: warning: unable to resolve reference to `front_end.new' for \ref command
+C:/Users/Guy and Noam/Documents/GitHub/PyHoot/Files/quiz.js:2: warning: unable to resolve reference to `front_end.quiz' for \ref command

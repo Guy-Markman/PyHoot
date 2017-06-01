@@ -1,6 +1,6 @@
 ## @package PyHoot.poll_object
 # Select API for async_io.
-## @file poll.py Implementation of @ref PyHoot.poll
+## @file poll_object.py Implementation of @ref PyHoot.poll_object
 
 
 import select

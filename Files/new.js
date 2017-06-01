@@ -1,5 +1,7 @@
 /**
- * @file Files\new.js functions for game.html
+ * @file Files\new.js Implementation of @ref front_end.new
+ * functions for game.html
+ * @addtogroup front_end.new
  * @{
  */
 

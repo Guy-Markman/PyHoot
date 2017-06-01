@@ -1,5 +1,9 @@
 /**
- * @file Files\game.js functions for game.html
+ * @file Files\game.js Implementation of @ref front_end.game
+ * functions for game.html
+ * @defgroup front_end.game functions for front_end.html
+ * @addtogroup front_end.game
+ * @addtogroup front_end
  * @{
  */
 
@@ -124,7 +128,7 @@ function get_title() {
 
 /**
  * check if there is a need to move to the next part
- * @return nothing 
+ * @return nothing
  */
 function check_move_to_next() {
 	xmlrequest("check_move_next_page",

@@ -1,5 +1,7 @@
 /**
- * @file Files\home.js functions for game.html
+ * @file Files\home.js Implementation of @ref front_end.home
+ * functions for game.html
+ * @addtogroup
  * @{
  */
 

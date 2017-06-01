@@ -1,5 +1,7 @@
 /**
- * @file Files\quiz.js functions for game.html
+ * @file Files\quiz.js Implementation of @ref front_end.quiz
+ * functions for game.html
+ * @addtogroup front_end.quiz
  * @{
  */
 var PLAYERS_IN_LINE = 3;
