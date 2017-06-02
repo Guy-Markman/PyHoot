@@ -1,3 +1,5 @@
+"""XML parser for test files"""
+## @file xmlparser.py XML parser for test files
 import os.path
 from xml.etree import ElementTree
 
@@ -5,45 +7,59 @@ from . import custom_exceptions, util
 
 
 class XMLParser(object):
+    """Parser for test/xml files"""
 
     def __init__(self, file_name, base_directory):
+        """initialization"""
         test_file("%s.xml" % file_name, "%s\Quizes" % base_directory)
         self._root = ElementTree.parse(
             "%s\Quizes\%s.xml" % (base_directory, file_name)).getroot()
-        self.question_number = 0  # 0 Represent the starting page
+
+        ## The number of the questions, start at 0
+        self.question_number = 0
+
+        ## Quiz name
         self.file_name = file_name
         self._base_directory = base_directory
 
     def get_backuproot(self):
+        """Returning a copy of root as ElementTree.Element object"""
         return ElementTree.parse(
             "%s\Quizes\%s.xml" % (self._base_directory, self.file_name)
         ).getroot()
 
     def get_question_number(self):
+        """Returning the question number as integer"""
         return self.question_number
 
     def get_current_question(self, root):
+        """Return the current question as ElementTree.Element object"""
         return root.findall("./Quiz/Question")[self.question_number - 1]
 
     def get_left_questions(self):
+        """Return number of questions left to play as integer"""
         return (
             int(self._root.find(
                 "./Quiz").attrib["number_of_questions"]) - self.question_number
         )
 
     def get_information(self):
+        """Returning XML file of infromation about the quiz"""
         backup_root = self.get_backuproot()
         for question in backup_root.findall("./Quiz/Question"):
             backup_root.find("./Quiz").remove(question)
         return util.to_string(backup_root)
 
     def get_xml_question(self):
+        """Returning the question as XML, without the marking of the right\
+        question"""
         question = self.get_current_question(self.get_backuproot())
         for ans in question.findall("Answer"):
             ans.attrib.pop("correct", None)
         return util.to_string(question)
 
     def get_current_question_title(self):
+        """Return the title of the current question as XML file"""
         root = ElementTree.Element("Root")
         ElementTree.SubElement(
             root,
@@ -52,6 +68,7 @@ class XMLParser(object):
         return util.to_string(root)
 
     def get_question_answers(self):
+        """Return list of the right answers"""
         right_answer = []
         answers = self.get_current_question(self._root).findall("./Answer")
         for ans in answers:
@@ -60,10 +77,12 @@ class XMLParser(object):
         return right_answer
 
     def get_duration_question(self):
+        """Return the duration of the question as integer"""
         return int(self._root.findall("./Quiz/Question")[
             self.question_number - 1].attrib["duration"])
 
     def move_to_next_question(self):
+        """Moving to next question"""
         self.question_number += 1
 
 

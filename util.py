@@ -1,4 +1,5 @@
-
+"""Util file"""
+## @file util.py Util file
 import httplib
 import mimetypes
 import socket
@@ -76,6 +77,7 @@ def creat_error(code, extra):
 
 
 def remove_from_sysyem(common, pid):
+    """Removing Game from the system and all it's users"""
     g = common.pid_client.pop(pid, None)
     if g is not None:
         if g.TYPE == "MASTER":
@@ -88,8 +90,10 @@ def remove_from_sysyem(common, pid):
 
 
 def to_string(element):
+    """ElementTree.Element object to string"""
     return ElementTree.tostring(element, constants.ENCODING)
 
 
 def boolean_to_xml(boolean):
+    """Creating boolean xml from boolean and return it as string"""
     return to_string(ElementTree.Element("Root", {"answer": str(boolean)}))

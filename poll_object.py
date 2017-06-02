@@ -1,3 +1,5 @@
+"""Select API for async_io."""
+## @file  poll_object.py Select API for async_io.
 import select
 
 from . import base
@@ -12,7 +14,7 @@ class Poll(base.Base):
     """
 
     def __init__(self):
-
+        """initialization"""
         super(Poll, self).__init__()
         self._poll = select.poll()
 

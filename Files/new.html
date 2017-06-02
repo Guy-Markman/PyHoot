@@ -8,23 +8,7 @@
         <link href="https://fonts.googleapis.com/css?family=Ravi+Prakash" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="common.css">
         <script src="util.js"></script>
-        <script>
-            function check_test_exist() {
-                xmlrequest(
-                    "check_test_exist?quiz_name=" + document.getElementById("quiz_name").value,
-                    function() {
-                        if (this.readyState == 4 && this.status == 200) {
-                            if (xmlstring_to_boolean(this.responseText)) {
-                                document.getElementById("register_quiz").submit();
-                            } else {
-                                document.getElementById("title_register").innerHTML =
-                                    "No such quiz!<br />Name of quiz:";
-                            }
-                        }
-                    }
-                );
-            }
-        </script>
+        <script src="new.js"></script>
     </head>
 
     <body>

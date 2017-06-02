@@ -1,3 +1,6 @@
+"""The server class"""
+## @file server.py The server class
+
 import errno
 import select
 import socket
@@ -8,6 +11,7 @@ from . import (async_io, base, client, common, common_events, constants,
 
 
 class Server(base.Base):
+    """The server class"""
 
     _database = {}
     _fd_socket = {}
@@ -18,15 +22,19 @@ class Server(base.Base):
         base_directory,
         io_mode
     ):
+        """Initiliazator"""
         super(Server, self).__init__()
         self._buff_size = buff_size
         self._async_io_object = async_io.AsyncIO(io_mode)
         self._run = True
         self.logger.info("Initialized server, buff size '%d'", buff_size)
         self._base_directory = base_directory
+
+        ## Init to common
         self.common = common.Common()
 
     def terminate(self):
+        """Terminator for the system"""
         self._run = False
 
     def add_server(
@@ -51,6 +59,7 @@ class Server(base.Base):
                     "buff": The buffer will contain the data we need to send.
                     "state": The state of the socket, CLOSE, SERVER or CLIENT.
                     "fd": The file descriptor of the socket.
+                    "client": Client Object for this socket
                     }
                 }
         """
@@ -136,7 +145,7 @@ class Server(base.Base):
                             entry["client"].send()
                             if entry["client"].check_finished_request():
                                 self.logger.info(
-                                    "Completed reading the request for %s",  s)
+                                    "Completed reading the request for %s", s)
                                 self._change_to_close(self._database[s])
                         if entry["state"] == constants.CLOSE:
                             self.logger.debug("Close send")
@@ -156,7 +165,7 @@ class Server(base.Base):
                     entry = self._database[s]
                     if entry["state"] == constants.CLIENT:
                         if entry["client"].check_finished_request():
-                            self.logger.info("Finished Request for %s",  s)
+                            self.logger.info("Finished Request for %s", s)
                             self._change_to_close(self._database[s])
                     if entry["state"] == constants.CLOSE:
                         if entry["buff"] == "":
@@ -179,7 +188,7 @@ class Server(base.Base):
         while self._database[s]["buff"]:
             try:
                 sent = s.send(self._database[s]["buff"])
-                self.logger.debug("sent %s",  sent)
+                self.logger.debug("sent %s", sent)
                 self._database[s]["buff"] = self._database[s]["buff"][sent:]
             except socket.error as e:
                 self.logger.error(traceback.format_exc())
@@ -188,4 +197,4 @@ class Server(base.Base):
                 else:
                     self.logger.debug("ERROR WOULD BLOCK")
                     break
-        self.logger.debug("left %s",  len(self._database[s]["buff"]))
+        self.logger.debug("left %s", len(self._database[s]["buff"]))

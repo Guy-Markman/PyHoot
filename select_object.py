@@ -1,3 +1,6 @@
+"""Select API for async_io."""
+## @file select_object.py Select API for async_io.
+
 import select
 
 from . import base, common_events
@@ -5,7 +8,7 @@ from . import base, common_events
 
 class Select(base.Base):
     """
-    Select protocol for async_io.
+    Select API for async_io.
     Return events in the same protocol of Poll protocol
     Args:
         self._rlist: All the sockets that will be registered for reading
@@ -14,6 +17,7 @@ class Select(base.Base):
     """
 
     def __init__(self):
+        """initialization"""
         super(Select, self).__init__()
         self._rlist = []
         self._wlist = []
