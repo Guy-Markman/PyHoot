@@ -171,7 +171,7 @@ class GameMaster(Game):
     def get_information(self):
         """Return the information about the question: It's name and how many
          questions"""
-        self._parser.get_information()
+        return self._parser.get_information()
 
     def move_to_next_question(self):
         """Moving to the next question, also encryp the answer into the picture,
