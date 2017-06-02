@@ -131,38 +131,41 @@ function get_title() {
 function check_move_to_next() {
 	xmlrequest("check_move_next_page",
 		function() {
-			if (this.readyState == 4 && this.status == 200) {
-				if (xmlstring_to_boolean(this.responseText)) {
-					switch (state) {
-						case "wait":
-							get_title()
-							switch_screens();
-							state = "question";
-							xmlrequest("moved_to_next_question", null);
-							break;
-						case "question":
-							switch_screens();
-							state = "leaderboard";
-							xmlrequest("moved_to_next_question", null);
-							break;
-						case "wait_question":
-							get_score();
-							switch_screens();
-							state = "leaderboard";
-							xmlrequest("moved_to_next_question", null);
-							break;
-						case "leaderboard":
-							get_title()
-							switch_screens();
-							xmlrequest("moved_to_next_question", null);
-							state = "question";
-							break;
+			if (this.readyState == 4) {
+				if (this.status == 200) {
+					if (xmlstring_to_boolean(this.responseText)) {
+						switch (state) {
+							case "wait":
+								get_title()
+								switch_screens();
+								state = "question";
+								xmlrequest("moved_to_next_question", null);
+								break;
+							case "question":
+								switch_screens();
+								state = "leaderboard";
+								xmlrequest("moved_to_next_question", null);
+								break;
+							case "wait_question":
+								get_score();
+								switch_screens();
+								state = "leaderboard";
+								xmlrequest("moved_to_next_question", null);
+								break;
+							case "leaderboard":
+								get_title()
+								switch_screens();
+								xmlrequest("moved_to_next_question", null);
+								state = "question";
+								break;
+						}
 					}
 				}
+				setTimeout(check_move_to_next, 1000);
 			}
 		}
 	);
-	setTimeout(check_move_to_next, 1000);
+
 }
 
 /** @} */

@@ -7,7 +7,7 @@
 
 var PLAYERS_IN_LINE = 3;
 var state = "Registration";
-var timer = window.setInterval(getnames, 1000);
+timer = window.setInterval(getnames, 1000);
 var number_of_questions = null;
 
 
@@ -72,19 +72,21 @@ function get_join_number() {
  */
 function getnames() {
 	xmlrequest("getnames", function() {
-		if (this.readyState == 4 && this.status == 200) {
-			xmlDoc = parse_xml_from_string(this.responseText);
-			players = xmlDoc.getElementsByTagName("player");
-			string_players = "";
-			for (i = 0; i < players.length; i++) {
-				string_players += players[i].getAttribute("name");
-				if (i % PLAYERS_IN_LINE === 0 && i !== 0) {
-					string_players += "<br/>";
-				} else if ((i + 1) < players.length) {
-					string_players += "&emsp;";
+		if (this.readyState == 4) {
+			if (this.status == 200) {
+				xmlDoc = parse_xml_from_string(this.responseText);
+				players = xmlDoc.getElementsByTagName("player");
+				string_players = "";
+				for (i = 0; i < players.length; i++) {
+					string_players += players[i].getAttribute("name");
+					if (i % PLAYERS_IN_LINE === 0 && i !== 0) {
+						string_players += "<br/>";
+					} else if ((i + 1) < players.length) {
+						string_players += "&emsp;";
+					}
 				}
+				document.getElementById("names").innerHTML = string_players;
 			}
-			document.getElementById("names").innerHTML = string_players;
 		}
 	});
 }
@@ -102,25 +104,25 @@ function check_moveable() {
  * Switch from Registration screen to Opening screen
  */
 function change_Registeration_Opening() {
+	clearInterval(timer);
 	state = "Opening";
 	set_timer("5");
-	clearInterval(timer);
-	timer = window.setInterval(check_timer_change, 1000);
+	check_timer_change()
 	getinfo();
 	switch_screens();
 }
 
 /**
- * Check if need to change question
+ * Check if need to change from Question to part after it
  */
 function check_move_question() {
 	xmlrequest("check_move_question",
 		function() {
 			if (this.readyState == 4 && this.status == 200) {
 				if (xmlstring_to_boolean(this.responseText)) {
-					//HACK: check if you can change it to to check_move_next_page insteed
-					clearInterval(timer);
 					change_Question_Answer();
+				} else {
+					setTimeout(check_move_question, 1000)
 				}
 			}
 		}
@@ -145,9 +147,8 @@ function change_Question_Answer() {
 				}
 				state = "Answer";
 				switch_screens();
-				clearInterval(timer);
 				set_timer("5");
-				timer = window.setInterval(check_timer_change, 1000);
+				check_timer_change()
 			}
 		}
 	);
@@ -193,7 +194,7 @@ function change_Answer_Leaderboard() {
 				state = "Leaderboard";
 				switch_screens();
 				set_timer("5");
-				timer = window.setInterval(check_timer_change, 1000);
+				check_timer_change();
 			}
 		}
 	);
@@ -252,25 +253,29 @@ function set_timer(new_time) {
 function check_timer_change() {
 	xmlrequest("check_timer_change",
 		function() {
-			if (this.readyState == 4 && this.status == 200) {
-				if (xmlstring_to_boolean(this.responseText)) {
-					clearInterval(timer);
-					if (state == "Opening") {
-						move_to_next_question();
-					}
-					if (state == "Answer") {
-						change_Answer_Leaderboard();
-					}
-					if (state == "Leaderboard") {
-						if (number_of_questions > -1) {
+			if (this.readyState == 4) {
+				if (this.status == 200) {
+					if (xmlstring_to_boolean(this.responseText)) {
+						if (state == "Opening") {
 							move_to_next_question();
-						} else {
-							xmlrequest("set_ended?new=True", null);
-							order_move_all_players();
-							state = "Finish";
-							// WIP
 						}
+						if (state == "Answer") {
+							change_Answer_Leaderboard();
+						}
+						if (state == "Leaderboard") {
+							if (number_of_questions > -1) {
+								move_to_next_question();
+							} else {
+								xmlrequest("set_ended?new=True", null);
+								order_move_all_players();
+								state = "Finish";
+							}
+						}
+					} else {
+						setTimeout(check_timer_change, 1000);
 					}
+				} else if (this.status == 500) {
+					setTimeout(check_timer_change, 1000);
 				}
 			}
 		}
@@ -294,7 +299,6 @@ function move_to_next_question() {
 					state = "Finish";
 					get_winner();
 					switch_screens();
-					clearInterval(timer);
 				}
 			}
 		}
@@ -311,7 +315,7 @@ function get_question() {
 				xmlDoc = parse_xml_from_string(this.responseText);
 				question = xmlDoc.getElementsByTagName("Question")[0];
 				set_timer(question.getAttribute("duration"));
-				timer = window.setInterval(check_move_question, 1000);
+				check_move_question();
 				document.getElementById("question_title").innerHTML =
 					question.childNodes[1].textContent;
 				var questionsID = ["A_answer", "B_answer", "C_answer", "D_answer"];
