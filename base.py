@@ -1,7 +1,6 @@
-"""Base module"""
-## @file base.py Base module
-# -*- coding: utf-8 -*-
-# By Alon Bar-Lev alonbl
+## @package PyHoot.base
+# Base module
+## @file base.py Implementation of @ref PyHoot.base
 
 
 import logging

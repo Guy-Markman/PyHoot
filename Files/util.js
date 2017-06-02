@@ -1,5 +1,7 @@
 /**
- * @file Files\util.js Util file
+ * @file Files/util.js Implementation of @ref util
+ * @defgroup util Functions for util.js
+ * @addtogroup util
  * @{
  */
 

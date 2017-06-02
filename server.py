@@ -1,5 +1,7 @@
-"""The server class"""
-## @file server.py The server class
+## @package PyHoot.server
+# The server class
+## @file server.py Implementation of @ref PyHoot.server
+
 
 import errno
 import select

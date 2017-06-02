@@ -1,5 +1,6 @@
-"""Setting up os for the program"""
-## @file compat.py Setting up os for the program
+## @package PyHoot.compat
+# Getting the OS ready
+## @file compat.py Implementation of @ref PyHoot.compat
 
 import os
 

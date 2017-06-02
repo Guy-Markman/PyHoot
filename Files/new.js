@@ -1,5 +1,7 @@
 /**
- * @file Files\new.js functions for game.html
+ * @file Files/new.js Implementation of @ref new
+ * @defgroup new Functions for new.js
+ * @addtogroup new
  * @{
  */
 

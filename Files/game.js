@@ -1,5 +1,7 @@
 /**
- * @file Files\game.js functions for game.html
+ * @file Files/game.js Implementation of @ref game
+ * @defgroup game Functions for game.js
+ * @addtogroup game
  * @{
  */
 
@@ -124,42 +126,46 @@ function get_title() {
 
 /**
  * check if there is a need to move to the next part
- * @return nothing 
+ * @return nothing
  */
 function check_move_to_next() {
 	xmlrequest("check_move_next_page",
 		function() {
-			if (this.readyState == 4 && this.status == 200) {
-				if (xmlstring_to_boolean(this.responseText)) {
-					switch (state) {
-						case "wait":
-							switch_screens();
-							state = "question";
-							get_title()
-							xmlrequest("moved_to_next_question", null);
-							break;
-						case "question":
-							switch_screens();
-							state = "leaderboard";
-							xmlrequest("moved_to_next_question", null);
-							break;
-						case "wait_question":
-							get_score();
-							switch_screens();
-							state = "leaderboard";
-							xmlrequest("moved_to_next_question", null);
-							break;
-						case "leaderboard":
-							switch_screens();
-							xmlrequest("moved_to_next_question", null);
-							state = "question";
-							break;
+			if (this.readyState == 4) {
+				if (this.status == 200) {
+					if (xmlstring_to_boolean(this.responseText)) {
+						switch (state) {
+							case "wait":
+								get_title()
+								switch_screens();
+								state = "question";
+								xmlrequest("moved_to_next_question", null);
+								break;
+							case "question":
+								switch_screens();
+								state = "leaderboard";
+								xmlrequest("moved_to_next_question", null);
+								break;
+							case "wait_question":
+								get_score();
+								switch_screens();
+								state = "leaderboard";
+								xmlrequest("moved_to_next_question", null);
+								break;
+							case "leaderboard":
+								get_title()
+								switch_screens();
+								xmlrequest("moved_to_next_question", null);
+								state = "question";
+								break;
+						}
 					}
 				}
+				setTimeout(check_move_to_next, 1000);
 			}
 		}
 	);
-	setTimeout(check_move_to_next, 1000);
+
 }
 
 /** @} */

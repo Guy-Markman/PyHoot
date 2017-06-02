@@ -1,5 +1,7 @@
-"""main file"""
-## @file __main__.pymain file
+## @package PyHoot.__main__
+# Main file
+## @file __main__.py Implementation of @ref PyHoot.__main__
+
 import argparse
 import logging
 import os

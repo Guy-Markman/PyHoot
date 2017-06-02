@@ -1,5 +1,6 @@
-"""Special exceptions for the project"""
-## @file custom_exceptions.py Special exceptions for the project
+## @package PyHoot.custom_exceptions
+# Special exceptions for the project
+## @file custom_exceptions.py Implementation of @ref PyHoot.custom_exceptions
 
 
 class Disconnect(RuntimeError):
