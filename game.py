@@ -174,10 +174,9 @@ class GameMaster(Game):
         return self._parser.get_information()
 
     def move_to_next_question(self):
-        """Moving to the next question, also encryp the answer into the picture,
+        """Moving to the next question.
         """
         self._parser.move_to_next_question()
-        self._encryp()
 
     def get_left_questions(self):
         """Return how many questions left - 1"""
@@ -215,26 +214,8 @@ class GameMaster(Game):
         question = question[:question.index('"')]
         return question
 
-    def _enrypt(self):
-        """Encrypt the answer in the picture"""
-        picture = self._get_picture()
-        if picture is None:
-            return
-        answer = self.get_answers[0].replace()
-        fd = os.open(picture, os.O_RDWR | os.O_APPEND | os.O_BINARY)
-        try:
-            os.write(fd, answer)
-        finally:
-            os.close(fd)
 
-    def _remove_answer_from_picture(self):
-        """Remove the answer added in encrypt"""
-        picture = self._get_picture()
-        if picture is None:
-            return
-        with open(picture, 'rb+') as fd:
-            fd.seek(-1, os.SEEK_END)
-            fd.truncate()
+
 
     @property
     def join_number(self):
