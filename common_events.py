@@ -1,5 +1,6 @@
-"""Events for async_io"""
-## @file common_events.py Events for async_io
+## @package PyHoot.common_events
+# The client of the server
+## @file common_events.py Implementation of @ref PyHoot.common_events
 
 import os
 import select

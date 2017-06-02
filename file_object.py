@@ -1,8 +1,10 @@
-"""Object to handle reading from files
-lkkkkkkkkkkkkkkkzssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+## @package PyHoot.file_object
+# Object to handle reading from files
+## @file file_object.py Implementation of @ref PyHoot.file_object
+
+"""lkkkkkkkkkkkkkkkzssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
 ssssssssssssssssssssssssssssssssssssssssssssssssssx
 Never let your cat document the code for you"""
-## @file file_object.py Object to handle reading from files
 
 import os
 

@@ -1,5 +1,7 @@
 /**
- * @file Files\home.js functions for game.html
+ * @file Files/home.js Implementation of @ref home
+ * @defgroup home Functions for home.js
+ * @addtogroup home
  * @{
  */
 

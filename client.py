@@ -1,5 +1,7 @@
-"""@file client.py The client of the server"""
-## @file client.py The client of the server
+## @package PyHoot.client
+# The client of the server
+## @file client.py Implementation of @ref PyHoot.client
+
 
 import Cookie
 import errno

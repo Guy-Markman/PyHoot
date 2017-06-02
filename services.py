@@ -1,3 +1,7 @@
+## @package PyHoot.services
+# All the services get the method we need and return the data
+## @file services.py Implementation of @ref PyHoot.services
+
 """All the services get the method we need and return the data
 """
 ## @file services.py All the services get the method we need and return

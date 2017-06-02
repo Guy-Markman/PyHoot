@@ -1,5 +1,7 @@
-"""Request object to handle HTTP requests"""
-## @file request.py Request object to handle HTTP requests
+## @package PyHoot.request
+# Request object to handle HTTP requests
+## @file request.py Implementation of @ref PyHoot.request
+
 
 import base
 

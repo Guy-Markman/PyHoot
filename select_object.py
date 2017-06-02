@@ -1,5 +1,7 @@
-"""Select API for async_io."""
-## @file select_object.py Select API for async_io.
+## @package PyHoot.select_object
+# Select API for async_io.
+## @file select_object.py Implementation of @ref PyHoot.select_object
+
 
 import select
 
