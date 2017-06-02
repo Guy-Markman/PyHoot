@@ -1,10 +1,7 @@
 /**
- * @file Files\util.js Implementation of @ref PyHoot.util
- * Util file
- * @defgroup front_end Frontend implementation
- * @defgroup front_end.util Frontend implementation from Util files
- * @addtogroup front_end
- * @addtogroup front_end.util
+ * @file Files/util.js Implementation of @ref util
+ * @defgroup util Functions for util.js
+ * @addtogroup util
  * @{
  */
 

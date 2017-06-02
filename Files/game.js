@@ -1,9 +1,7 @@
 /**
- * @file Files\game.js Implementation of @ref front_end.game
- * functions for game.html
- * @defgroup front_end.game functions for front_end.html
- * @addtogroup front_end.game
- * @addtogroup front_end
+ * @file Files/game.js Implementation of @ref game
+ * @defgroup game Functions for game.js
+ * @addtogroup game
  * @{
  */
 

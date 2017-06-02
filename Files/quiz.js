@@ -1,9 +1,10 @@
 /**
- * @file Files\quiz.js Implementation of @ref front_end.quiz
- * functions for game.html
- * @addtogroup front_end.quiz
+ * @file Files/quiz.js Implementation of @ref quiz
+ * @defgroup quiz Functions for quiz.js
+ * @addtogroup quiz
  * @{
  */
+
 var PLAYERS_IN_LINE = 3;
 var state = "Registration";
 var timer = window.setInterval(getnames, 1000);
