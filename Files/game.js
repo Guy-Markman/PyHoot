@@ -135,9 +135,9 @@ function check_move_to_next() {
 				if (xmlstring_to_boolean(this.responseText)) {
 					switch (state) {
 						case "wait":
+							get_title()
 							switch_screens();
 							state = "question";
-							get_title()
 							xmlrequest("moved_to_next_question", null);
 							break;
 						case "question":
@@ -152,6 +152,7 @@ function check_move_to_next() {
 							xmlrequest("moved_to_next_question", null);
 							break;
 						case "leaderboard":
+							get_title()
 							switch_screens();
 							xmlrequest("moved_to_next_question", null);
 							state = "question";
