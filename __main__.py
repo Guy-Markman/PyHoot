@@ -39,7 +39,6 @@ def parse_args():
         type=int,
         help="The buff size for each time. Default %(default)d"
     )
-    print os.path.dirname(__file__)
     parser.add_argument(
         "--base",
         default=os.path.dirname(__file__),

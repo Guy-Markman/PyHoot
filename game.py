@@ -11,7 +11,6 @@ from xml.etree import ElementTree
 
 from . import constants, xmlparser
 
-
 # Registration -> Opening -> Question -> Answer -> Leaderboard -> Question
 # (number_of_questions > -1) -> Finish
 
@@ -58,7 +57,10 @@ class Game(object):
 
     def check_timer_change(self):
         """Check if need to change, for the timer"""
-        return self._change_timer - time.time() < 0
+        try:
+            return self._change_timer - time.time() < 0
+        except TypeError:
+            return False
 
 
 class GameMaster(Game):
@@ -213,9 +215,6 @@ class GameMaster(Game):
         question = question[question.index("src=") + len("src=") + 1:]
         question = question[:question.index('"')]
         return question
-
-
-
 
     @property
     def join_number(self):

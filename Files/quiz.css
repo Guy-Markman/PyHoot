@@ -2,14 +2,14 @@ input, body, .Start_playing, .Return_home {
     font-family: 'Ravi Prakash', cursive;
 }
 
-td{
+td {
     text-align: center;
 }
+
 tr {
     background-color: White;
     border-radius: 0.5em;
 }
-
 
 img {
     height: auto;
@@ -17,11 +17,12 @@ img {
 }
 
 body {
-    background-color: #EC631A; /*Ryza Dust*/
+    background-color: #EC631A;
+    /*Ryza Dust*/
     color: Black;
 }
 
-span{
+span {
     background-color: white;
     border-radius: 0.5em;
     font-size: 2em;
@@ -36,18 +37,19 @@ div {
 }
 
 .Return_home, .button_start {
-        background-color: #6B6A74; /*Warpfiend Grey*/
-        border-color:  #6B6A74; /*Warpfiend Grey*/
-        border-radius: 0.5em;
-        color: White;
-        font-family: 'Ravi Prakash', cursive;
-        font-size: 1.80em;
+    background-color: #6B6A74;
+    /*Warpfiend Grey*/
+    border-color: #6B6A74;
+    /*Warpfiend Grey*/
+    border-radius: 0.5em;
+    color: White;
+    font-family: 'Ravi Prakash', cursive;
+    font-size: 1.80em;
 }
 
-.quiz_name{
+.quiz_name {
     font-size: 3em;
 }
-
 
 table {
     display: table;
@@ -74,19 +76,23 @@ table {
 }
 
 .answer_A {
-    background-color: #991115; /*Mephiston Red*/
+    background-color: #991115;
+    /*Mephiston Red*/
 }
 
 .answer_B {
-    background-color: #0D407F;/*Macraage Blue*/
+    background-color: #0D407F;
+    /*Macraage Blue*/
 }
 
 .answer_C {
-    background-color: #FFDA00;/*Yriel Yellow*/
+    background-color: #FFDA00;
+    /*Yriel Yellow*/
 }
 
 .answer_D {
-    background-color: #00401E; /*Caliban Green*/
+    background-color: #00401E;
+    /*Caliban Green*/
 }
 
 input, body, .Start_playing, .Return_home {
@@ -95,11 +101,17 @@ input, body, .Start_playing, .Return_home {
 
 .Start_playing, .Return_home {
     font-family: 'Ravi Prakash', cursive;
-    height: 2em;
     width: 6.7em;
     padding-top: 0.5em;
 }
 
+.Start_playing {
+    height: 2em;
+}
+
+.Return_home {
+    height: 3.5em;
+}
 
 .Start_playing {
     font-size: 1.5em;

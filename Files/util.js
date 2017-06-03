@@ -14,6 +14,9 @@ function xmlrequest(url, state_change) {
 	if (state_change !== null) {
 		xhttp.onreadystatechange = state_change;
 	}
+	xhttp.onerror = function() {
+		xmlrequest(url, state_change);
+	}
 	xhttp.open("GET", url, true);
 	xhttp.send();
 }
